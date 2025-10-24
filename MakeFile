@@ -1,0 +1,23 @@
+CXX = g++
+CXXFLAGS = -Wall -Wextra -Iinclude -O3 -std=c++17
+
+TARGET = disassemble
+
+BUILD_DIR = build
+
+SRCS := $(shell find src -name "*.cpp")
+OBJS := $(SRCS:src/%.cpp=$(BUILD_DIR)/%.o)
+
+all: $(BUILD_DIR)/$(TARGET)
+
+$(BUILD_DIR)/$(TARGET): $(OBJS)
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(OBJS) -o $@
+
+$(BUILD_DIR)/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	@rm -rf $(BUILD_DIR)
