@@ -4,7 +4,8 @@ CXXFLAGS = -Wall -Wextra -Iinclude -O3 -std=c++17 -mconsole
 TARGET = disassemble
 BUILD_DIR = build
 
-SRCS := $(wildcard src/**/*.cpp)
+HDRS := $(wildcard include/*.h)
+SRCS := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
 OBJS := $(SRCS:src/%.cpp=$(BUILD_DIR)/%.o)
 
 all: $(BUILD_DIR)/$(TARGET)
