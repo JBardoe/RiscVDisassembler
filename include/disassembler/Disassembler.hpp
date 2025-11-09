@@ -3,5 +3,4 @@
 
 #include "utils/AssemblyFile.hpp"
 
-std::optional<ELFIO::elfio> get_file(const std::string& filepath);
-std::optional<AssemblyFile> disassemble(const std::string& filepath);
+std::unique_ptr<AssemblyFile> disassemble(const std::string& filepath);
