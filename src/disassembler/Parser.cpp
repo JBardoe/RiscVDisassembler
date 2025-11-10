@@ -20,13 +20,14 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
 
     if (filestream.fail()) throw BadFileException("Failed to open file");
 
-    parseHeader(filestream, *file);
+    file->setHeader(parseHeader(filestream));
+    file->isLittleEndian = file->getHeader().identifiers[5] == 1;
 
     filestream.close();
     return move(file);
 }
 
-void parseHeader(ifstream& filestream, const ELFFile& file) {
+const ELFHeader& parseHeader(ifstream& filestream) {
     array<char, 16> identifiers = {0};
 
     filestream.read(identifiers.data(), 16);
@@ -56,4 +57,6 @@ void parseHeader(ifstream& filestream, const ELFFile& file) {
     if (header.elfVersion != 1) throw BadFileException("Incorrect ELF version");
     if (header.headerSize != sizeof(header))
         throw BadFileException("Incorrect header size");
+
+    return header;
 }
