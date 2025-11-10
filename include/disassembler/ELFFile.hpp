@@ -1,16 +1,18 @@
 #ifndef ELFFILE_H
 #define ELFFILE_H
 
-#include <elfio/elfio.hpp>
+#include <string>
+
+#include "disassembler/ELFTypes.hpp"
 
 class ELFFile {
    public:
-    ELFFile(std::unique_ptr<ELFIO::elfio> file);
+    ELFFile();
 
-    std::unique_ptr<ELFIO::elfio> getFile();
+    void setHeader(const ELFHeader& hd) { header = hd; };
 
    private:
-    std::unique_ptr<ELFIO::elfio> file;
+    ELFHeader& header;
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 
+#include "disassembler/ELFTypes.hpp"
 #include "utils/BadFileException.hpp"
 using namespace std;
 
@@ -19,6 +20,13 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
 
     if (filestream.fail()) throw BadFileException("Failed to open file");
 
+    parseHeader(filestream, *file);
+
+    filestream.close();
+    return move(file);
+}
+
+void parseHeader(ifstream& filestream, const ELFFile& file) {
     array<char, 16> identifiers = {0};
 
     filestream.read(identifiers.data(), 16);
@@ -34,10 +42,18 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
         throw BadFileException("Invalid ELF header");
     if (identifiers[6] != 1) throw BadFileException("Invalid ELF version");
 
-    parseHeader(filestream, *file);
+    ELFHeader header;
 
-    filestream.close();
-    return move(file);
+    filestream.seekg(0);
+    filestream.read(reinterpret_cast<char*>(&header), sizeof(header));
+
+    if (filestream.gcount() != sizeof(header))
+        throw BadFileException("Invalid file length");
+    if (header.fileType < 1 || header.fileType > 3)
+        throw BadFileException("Invalid file type");
+    if (header.architecture != 243)
+        throw BadFileException("File is not RISC-V");
+    if (header.elfVersion != 1) throw BadFileException("Incorrect ELF version");
+    if (header.headerSize != sizeof(header))
+        throw BadFileException("Incorrect header size");
 }
-
-void parseHeader(const ifstream& filestream, const ELFFile& file) {}
