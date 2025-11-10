@@ -1,24 +1,43 @@
 #include "disassembler/Parser.hpp"
 
-std::unique_ptr<ELFFile> parseFile(const std::string& filepath) {
-    ELFIO::elfio temp = ELFIO::elfio();
+#include <fstream>
+#include <iostream>
+#include <memory>
 
-    if (!temp.load(filepath)) {
-        std::cout << "File not found\n";
-        return nullptr;
-    } else if (temp.get_class() != ELFIO::ELFCLASS32) {
-        std::cout << "File is not 32 bit\n";
-        return nullptr;
-    } else if (temp.get_machine() != ELFIO::EM_RISCV) {
-        std::cout << "File is not RISC-V\n";
-        return nullptr;
-    } else if (temp.sections[".text"] == nullptr) {
-        std::cout << "No text section\n";
-        return nullptr;
-    }
+#include "utils/BadFileException.hpp"
+using namespace std;
 
-    std::unique_ptr<ELFFile> file = std::make_unique<ELFFile>(
-        std::move(std::make_unique<ELFIO::elfio>(temp)));
+unique_ptr<ELFFile> parseFile(const string& filepath) {
+    unique_ptr<ELFFile> file = make_unique<ELFFile>();
 
-    return std::move(std::make_unique<ELFFile>(file));
+    if (!(filepath.substr(filepath.length() - 4, 4).compare(".elf") == 0))
+        throw BadFileException("File not in ELF format");
+
+    ifstream filestream;
+
+    filestream.open(filepath, ifstream::in | ifstream::binary);
+
+    if (filestream.fail()) throw BadFileException("Failed to open file");
+
+    array<char, 16> identifiers = {0};
+
+    filestream.read(identifiers.data(), 16);
+
+    if (filestream.gcount() != 16)
+        throw BadFileException("Invalid file length");
+    if (static_cast<unsigned char>(identifiers[0]) != 0x7F ||
+        identifiers[1] != 'E' || identifiers[2] != 'L' || identifiers[3] != 'F')
+        throw BadFileException("Failed to parse ELF magic bytes");
+
+    if (identifiers[4] != 1) throw BadFileException("File is not 32-bit");
+    if (identifiers[5] != 1 && identifiers[5] != 2)
+        throw BadFileException("Invalid ELF header");
+    if (identifiers[6] != 1) throw BadFileException("Invalid ELF version");
+
+    parseHeader(filestream, *file);
+
+    filestream.close();
+    return move(file);
 }
+
+void parseHeader(const ifstream& filestream, const ELFFile& file) {}
