@@ -18,7 +18,7 @@ void ELFFile::parseSections() {
         stream->read(reinterpret_cast<char*>(&sectionhdr), sizeof(sectionhdr));
 
         std::unique_ptr<ELFSection> section =
-            std::make_unique<ELFSection>(sectionhdr.size, this, sectionhdr);
+            std::make_unique<ELFSection>(this, sectionhdr);
 
         stream->seekg(stringTableHeader.offset + sectionhdr.name);
         std::string name;
@@ -30,9 +30,31 @@ void ELFFile::parseSections() {
         sections[name] = std::move(section);
     }
 }
-void ELFFile::parseSegments() {}
+void ELFFile::parseSegments() {
+    if (header.phnum != 0 && header.phentrySize != sizeof(SegmentHeader))
+        throw BadFileException("Segment header table entry size is invalid");
+
+    for (uint16_t i = 0; i < header.phnum; i++) {
+        stream->seekg(header.phoff + (i * header.phentrySize));
+        SegmentHeader segmentHeader;
+
+        if (!stream->read(reinterpret_cast<char*>(&segmentHeader),
+                          sizeof(segmentHeader))) {
+            throw BadFileException("Failed to read program header");
+        }
+
+        segments.push_back(std::make_unique<ELFSegment>(this, segmentHeader));
+    }
+}
 
 char* ELFSection::getData() {
+    if (loaded) return data;
+
+    loaded = true;
+    return nullptr;  // TODO
+}
+
+char* ELFSegment::getData() {
     if (loaded) return data;
 
     loaded = true;

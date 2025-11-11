@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "disassembler/ELFTypes.hpp"
 
@@ -24,6 +25,7 @@ class ELFFile {
     const ELFHeader& header;
     std::unique_ptr<std::ifstream> stream;
     std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
+    std::vector<std::unique_ptr<ELFSegment>> segments;
 };
 
 class ELFSection {
@@ -35,6 +37,20 @@ class ELFSection {
 
    private:
     const SectionHeader& header;
+    char* data;
+    ELFFile* file;
+    bool loaded;
+};
+
+class ELFSegment {
+   public:
+    ELFSegment(ELFFile* file, const SegmentHeader& hdr)
+        : data(nullptr), file(file), loaded(false), header(hdr) {};
+
+    char* getData();
+
+   private:
+    const SegmentHeader& header;
     char* data;
     ELFFile* file;
     bool loaded;

@@ -32,6 +32,17 @@ typedef struct SectionHeader {
     uint32_t info;     // Additional information
     uint32_t addressAlignment;
     uint32_t entrySize;  // Entry size if the section holds a table
-};
+} SectionHeader;
+
+typedef struct SegmentHeader {
+    uint32_t type;
+    uint32_t offset;    // Offset to the section in the file
+    uint32_t vaddr;     // Virtual address
+    uint32_t paddr;     // Physical address (when relevant)
+    uint32_t fileSize;  // Size of the file image
+    uint32_t memSize;   // Size of the memory image
+    uint32_t flags;
+    uint32_t align;
+} SegmentHeader;
 
 #endif
