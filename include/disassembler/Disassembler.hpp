@@ -1,5 +1,4 @@
-#include <elfio/elfio.hpp>
-#include <optional>
+#include <memory>
 
 #include "utils/AssemblyFile.hpp"
 

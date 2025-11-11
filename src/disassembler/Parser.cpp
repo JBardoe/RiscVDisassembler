@@ -18,7 +18,7 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
 
     if (filestream->fail()) throw BadFileException("Failed to open file");
 
-    ELFHeader hdr = parseHeader(filestream);
+    ELFHeader hdr = parseHeader(*filestream);
     unique_ptr<ELFFile> file = make_unique<ELFFile>(move(filestream), hdr);
 
     file->isLittleEndian = hdr.identifiers[5] == 1;

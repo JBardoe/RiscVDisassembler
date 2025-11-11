@@ -1,3 +1,4 @@
+#include <fstream>
 #include <memory>
 #include <string>
 
@@ -5,4 +6,4 @@
 
 std::unique_ptr<ELFFile> parseFile(const std::string& filepath);
 
-const ELFHeader& parseHeader(const ifstream& filestream);
+const ELFHeader& parseHeader(std::ifstream& filestream);

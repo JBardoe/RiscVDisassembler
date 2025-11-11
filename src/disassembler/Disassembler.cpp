@@ -12,6 +12,5 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     unique_ptr<ELFFile> elffile = parseFile(filepath);
     if (!elffile) return nullptr;
 
-    unique_ptr<AssemblyFile> assembly = make_unique<AssemblyFile>();
     return nullptr;
 }
