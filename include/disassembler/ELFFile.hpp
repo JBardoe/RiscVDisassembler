@@ -1,29 +1,43 @@
 #ifndef ELFFILE_H
 #define ELFFILE_H
 
+#include <fstream>
+#include <iostream>
+#include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "disassembler/ELFTypes.hpp"
 
 class ELFFile {
    public:
     bool isLittleEndian;
-    ELFFile();
+    ELFFile(std::unique_ptr<std::ifstream> st, const ELFHeader& hd)
+        : stream(std::move(st)), header(hd) {};
 
-    void setHeader(const ELFHeader& hd) { header = hd; };
     const ELFHeader& getHeader() { return header; }
 
+    void parseSections();
+    void parseSegments();
+
    private:
-    ELFHeader& header;
+    const ELFHeader& header;
+    std::unique_ptr<std::ifstream> stream;
+    std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
 };
 
 class ELFSection {
    public:
-    ELFSection(const char* data, const int size) : data(data), size(size) {};
+    ELFSection(ELFFile* file, const SectionHeader& hdr)
+        : data(nullptr), file(file), loaded(false), header(hdr) {};
+
+    char* getData();
 
    private:
-    const char* data;
-    const int size;
+    const SectionHeader& header;
+    char* data;
+    ELFFile* file;
+    bool loaded;
 };
 
 #endif

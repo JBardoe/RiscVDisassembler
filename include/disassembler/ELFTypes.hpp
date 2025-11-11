@@ -21,4 +21,17 @@ typedef struct ELFHeader {
                         // string table
 } ELFHeader;
 
+typedef struct SectionHeader {
+    uint32_t name;
+    uint32_t type;
+    uint32_t flags;
+    uint32_t address;  // Virtual address at execution
+    uint32_t offset;   // Offset to the section in the file
+    uint32_t size;
+    uint32_t sh_link;  // Link to another section
+    uint32_t info;     // Additional information
+    uint32_t addressAlignment;
+    uint32_t entrySize;  // Entry size if the section holds a table
+};
+
 #endif
