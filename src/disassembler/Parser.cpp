@@ -9,21 +9,22 @@
 using namespace std;
 
 unique_ptr<ELFFile> parseFile(const string& filepath) {
-    unique_ptr<ELFFile> file = make_unique<ELFFile>();
-
     if (!(filepath.substr(filepath.length() - 4, 4).compare(".elf") == 0))
         throw BadFileException("File not in ELF format");
 
-    ifstream filestream;
+    std::unique_ptr<ifstream> filestream = make_unique<ifstream>();
 
-    filestream.open(filepath, ifstream::in | ifstream::binary);
+    filestream->open(filepath, ifstream::in | ifstream::binary);
 
-    if (filestream.fail()) throw BadFileException("Failed to open file");
+    if (filestream->fail()) throw BadFileException("Failed to open file");
 
-    file->setHeader(parseHeader(filestream));
-    file->isLittleEndian = file->getHeader().identifiers[5] == 1;
+    ELFHeader hdr = parseHeader(filestream);
+    unique_ptr<ELFFile> file = make_unique<ELFFile>(move(filestream), hdr);
 
-    filestream.close();
+    file->isLittleEndian = hdr.identifiers[5] == 1;
+    file->parseSections();
+    file->parseSegments();
+
     return move(file);
 }
 
