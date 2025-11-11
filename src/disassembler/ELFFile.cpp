@@ -43,20 +43,47 @@ void ELFFile::parseSegments() {
             throw BadFileException("Failed to read program header");
         }
 
-        segments.push_back(std::make_unique<ELFSegment>(this, segmentHeader));
+        segments.emplace_back(
+            std::move(std::make_unique<ELFSegment>(this, segmentHeader)));
     }
 }
 
-char* ELFSection::getData() {
+const char* ELFSection::getData() {
     if (loaded) return data;
+    if (header.size == 0) {
+        loaded = true;
+        return nullptr;
+    }
+    if (!data) data = new char[header.size];
+    if (!file || !file->stream || !file->stream->good())
+        throw BadFileException("Cannot find stream");
+
+    file->stream->seekg(header.offset);
+    file->stream->read(data, header.size);
+
+    if (file->stream->gcount() != static_cast<std::streamsize>(header.size))
+        throw BadFileException("Section cut off");
 
     loaded = true;
-    return nullptr;  // TODO
+    return data;
 }
 
 char* ELFSegment::getData() {
     if (loaded) return data;
+    if (header.fileSize == 0) {
+        loaded = true;
+        return nullptr;
+    }
+    if (!data) data = new char[header.fileSize];
+    if (!file || !file->stream || !file->stream->good())
+        throw BadFileException("Cannot find stream");
+
+    file->stream->seekg(header.offset);
+    file->stream->read(data, header.fileSize);
+
+    if (file->stream->gcount() != static_cast<std::streamsize>(header.fileSize))
+        throw BadFileException("Segment cut off");
 
     loaded = true;
-    return nullptr;  // TODO
+    return data;
 }

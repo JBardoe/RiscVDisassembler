@@ -13,6 +13,7 @@
 class ELFFile {
    public:
     bool isLittleEndian;
+    std::unique_ptr<std::ifstream> stream;
     ELFFile(std::unique_ptr<std::ifstream> st, const ELFHeader& hd)
         : stream(std::move(st)), header(hd) {};
 
@@ -23,7 +24,6 @@ class ELFFile {
 
    private:
     const ELFHeader& header;
-    std::unique_ptr<std::ifstream> stream;
     std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
     std::vector<std::unique_ptr<ELFSegment>> segments;
 };
@@ -33,7 +33,7 @@ class ELFSection {
     ELFSection(ELFFile* file, const SectionHeader& hdr)
         : data(nullptr), file(file), loaded(false), header(hdr) {};
 
-    char* getData();
+    const char* getData();
 
    private:
     const SectionHeader& header;
