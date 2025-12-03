@@ -17,13 +17,17 @@ class ELFFile {
    public:
     bool isLittleEndian;
     std::unique_ptr<std::ifstream> stream;
-    ELFFile(std::unique_ptr<std::ifstream> st, const ELFHeader& hd)
+    ELFFile(std::unique_ptr<std::ifstream> st, ELFHeader* hd)
         : stream(std::move(st)), header(hd) {};
+
+    ~ELFFile(){
+        if(header) delete header;
+    }
 
     void parseSections();
     void parseSegments();
 
-    const ELFHeader& getHeader() { return header; }
+    ELFHeader* getHeader() { return header; }
     std::unordered_map<std::string, std::unique_ptr<ELFSection>>&
     getSections() {
         return sections;
@@ -33,21 +37,25 @@ class ELFFile {
     };
 
    private:
-    const ELFHeader& header;
+    ELFHeader* header;
     std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
     std::vector<std::unique_ptr<ELFSegment>> segments;
 };
 
 class ELFSection {
    public:
-    ELFSection(ELFFile* file, const SectionHeader& hdr)
+    ELFSection(ELFFile* file, SectionHeader hdr)
         : header(hdr), data(nullptr), file(file), loaded(false) {};
-
+    
+    ~ELFSection(){
+        if(data) delete[] data;
+    }
+    
     const char* getData();
     const SectionHeader& getHeader() { return header; }
 
    private:
-    const SectionHeader& header;
+    SectionHeader header;
     char* data;
     ELFFile* file;
     bool loaded;
@@ -55,14 +63,18 @@ class ELFSection {
 
 class ELFSegment {
    public:
-    ELFSegment(ELFFile* file, const SegmentHeader& hdr)
+    ELFSegment(ELFFile* file, SegmentHeader hdr)
         : header(hdr), data(nullptr), file(file), loaded(false) {};
+
+    ~ELFSegment(){
+        if(data) delete[] data;
+    }
 
     char* getData();
     const SegmentHeader& getHeader() { return header; }
 
    private:
-    const SegmentHeader& header;
+    SegmentHeader header;
     char* data;
     ELFFile* file;
     bool loaded;

@@ -6,4 +6,4 @@
 
 std::unique_ptr<ELFFile> parseFile(const std::string& filepath);
 
-const ELFHeader& parseHeader(std::ifstream& filestream);
+ELFHeader* parseHeader(std::ifstream& filestream);

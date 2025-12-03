@@ -7,7 +7,7 @@
 #include "disassembler/Parser.hpp"
 int main() {
     std::cout << "About to parse the file\n";
-    std::unique_ptr<ELFFile> file = parseFile("data/elf/add.elf");
+    auto file = parseFile("data/elf/add.elf");
     if (file) {
         std::cout << "Parsed the file\n";
     }
@@ -26,6 +26,8 @@ int main() {
                       0xff)
                   << ' ';
     }
+
+    std::cout << "\n";
 
     return 0;
 }

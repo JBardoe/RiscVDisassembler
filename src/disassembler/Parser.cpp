@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <array>
 
 #include "disassembler/ELFTypes.hpp"
 #include "utils/BadFileException.hpp"
@@ -12,24 +13,24 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
     if (!(filepath.substr(filepath.length() - 4, 4).compare(".elf") == 0))
         throw BadFileException("File not in ELF format");
 
-    std::unique_ptr<ifstream> filestream = make_unique<ifstream>();
+    auto filestream = make_unique<ifstream>();
 
     filestream->open(filepath, ifstream::in | ifstream::binary);
 
     if (filestream->fail()) throw BadFileException("Failed to open file");
 
-    ELFHeader hdr = parseHeader(*filestream);
-    unique_ptr<ELFFile> file = make_unique<ELFFile>(move(filestream), hdr);
+    ELFHeader* hdr = parseHeader(*filestream);
+    auto file = make_unique<ELFFile>(move(filestream), hdr);
 
-    file->isLittleEndian = hdr.identifiers[5] == 1;
+    file->isLittleEndian = (*hdr).identifiers[5] == 1;
     file->parseSections();
     file->parseSegments();
 
-    return move(file);
+    return std::move(file);
 }
 
-const ELFHeader& parseHeader(ifstream& filestream) {
-    array<char, 16> identifiers = {0};
+ELFHeader* parseHeader(ifstream& filestream) {
+    array<char, 16> identifiers = {};
 
     filestream.read(identifiers.data(), 16);
 
@@ -44,19 +45,19 @@ const ELFHeader& parseHeader(ifstream& filestream) {
         throw BadFileException("Invalid ELF header");
     if (identifiers[6] != 1) throw BadFileException("Invalid ELF version");
 
-    ELFHeader header;
+    ELFHeader* header = new ELFHeader{};
 
     filestream.seekg(0);
-    filestream.read(reinterpret_cast<char*>(&header), sizeof(header));
+    filestream.read(reinterpret_cast<char*>(header), sizeof(*header));
 
-    if (filestream.gcount() != sizeof(header))
+    if (filestream.gcount() != sizeof(*header))
         throw BadFileException("Invalid file length");
-    if (header.fileType < 1 || header.fileType > 3)
+    if ((*header).fileType < 1 || (*header).fileType > 3)
         throw BadFileException("Invalid file type");
-    if (header.architecture != 243)
+    if ((*header).architecture != 243)
         throw BadFileException("File is not RISC-V");
-    if (header.elfVersion != 1) throw BadFileException("Incorrect ELF version");
-    if (header.headerSize != sizeof(header))
+    if ((*header).elfVersion != 1) throw BadFileException("Incorrect ELF version");
+    if ((*header).headerSize != sizeof(*header))
         throw BadFileException("Incorrect header size");
 
     return header;
