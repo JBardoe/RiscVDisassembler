@@ -10,6 +10,7 @@
 
 #include "disassembler/ELFTypes.hpp"
 
+namespace ELFParser {
 class ELFSection;
 class ELFSegment;
 
@@ -20,8 +21,8 @@ class ELFFile {
     ELFFile(std::unique_ptr<std::ifstream> st, ELFHeader* hd)
         : stream(std::move(st)), header(hd) {};
 
-    ~ELFFile(){
-        if(header) delete header;
+    ~ELFFile() {
+        if (header) delete header;
     }
 
     void parseSections();
@@ -46,11 +47,11 @@ class ELFSection {
    public:
     ELFSection(ELFFile* file, SectionHeader hdr)
         : header(hdr), data(nullptr), file(file), loaded(false) {};
-    
-    ~ELFSection(){
-        if(data) delete[] data;
+
+    ~ELFSection() {
+        if (data) delete[] data;
     }
-    
+
     const char* getData();
     const SectionHeader& getHeader() { return header; }
 
@@ -66,8 +67,8 @@ class ELFSegment {
     ELFSegment(ELFFile* file, SegmentHeader hdr)
         : header(hdr), data(nullptr), file(file), loaded(false) {};
 
-    ~ELFSegment(){
-        if(data) delete[] data;
+    ~ELFSegment() {
+        if (data) delete[] data;
     }
 
     char* getData();
@@ -79,5 +80,6 @@ class ELFSegment {
     ELFFile* file;
     bool loaded;
 };
+}  // namespace ELFParser
 
 #endif

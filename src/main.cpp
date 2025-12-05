@@ -5,15 +5,20 @@
 #include "disassembler/Disassembler.hpp"
 #include "disassembler/ELFFile.hpp"
 #include "disassembler/Parser.hpp"
+
 int main() {
     std::cout << "About to parse the file\n";
-    auto file = parseFile("data/elf/add.elf");
+    auto file = ELFParser::parseFile("data/elf/add.elf");
     if (file) {
         std::cout << "Parsed the file\n";
     }
 
-    const char* textData = (file->getSections()[".text"])->getData();
-    uint32_t size = (file->getSections()[".text"])->getHeader().size;
+    const char* textData = (file->getSections()[".data"])->getData();
+    uint32_t size = (file->getSections()[".data"])->getHeader().size;
+
+    for (auto& sect : file->getSections()) {
+        std::cout << "Section:" << sect.first << "\n";
+    }
 
     for (uint32_t i = 0; i < size; ++i) {
         if (i % 16 == 0)

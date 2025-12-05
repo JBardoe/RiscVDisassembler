@@ -4,6 +4,9 @@
 
 #include "disassembler/ELFFile.hpp"
 
+namespace ELFParser {
+
 std::unique_ptr<ELFFile> parseFile(const std::string& filepath);
 
 ELFHeader* parseHeader(std::ifstream& filestream);
+}  // namespace ELFParser

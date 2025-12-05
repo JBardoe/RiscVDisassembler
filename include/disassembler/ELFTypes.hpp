@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+namespace ELFParser {
 typedef struct ELFHeader {
     unsigned char identifiers[16];
     uint16_t fileType;
@@ -45,4 +46,5 @@ typedef struct SegmentHeader {
     uint32_t align;
 } SegmentHeader;
 
+}  // namespace ELFParser
 #endif

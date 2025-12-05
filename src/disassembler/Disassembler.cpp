@@ -9,7 +9,7 @@
 using namespace std;
 
 unique_ptr<AssemblyFile> disassemble(const string& filepath) {
-    unique_ptr<ELFFile> elffile = parseFile(filepath);
+    unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
     return nullptr;

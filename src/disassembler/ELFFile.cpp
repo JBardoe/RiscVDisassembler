@@ -2,6 +2,8 @@
 
 #include "utils/BadFileException.hpp"
 
+namespace ELFParser {
+
 void ELFFile::parseSections() {
     if ((*header).shnum != 0 && (*header).shentrySize != sizeof(SectionHeader))
         throw BadFileException("Section header table entry size is invalid");
@@ -86,3 +88,4 @@ char* ELFSegment::getData() {
     loaded = true;
     return data;
 }
+}  // namespace ELFParser

@@ -1,13 +1,15 @@
 #include "disassembler/Parser.hpp"
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <array>
 
 #include "disassembler/ELFTypes.hpp"
 #include "utils/BadFileException.hpp"
 using namespace std;
+
+namespace ELFParser {
 
 unique_ptr<ELFFile> parseFile(const string& filepath) {
     if (!(filepath.substr(filepath.length() - 4, 4).compare(".elf") == 0))
@@ -26,7 +28,7 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
     file->parseSections();
     file->parseSegments();
 
-    return std::move(file);
+    return file;
 }
 
 ELFHeader* parseHeader(ifstream& filestream) {
@@ -56,9 +58,11 @@ ELFHeader* parseHeader(ifstream& filestream) {
         throw BadFileException("Invalid file type");
     if ((*header).architecture != 243)
         throw BadFileException("File is not RISC-V");
-    if ((*header).elfVersion != 1) throw BadFileException("Incorrect ELF version");
+    if ((*header).elfVersion != 1)
+        throw BadFileException("Incorrect ELF version");
     if ((*header).headerSize != sizeof(*header))
         throw BadFileException("Incorrect header size");
 
     return header;
 }
+}  // namespace ELFParser
