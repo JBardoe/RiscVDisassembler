@@ -14,14 +14,13 @@ int main() {
     }
 
     const char* textData = (file->getSections()[".text"])->getData();
-    uint32_t size = (file->getSections()[".text"])->getHeader().size;
+    uint32_t size = (file->getSections()[".text"])->header->size;
 
     std::cout << "Is little endian? " << std::to_string(file->isLittleEndian)
               << "\n";
 
     std::cout << "Address of the text section: "
-              << std::to_string(
-                     (file->getSections()[".data"])->getHeader().address)
+              << std::to_string((file->getSections()[".data"])->header->address)
               << "\n";
 
     for (auto& sect : file->getSections()) {

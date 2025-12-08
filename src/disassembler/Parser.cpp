@@ -21,17 +21,16 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
 
     if (filestream->fail()) throw BadFileException("Failed to open file");
 
-    ELFHeader* hdr = parseHeader(*filestream);
-    auto file = make_unique<ELFFile>(move(filestream), hdr);
+    auto hdr = parseHeader(*filestream);
+    auto file = make_unique<ELFFile>(move(filestream), move(hdr));
 
-    file->isLittleEndian = (*hdr).identifiers[5] == 1;
     file->parseSections();
     file->parseSegments();
 
     return file;
 }
 
-ELFHeader* parseHeader(ifstream& filestream) {
+unique_ptr<ELFHeader> parseHeader(ifstream& filestream) {
     array<char, 16> identifiers = {};
 
     filestream.read(identifiers.data(), 16);
@@ -47,10 +46,10 @@ ELFHeader* parseHeader(ifstream& filestream) {
         throw BadFileException("Invalid ELF header");
     if (identifiers[6] != 1) throw BadFileException("Invalid ELF version");
 
-    ELFHeader* header = new ELFHeader{};
+    auto header = make_unique<ELFHeader>();
 
     filestream.seekg(0);
-    filestream.read(reinterpret_cast<char*>(header), sizeof(*header));
+    filestream.read(reinterpret_cast<char*>(header.get()), sizeof(*header));
 
     if (filestream.gcount() != sizeof(*header))
         throw BadFileException("Invalid file length");

@@ -8,5 +8,5 @@ namespace ELFParser {
 
 std::unique_ptr<ELFFile> parseFile(const std::string& filepath);
 
-ELFHeader* parseHeader(std::ifstream& filestream);
+std::unique_ptr<ELFHeader> parseHeader(std::ifstream& filestream);
 }  // namespace ELFParser

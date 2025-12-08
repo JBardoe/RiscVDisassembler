@@ -16,19 +16,16 @@ class ELFSegment;
 
 class ELFFile {
    public:
-    bool isLittleEndian;
     std::unique_ptr<std::ifstream> stream;
-    ELFFile(std::unique_ptr<std::ifstream> st, ELFHeader* hd)
-        : stream(std::move(st)), header(hd) {};
-
-    ~ELFFile() {
-        if (header) delete header;
-    }
+    bool isLittleEndian;
+    ELFFile(std::unique_ptr<std::ifstream> st, std::unique_ptr<ELFHeader> hd)
+        : stream(std::move(st)),
+          isLittleEndian(hd->identifiers[5] == 1),
+          header(std::move(hd)) {};
 
     void parseSections();
     void parseSegments();
 
-    ELFHeader* getHeader() { return header; }
     std::unordered_map<std::string, std::unique_ptr<ELFSection>>&
     getSections() {
         return sections;
@@ -38,25 +35,24 @@ class ELFFile {
     };
 
    private:
-    ELFHeader* header;
+    std::unique_ptr<ELFHeader> header;
     std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
     std::vector<std::unique_ptr<ELFSegment>> segments;
 };
 
 class ELFSection {
    public:
-    ELFSection(ELFFile* file, SectionHeader hdr)
-        : header(hdr), data(nullptr), file(file), loaded(false) {};
+    std::unique_ptr<SectionHeader> header;
+    ELFSection(ELFFile* file, std::unique_ptr<SectionHeader> hdr)
+        : header(std::move(hdr)), data(nullptr), file(file), loaded(false) {};
 
     ~ELFSection() {
         if (data) delete[] data;
     }
 
     const char* getData();
-    const SectionHeader& getHeader() { return header; }
 
    private:
-    SectionHeader header;
     char* data;
     ELFFile* file;
     bool loaded;
@@ -64,18 +60,17 @@ class ELFSection {
 
 class ELFSegment {
    public:
-    ELFSegment(ELFFile* file, SegmentHeader hdr)
-        : header(hdr), data(nullptr), file(file), loaded(false) {};
+    std::unique_ptr<SegmentHeader> header;
+    ELFSegment(ELFFile* file, std::unique_ptr<SegmentHeader> hdr)
+        : header(std::move(hdr)), data(nullptr), file(file), loaded(false) {};
 
     ~ELFSegment() {
         if (data) delete[] data;
     }
 
     char* getData();
-    const SegmentHeader& getHeader() { return header; }
 
    private:
-    SegmentHeader header;
     char* data;
     ELFFile* file;
     bool loaded;
