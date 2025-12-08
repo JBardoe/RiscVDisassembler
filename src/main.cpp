@@ -13,8 +13,16 @@ int main() {
         std::cout << "Parsed the file\n";
     }
 
-    const char* textData = (file->getSections()[".data"])->getData();
-    uint32_t size = (file->getSections()[".data"])->getHeader().size;
+    const char* textData = (file->getSections()[".text"])->getData();
+    uint32_t size = (file->getSections()[".text"])->getHeader().size;
+
+    std::cout << "Is little endian? " << std::to_string(file->isLittleEndian)
+              << "\n";
+
+    std::cout << "Address of the text section: "
+              << std::to_string(
+                     (file->getSections()[".data"])->getHeader().address)
+              << "\n";
 
     for (auto& sect : file->getSections()) {
         std::cout << "Section:" << sect.first << "\n";
