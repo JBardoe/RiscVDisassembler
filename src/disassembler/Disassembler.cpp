@@ -4,6 +4,7 @@
 
 #include "disassembler/DisassemblerTypes.hpp"
 #include "disassembler/ELFFile.hpp"
+#include "disassembler/Instruction.hpp"
 #include "disassembler/Parser.hpp"
 #include "utils/BadFileException.hpp"
 
@@ -11,37 +12,42 @@ using namespace std;
 
 namespace Disassembler {
 
-unique_ptr<Instruction> disassembleIntruction(const RawInstruction& raw) {
+unique_ptr<Instruction> parseInstruction(uint32_t raw) {
     // Get opcode
-    bool msb = raw.byte1 & 0x80;
-
-    if (opcodeMap.find(raw.byte1 & 0x7F) == opcodeMap.end()) {
+    if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
         // TODO throw error
     }
 
-    Opcode opcode = opcodeMap.at(raw.byte1 & 0x7F);
+    Opcode opcode = opcodeMap.at(raw & 0x7F);
 
     switch (opcode) {
-        case Opcode::LOAD:
-            break;
-        case Opcode::IMM_INSTR:
-            break;
-        case Opcode::AUIPC:
-            break;
-        case Opcode::S_TYPE:
-            break;
+        // R-Type
         case Opcode::R_TYPE:
-            break;
-        case Opcode::LUI:
-            break;
-        case Opcode::B_TYPE:
-            break;
+            return make_unique<RInstruction>(opcode, raw);
+
+        // I-Types
+        case Opcode::LOAD:
+        case Opcode::IMM_INSTR:
         case Opcode::JALR:
-            break;
-        case Opcode::JAL:
-            break;
         case Opcode::ENV_TYPE:
-            break;
+            return make_unique<IInstruction>(opcode, raw);
+
+        // S-Type
+        case Opcode::S_TYPE:
+            return make_unique<SInstruction>(opcode, raw);
+
+        // B-Type
+        case Opcode::B_TYPE:
+            return make_unique<BInstruction>(opcode, raw);
+
+        // U-Type
+        case Opcode::AUIPC:
+        case Opcode::LUI:
+            return make_unique<UInstruction>(opcode, raw);
+
+        // J-Type
+        default:
+            return make_unique<JInstruction>(opcode, raw);
     }
 }
 

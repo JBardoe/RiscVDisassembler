@@ -5,17 +5,6 @@
 
 namespace Disassembler {
 
-// Instruction written out in little-endian
-typedef struct RawInstruction {
-    unsigned char byte1;
-    unsigned char byte2;
-    unsigned char byte3;
-    unsigned char byte4;
-} RawInstruction;
-
-typedef struct Instruction {
-} Instruction;
-
 enum class Opcode : int {
     LOAD = 3,
     IMM_INSTR = 19,
