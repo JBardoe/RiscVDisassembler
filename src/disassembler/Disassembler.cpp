@@ -65,6 +65,10 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     */
 
     /*
+        Deal with endianness
+    */
+
+    /*
         Extract instructions
     */
 

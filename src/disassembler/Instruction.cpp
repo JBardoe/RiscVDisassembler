@@ -59,6 +59,7 @@ const std::string& RInstruction::toString() {
     this->printOut += std::string(registerNames[this->rd]) + " " +
                       std::string(registerNames[this->rs1]) + " " +
                       std::string(registerNames[this->rs2]);
+
     if (this->funct3 == 2 || this->funct3 == 3) {
         this->printOut += " # " + std::string(registerNames[this->rd]) +
                           " = (" + std::string(registerNames[this->rs1]) +
@@ -112,8 +113,50 @@ BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
 }
 const std::string& BInstruction::toString() {
     if (this->printOut != "") return this->printOut;
+
+    std::string symbol;
+
+    this->printOut = "";
+
+    switch (this->funct3) {
+        case 0:
+            this->printOut += "beq ";
+            symbol = "==";
+            break;
+        case 1:
+            this->printOut += "bne ";
+            symbol = "!=";
+            break;
+        case 4:
+            this->printOut += "blt ";
+            symbol = "<";
+            break;
+        case 5:
+            this->printOut += "bge ";
+            symbol = ">=";
+            break;
+        case 6:
+            this->printOut += "bltu ";
+            symbol = "<";
+            break;
+        case 7:
+            this->printOut += "bgeu ";
+            symbol = ">=";
+            break;
+        default:
+            throw DisassemblyException(
+                "Invalid funct3 parameter on B-Type instruction.");
+    }
+
+    this->printOut += std::string(registerNames[this->rs1]) + " " +
+                      std::string(registerNames[this->rs2]) + " " +
+                      std::to_string(this->imm) + " # if(" +
+                      std::string(registerNames[this->rs1]) + " " + symbol +
+                      " " + std::string(registerNames[this->rs2]) +
+                      ") PC += " + std::to_string(this->imm);
+
     return this->printOut;
-}  // TODO: implement
+}
 
 UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op) {
     this->rd = (raw >> 7) & 0x1F;
@@ -133,6 +176,13 @@ JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
 }
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
+
+    this->printOut = "jal " + std::string(registerNames[this->rd]) + " " +
+                     std::to_string(this->imm) + " # " +
+                     std::string(registerNames[this->rd]) +
+                     " = PC+$; PC += " + std::to_string(this->imm);
+
     return this->printOut;
 }  // TODO: implement
+
 }  // namespace Disassembler
