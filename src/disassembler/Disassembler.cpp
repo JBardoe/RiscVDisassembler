@@ -1,12 +1,13 @@
 #include "disassembler/Disassembler.hpp"
 
+#include <format>
 #include <vector>
 
 #include "disassembler/DisassemblerTypes.hpp"
 #include "disassembler/ELFFile.hpp"
 #include "disassembler/Instruction.hpp"
 #include "disassembler/Parser.hpp"
-#include "utils/BadFileException.hpp"
+#include "utils/DisassemblyException.hpp"
 
 using namespace std;
 
@@ -15,7 +16,8 @@ namespace Disassembler {
 unique_ptr<Instruction> parseInstruction(uint32_t raw) {
     // Get opcode
     if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
-        // TODO throw error
+        throw DisassemblyException("Unknown Opcode: " +
+                                   format("{:02X}", (raw & 0x7F)));
     }
 
     Opcode opcode = opcodeMap.at(raw & 0x7F);

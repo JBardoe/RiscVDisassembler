@@ -1,5 +1,7 @@
 #include "disassembler/Instruction.hpp"
 
+#include "utils/DisassemblyException.hpp"
+
 namespace Disassembler {
 
 RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op) {
@@ -12,8 +14,63 @@ RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op) {
 
 const std::string& RInstruction::toString() {
     if (this->printOut != "") return this->printOut;
+
+    std::string symbol;
+
+    this->printOut = "";
+
+    switch (this->funct3) {
+        case 0:
+            this->printOut += (this->funct7) ? "sub " : "add ";
+            symbol = (this->funct7) ? "-" : "+";
+            break;
+        case 1:
+            this->printOut += "sll ";
+            symbol = "<<";
+            break;
+        case 2:
+            this->printOut += "slt ";
+            break;
+        case 3:
+            this->printOut += "sltu ";
+            break;
+        case 4:
+            this->printOut += "xor ";
+            symbol = "^";
+            break;
+        case 5:
+            this->printOut += (this->funct7) ? "sra " : "srl ";
+            symbol = ">>";
+            break;
+        case 6:
+            this->printOut += "or ";
+            symbol = "|";
+            break;
+        case 7:
+            this->printOut += "and ";
+            symbol = "&";
+            break;
+        default:
+            throw DisassemblyException(
+                "Invalid funct3 parameter on R-Type instruction.");
+    }
+
+    // Registers to be in the range 0-31 as it is parsed from a 5 bit number
+    this->printOut += std::string(registerNames[this->rd]) + " " +
+                      std::string(registerNames[this->rs1]) + " " +
+                      std::string(registerNames[this->rs2]);
+    if (this->funct3 == 2 || this->funct3 == 3) {
+        this->printOut += " # " + std::string(registerNames[this->rd]) +
+                          " = (" + std::string(registerNames[this->rs1]) +
+                          " < " + std::string(registerNames[this->rs2]) +
+                          ")?1:0";
+    } else {
+        this->printOut += " # " + std::string(registerNames[this->rd]) + " = " +
+                          std::string(registerNames[this->rs1]) + " " + symbol +
+                          " " + std::string(registerNames[this->rs2]);
+    }
     return this->printOut;
-}  // TODO: implement
+}
 
 IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
     this->rd = (raw >> 7) & 0x1F;
@@ -21,7 +78,9 @@ IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
     this->rs1 = (raw >> 15) & 0x1F;
     this->imm = (raw >> 20);
 
-    this->imm = (this->imm << 20) >> 20;
+    if ((op == Opcode::IMM_INSTR && this->funct3 != 3) ||
+        (op == Opcode::LOAD && this->funct3 != 4 && this->funct3 != 5))
+        this->imm = (this->imm << 20) >> 20;
 }
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
@@ -48,7 +107,8 @@ BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
     this->imm = (((raw >> 31) & 0x01) << 12) | (((raw >> 7) & 0x01) << 11) |
                 (((raw >> 25) & 0x3F) << 5) | (((raw >> 8) & 0x0F) << 1);
 
-    this->imm = (this->imm << 19) >> 19;
+    if (this->funct3 != 6 && this->funct3 != 7)
+        this->imm = (this->imm << 19) >> 19;
 }
 const std::string& BInstruction::toString() {
     if (this->printOut != "") return this->printOut;
