@@ -79,14 +79,126 @@ IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
     this->rs1 = (raw >> 15) & 0x1F;
     this->imm = (raw >> 20);
 
-    if ((op == Opcode::IMM_INSTR && this->funct3 != 3) ||
-        (op == Opcode::LOAD && this->funct3 != 4 && this->funct3 != 5))
+    if ((this->op == Opcode::IMM_INSTR && this->funct3 != 3) ||
+        (this->op == Opcode::LOAD && this->funct3 != 4 && this->funct3 != 5))
         this->imm = (this->imm << 20) >> 20;
 }
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
+
+    if (this->op == Opcode::JALR) {
+        this->printOut =
+            "jalr " + std::string(registerNames[this->rd]) + ", " +
+            std::to_string(this->imm) + "(" +
+            std::string(registerNames[this->rs1]) + ") # " +
+            std::string(registerNames[this->rd]) +
+            " = PC+4; PC = " + std::string(registerNames[this->rs1]) + " + " +
+            std::to_string(this->imm);
+    } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
+        this->printOut = "ecall # Transfer control to OS";
+    } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {
+        this->printOut = "ebreak # Transfer control to debugger";
+    } else if (this->op == Opcode::LOAD) {
+        int upper;
+        this->printOut = "";
+        switch (this->funct3) {
+            case 0:
+                this->printOut += "lb ";
+                upper = 7;
+                break;
+            case 1:
+                this->printOut += "lh ";
+                upper = 15;
+                break;
+            case 2:
+                this->printOut += "lw ";
+                upper = 31;
+                break;
+            case 4:
+                this->printOut += "lbu ";
+                upper = 7;
+                break;
+            case 5:
+                this->printOut += "lhu ";
+                upper = 15;
+                break;
+            default:
+                throw DisassemblyException(
+                    "Invalid funct3 parameter on I-Type instruction.");
+        }
+
+        this->printOut += std::string(registerNames[this->rd]) + ", " +
+                          std::to_string(this->imm) + "(" +
+                          std::string(registerNames[this->rs1]) + ") # " +
+                          std::string(registerNames[this->rd]) + " = M[" +
+                          std::string(registerNames[this->rs1]) + "+" +
+                          std::to_string(this->imm) +
+                          "][0:" + std::to_string(upper) + "]";
+    } else {
+        this->printOut = "";
+        std::string symbol;
+        switch (this->funct3) {
+            case 0:
+                this->printOut += "addi ";
+                symbol = "+";
+                break;
+            case 1:
+                this->printOut += "slli ";
+                symbol = "<<";
+                break;
+            case 2:
+                this->printOut += "slti ";
+                break;
+            case 3:
+                this->printOut += "sltiu ";
+                break;
+            case 4:
+                this->printOut += "xori ";
+                symbol = "^";
+                break;
+            case 5:
+                if ((imm >> 5) & 0x7F == 2) {
+                    this->printOut += "srai ";
+                } else if ((imm >> 5) & 0x7F == 0) {
+                    this->printOut += "srli ";
+                } else {
+                    throw DisassemblyException(
+                        "Invalid imm parameter on Shift Right instruction.");
+                }
+                symbol = ">>";
+            case 6:
+                this->printOut += "ori ";
+                symbol = "|";
+                break;
+            case 7:
+                this->printOut += "andi ";
+                symbol = "&";
+                break;
+            default:
+                throw DisassemblyException(
+                    "Invalid funct3 parameter on I-Type instruction.");
+        }
+
+        this->printOut += std::string(registerNames[this->rd]) + " " +
+                          std::string(registerNames[this->rs1]) + " " +
+                          std::to_string(this->imm) + " # " +
+                          std::string(registerNames[this->rd]) + " = ";
+
+        if (this->funct3 == 2 || this->funct3 == 3) {
+            this->printOut += "(" + std::string(registerNames[this->rs1]) +
+                              " < " + std::to_string(this->imm) + ")?1:0";
+        } else {
+            this->printOut += std::string(registerNames[this->rs1]) + " " +
+                              symbol + " " + std::to_string(this->imm);
+        }
+
+        if (this->funct3 == 1 || this->funct3 == 5) {
+            this->printOut += "[0:4]";
+        }
+    }
+
     return this->printOut;
-}  // TODO: implement
+}
 
 SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op) {
     this->funct3 = (raw >> 12) & 0x07;
@@ -198,7 +310,7 @@ const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     // Cannot be an unknown opcode as it will have been caught earlier
-    if (op == Opcode::LUI) {
+    if (this->op == Opcode::LUI) {
         this->printOut = "lui " + std::string(registerNames[this->rd]) + " " +
                          std::to_string(this->imm) + " # " +
                          std::string(registerNames[this->rd]) + " = " +
