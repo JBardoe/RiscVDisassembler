@@ -1,10 +1,12 @@
 #include "disassembler/Instruction.hpp"
 
+#include <iostream>
+
 #include "utils/DisassemblyException.hpp"
 
 namespace Disassembler {
 
-RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op) {
+RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
@@ -61,19 +63,19 @@ const std::string& RInstruction::toString() {
                       std::string(registerNames[this->rs2]);
 
     if (this->funct3 == 2 || this->funct3 == 3) {
-        this->printOut += " # " + std::string(registerNames[this->rd]) +
+        this->printOut += "\t\t# " + std::string(registerNames[this->rd]) +
                           " = (" + std::string(registerNames[this->rs1]) +
                           " < " + std::string(registerNames[this->rs2]) +
                           ")?1:0";
     } else {
-        this->printOut += " # " + std::string(registerNames[this->rd]) + " = " +
-                          std::string(registerNames[this->rs1]) + " " + symbol +
-                          " " + std::string(registerNames[this->rs2]);
+        this->printOut += "\t\t# " + std::string(registerNames[this->rd]) +
+                          " = " + std::string(registerNames[this->rs1]) + " " +
+                          symbol + " " + std::string(registerNames[this->rs2]);
     }
     return this->printOut;
 }
 
-IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
+IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
@@ -83,6 +85,7 @@ IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
         (this->op == Opcode::LOAD && this->funct3 != 4 && this->funct3 != 5))
         this->imm = (this->imm << 20) >> 20;
 }
+
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
@@ -90,14 +93,14 @@ const std::string& IInstruction::toString() {
         this->printOut =
             "jalr " + std::string(registerNames[this->rd]) + ", " +
             std::to_string(this->imm) + "(" +
-            std::string(registerNames[this->rs1]) + ") # " +
+            std::string(registerNames[this->rs1]) + ")\t\t# " +
             std::string(registerNames[this->rd]) +
             " = PC+4; PC = " + std::string(registerNames[this->rs1]) + " + " +
             std::to_string(this->imm);
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
-        this->printOut = "ecall # Transfer control to OS";
+        this->printOut = "ecall\t\t# Transfer control to OS";
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {
-        this->printOut = "ebreak # Transfer control to debugger";
+        this->printOut = "ebreak\t\t# Transfer control to debugger";
     } else if (this->op == Opcode::LOAD) {
         int upper;
         this->printOut = "";
@@ -129,7 +132,7 @@ const std::string& IInstruction::toString() {
 
         this->printOut += std::string(registerNames[this->rd]) + ", " +
                           std::to_string(this->imm) + "(" +
-                          std::string(registerNames[this->rs1]) + ") # " +
+                          std::string(registerNames[this->rs1]) + ")\t\t# " +
                           std::string(registerNames[this->rd]) + " = M[" +
                           std::string(registerNames[this->rs1]) + "+" +
                           std::to_string(this->imm) +
@@ -157,15 +160,16 @@ const std::string& IInstruction::toString() {
                 symbol = "^";
                 break;
             case 5:
-                if ((imm >> 5) & 0x7F == 2) {
+                if (((imm >> 5) & 0x7F) == 2) {
                     this->printOut += "srai ";
-                } else if ((imm >> 5) & 0x7F == 0) {
+                } else if (((imm >> 5) & 0x7F) == 0) {
                     this->printOut += "srli ";
                 } else {
                     throw DisassemblyException(
                         "Invalid imm parameter on Shift Right instruction.");
                 }
                 symbol = ">>";
+                break;
             case 6:
                 this->printOut += "ori ";
                 symbol = "|";
@@ -181,7 +185,7 @@ const std::string& IInstruction::toString() {
 
         this->printOut += std::string(registerNames[this->rd]) + " " +
                           std::string(registerNames[this->rs1]) + " " +
-                          std::to_string(this->imm) + " # " +
+                          std::to_string(this->imm) + "\t\t# " +
                           std::string(registerNames[this->rd]) + " = ";
 
         if (this->funct3 == 2 || this->funct3 == 3) {
@@ -200,7 +204,7 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op) {
+SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
     this->rs2 = (raw >> 20) & 0x1F;
@@ -208,6 +212,7 @@ SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op) {
 
     this->imm = (this->imm << 20) >> 20;
 }
+
 const std::string& SInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
@@ -235,7 +240,7 @@ const std::string& SInstruction::toString() {
 
     this->printOut += std::string(registerNames[this->rs2]) + ", " +
                       std::to_string(this->imm) + "(" +
-                      std::string(registerNames[this->rs1]) + ") # M[" +
+                      std::string(registerNames[this->rs1]) + ")\t\t# M[" +
                       std::string(registerNames[this->rs1]) + "+" +
                       std::to_string(this->imm) +
                       "][0:" + std::to_string(upper) +
@@ -245,7 +250,7 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
+BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
     this->rs2 = (raw >> 20) & 0x1F;
@@ -255,6 +260,7 @@ BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
     if (this->funct3 != 6 && this->funct3 != 7)
         this->imm = (this->imm << 19) >> 19;
 }
+
 const std::string& BInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
@@ -294,7 +300,7 @@ const std::string& BInstruction::toString() {
 
     this->printOut += std::string(registerNames[this->rs1]) + " " +
                       std::string(registerNames[this->rs2]) + " " +
-                      std::to_string(this->imm) + " # if(" +
+                      std::to_string(this->imm) + "\t\t# if(" +
                       std::string(registerNames[this->rs1]) + " " + symbol +
                       " " + std::string(registerNames[this->rs2]) +
                       ") PC += " + std::to_string(this->imm);
@@ -302,22 +308,23 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op) {
+UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->imm = (raw >> 12);
 }
+
 const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     // Cannot be an unknown opcode as it will have been caught earlier
     if (this->op == Opcode::LUI) {
         this->printOut = "lui " + std::string(registerNames[this->rd]) + " " +
-                         std::to_string(this->imm) + " # " +
+                         std::to_string(this->imm) + "\t\t# " +
                          std::string(registerNames[this->rd]) + " = " +
                          std::to_string(this->imm) + " << 12";
     } else {
         this->printOut = "auipc " + std::string(registerNames[this->rd]) + " " +
-                         std::to_string(this->imm) + " # " +
+                         std::to_string(this->imm) + "\t\t# " +
                          std::string(registerNames[this->rd]) + " = PC + (" +
                          std::to_string(this->imm) + " << 12)";
     }
@@ -325,18 +332,19 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
+JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
                 (((raw >> 20) & 0x1) << 11) | (((raw >> 21) & 0x3FF) << 1);
 
     this->imm = (this->imm << 11) >> 11;
 }
+
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     this->printOut = "jal " + std::string(registerNames[this->rd]) + " " +
-                     std::to_string(this->imm) + " # " +
+                     std::to_string(this->imm) + "\t\t# " +
                      std::string(registerNames[this->rd]) +
                      " = PC+$; PC += " + std::to_string(this->imm);
 
