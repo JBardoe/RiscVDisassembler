@@ -7,39 +7,15 @@
 #include "disassembler/Parser.hpp"
 
 int main() {
-    std::cout << "About to parse the file\n";
-    auto file = ELFParser::parseFile("data/elf/add.elf");
-    if (file) {
-        std::cout << "Parsed the file\n";
+    std::cout << "About to disassemble the file\n";
+
+    auto asmFile = Disassembler::disassemble("data/elf/add.elf");
+
+    if (asmFile) {
+        std::cout << "Disassembled file\n\n\n";
     }
 
-    const char* textData = (file->getSections()[".text"])->getData();
-    uint32_t size = (file->getSections()[".text"])->header->size;
-
-    std::cout << "Is little endian? " << std::to_string(file->isLittleEndian)
-              << "\n";
-
-    std::cout << "Address of the text section: "
-              << std::to_string((file->getSections()[".data"])->header->address)
-              << "\n";
-
-    for (auto& sect : file->getSections()) {
-        std::cout << "Section:" << sect.first << "\n";
-    }
-
-    for (uint32_t i = 0; i < size; ++i) {
-        if (i % 16 == 0)
-            std::cout << std::endl
-                      << std::setw(8) << std::setfill('0') << std::hex << i
-                      << ": ";
-        std::cout << std::setw(2) << std::setfill('0') << std::hex
-                  << (static_cast<unsigned>(
-                          static_cast<unsigned char>(textData[i])) &
-                      0xff)
-                  << ' ';
-    }
-
-    std::cout << "\n";
+    std::cout << asmFile->toString();
 
     return 0;
 }

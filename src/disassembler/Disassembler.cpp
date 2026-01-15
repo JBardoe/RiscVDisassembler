@@ -1,12 +1,15 @@
 #include "disassembler/Disassembler.hpp"
 
+#include <cstdint>
 #include <format>
+#include <iostream>
 #include <vector>
 
 #include "disassembler/DisassemblerTypes.hpp"
 #include "disassembler/ELFFile.hpp"
 #include "disassembler/Instruction.hpp"
 #include "disassembler/Parser.hpp"
+#include "utils/BadFileException.hpp"
 #include "utils/DisassemblyException.hpp"
 
 using namespace std;
@@ -57,21 +60,37 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
-    /*
-        Checks inc:
-            1. Required sections
-            2. Sections well formed
-            ...
-    */
+    const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
+        elffile->getSections();
 
-    /*
-        Deal with endianness
-    */
+    if (sections.find(".text") == sections.end()) {
+        throw ELFParser::BadFileException("No text section found.");
+    }
 
-    /*
-        Extract instructions
-    */
+    if (sections.at(".text")->header->size % 4 != 0) {
+        throw ELFParser::BadFileException(
+            "Text section is of an invalid size.");
+    }
 
-    return nullptr;
+    const unsigned char* textData =
+        reinterpret_cast<const unsigned char*>(sections.at(".text")->getData());
+    vector<unique_ptr<Instruction>> textInstructions;
+
+    uint32_t offset = 0;
+
+    while (offset < sections.at(".text")->header->size) {
+        uint32_t instr;
+        if (elffile->isLittleEndian) {
+            instr = (textData[offset]) | (textData[offset + 1] << 8) |
+                    (textData[offset + 2] << 16) | (textData[offset + 3] << 24);
+        } else {
+            instr = (textData[offset + 3]) | (textData[offset + 2] << 8) |
+                    (textData[offset + 1] << 16) | (textData[offset] << 24);
+        }
+        textInstructions.push_back(move(parseInstruction(instr)));
+        offset += 4;
+    }
+
+    return make_unique<AssemblyFile>(move(textInstructions));
 }
 }  // namespace Disassembler
