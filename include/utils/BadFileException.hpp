@@ -1,3 +1,6 @@
+#ifndef BADFILEEXCEPTION_H
+#define BADFILEEXCEPTION_H
+
 #include <stdexcept>
 
 namespace ELFParser {
@@ -8,3 +11,5 @@ class BadFileException : public std::runtime_error {
     BadFileException(std::string err) : runtime_error(err.c_str()) {};
 };
 }  // namespace ELFParser
+
+#endif

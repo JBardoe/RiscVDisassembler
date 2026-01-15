@@ -3,10 +3,9 @@
 const std::string& AssemblyFile::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = ".text\n";
-
-    for (auto& instr : this->textSection) {
-        printOut += "\t" + instr->toString() + "\n";
+    for (auto& sec : this->sections) {
+        printOut += sec.second->toString();
+        printOut += "\n";
     }
 
     return this->printOut;

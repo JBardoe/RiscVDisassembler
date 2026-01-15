@@ -60,9 +60,12 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
+    auto asmFile = make_unique<AssemblyFile>();
+
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
         elffile->getSections();
 
+    // Decode .text section
     if (sections.find(".text") == sections.end()) {
         throw ELFParser::BadFileException("No text section found.");
     }
@@ -91,6 +94,14 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         offset += 4;
     }
 
-    return make_unique<AssemblyFile>(move(textInstructions));
+    asmFile->addSection(make_unique<TextSection>(move(textInstructions)));
+
+    std::cout << "Sections:\n";
+
+    for (auto& sec : sections) {
+        std::cout << "Name: " << sec.first << "\n";
+    }
+
+    return asmFile;
 }
 }  // namespace Disassembler
