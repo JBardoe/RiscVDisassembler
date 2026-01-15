@@ -26,11 +26,11 @@ class ELFFile {
     void parseSections();
     void parseSegments();
 
-    std::unordered_map<std::string, std::unique_ptr<ELFSection>>&
+    const std::unordered_map<std::string, std::unique_ptr<ELFSection>>&
     getSections() {
         return sections;
     };
-    std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
+    const std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
         return segments;
     };
 

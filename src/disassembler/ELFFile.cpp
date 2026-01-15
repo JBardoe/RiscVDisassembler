@@ -1,5 +1,7 @@
 #include "disassembler/ELFFile.hpp"
 
+#include <cstdint>
+
 #include "utils/BadFileException.hpp"
 
 namespace ELFParser {
