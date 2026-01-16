@@ -5,10 +5,10 @@
 #include <iostream>
 #include <vector>
 
-#include "disassembler/DisassemblerTypes.hpp"
 #include "disassembler/ELFFile.hpp"
 #include "disassembler/Instruction.hpp"
 #include "disassembler/Parser.hpp"
+#include "disassembler/RiscvTypes.hpp"
 #include "utils/BadFileException.hpp"
 #include "utils/DisassemblyException.hpp"
 
@@ -18,36 +18,36 @@ namespace Disassembler {
 
 unique_ptr<Instruction> parseInstruction(uint32_t raw) {
     // Get opcode
-    if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
-        throw DisassemblyException("Unknown Opcode: " +
+    if (RISCV::opcodeMap.find(raw & 0x7F) == RISCV::opcodeMap.end()) {
+        throw DisassemblyException("Unknown RISCV::Opcode: " +
                                    format("{:02X}", (raw & 0x7F)));
     }
 
-    Opcode opcode = opcodeMap.at(raw & 0x7F);
+    RISCV::Opcode opcode = RISCV::opcodeMap.at(raw & 0x7F);
 
     switch (opcode) {
         // R-Type
-        case Opcode::R_TYPE:
+        case RISCV::Opcode::R_TYPE:
             return make_unique<RInstruction>(opcode, raw);
 
         // I-Types
-        case Opcode::LOAD:
-        case Opcode::IMM_INSTR:
-        case Opcode::JALR:
-        case Opcode::ENV_TYPE:
+        case RISCV::Opcode::LOAD:
+        case RISCV::Opcode::IMM_INSTR:
+        case RISCV::Opcode::JALR:
+        case RISCV::Opcode::ENV_TYPE:
             return make_unique<IInstruction>(opcode, raw);
 
         // S-Type
-        case Opcode::S_TYPE:
+        case RISCV::Opcode::S_TYPE:
             return make_unique<SInstruction>(opcode, raw);
 
         // B-Type
-        case Opcode::B_TYPE:
+        case RISCV::Opcode::B_TYPE:
             return make_unique<BInstruction>(opcode, raw);
 
         // U-Type
-        case Opcode::AUIPC:
-        case Opcode::LUI:
+        case RISCV::Opcode::AUIPC:
+        case RISCV::Opcode::LUI:
             return make_unique<UInstruction>(opcode, raw);
 
         // J-Type
@@ -99,7 +99,8 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     std::cout << "Sections:\n";
 
     for (auto& sec : sections) {
-        std::cout << "Name: " << sec.first << "\n";
+        std::cout << "Name: " << sec.first
+                  << ". Offset: " << sec.second->header->offset << "\n";
     }
 
     return asmFile;
