@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-#include "disassembler/DisassemblerTypes.hpp"
+#include "disassembler/RiscvTypes.hpp"
 
 namespace Disassembler {
 
@@ -17,88 +17,89 @@ class Instruction {
 
 class RInstruction : public virtual Instruction {
    public:
-    RInstruction(Opcode op, uint32_t raw);
+    RInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int rd;
-    int funct3;
-    int rs1;
-    int rs2;
-    int funct7;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rd;
+    RISCV::Register rs1;
+    RISCV::Register rs2;
     std::string printOut;
 };
 
 class IInstruction : public virtual Instruction {
    public:
-    IInstruction(Opcode op, uint32_t raw);
+    IInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int rd;
-    int funct3;
-    int rs1;
-    int imm;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rd;
+    RISCV::Register rs1;
+    int imm;
     std::string printOut;
 };
 
 class SInstruction : public virtual Instruction {
    public:
-    SInstruction(Opcode op, uint32_t raw);
+    SInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int imm;
-    int funct3;
-    int rs1;
-    int rs2;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rs1;
+    RISCV::Register rs2;
+    int imm;
     std::string printOut;
 };
 
 class BInstruction : public virtual Instruction {
    public:
-    BInstruction(Opcode op, uint32_t raw);
+    BInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int imm;
-    int funct3;
-    int rs1;
-    int rs2;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rs1;
+    RISCV::Register rs2;
+    int imm;
     std::string printOut;
 };
 
 class UInstruction : public virtual Instruction {
    public:
-    UInstruction(Opcode op, uint32_t raw);
+    UInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int rd;
-    int imm;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rd;
+    int imm;
     std::string printOut;
 };
 
 class JInstruction : public virtual Instruction {
    public:
-    JInstruction(Opcode op, uint32_t raw);
+    JInstruction(RISCV::Opcode op, uint32_t raw);
     const std::string& toString() override;
 
    private:
-    Opcode op;
-    int rd;
-    int imm;
+    RISCV::Opcode op;
 
+    RISCV::Instruction instr;
+    RISCV::Register rd;
+    int imm;
     std::string printOut;
 };
 

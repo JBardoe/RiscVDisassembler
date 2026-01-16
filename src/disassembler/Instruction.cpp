@@ -2,16 +2,49 @@
 
 #include <iostream>
 
+#include "disassembler/RiscvTypes.hpp"
 #include "utils/DisassemblyException.hpp"
 
 namespace Disassembler {
 
-RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
-    this->rd = (raw >> 7) & 0x1F;
-    this->funct3 = (raw >> 12) & 0x07;
-    this->rs1 = (raw >> 15) & 0x1F;
-    this->rs2 = (raw >> 20) & 0x1F;
-    this->funct7 = raw >> 25;
+RInstruction::RInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
+    switch ((raw >> 12) & 0x07) {
+        case 0:
+            this->instr =
+                (raw >> 25) ? RISCV::Instruction::sub : RISCV::Instruction::add;
+            break;
+        case 1:
+            this->instr = RISCV::Instruction::sll;
+            break;
+        case 2:
+            this->instr = RISCV::Instruction::slt;
+            break;
+        case 3:
+            this->instr = RISCV::Instruction::sltu;
+            break;
+        case 4:
+            this->instr = RISCV::Instruction::Xor;
+            break;
+        case 5:
+            this->instr =
+                (raw >> 25) ? RISCV::Instruction::sra : RISCV::Instruction::srl;
+            break;
+        case 6:
+            this->instr = RISCV::Instruction::Or;
+            break;
+        case 7:
+            this->instr = RISCV::Instruction::And;
+            break;
+        default:
+            throw DisassemblyException(
+                "Invalid funct3 parameter on R-Type instruction.");
+    }
+
+    // Registers to be in the range 0-31 as it is parsed from a 5 bit number
+    this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
+    this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<RISCV::Register>((raw >> 20) & 0x1F);
 }
 
 const std::string& RInstruction::toString() {
@@ -21,75 +54,66 @@ const std::string& RInstruction::toString() {
 
     this->printOut = "";
 
-    switch (this->funct3) {
-        case 0:
-            this->printOut += (this->funct7) ? "sub " : "add ";
-            symbol = (this->funct7) ? "-" : "+";
+    this->printOut +=
+        RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rd) + " " +
+        RISCV::to_string(this->rs1) + " " + RISCV::to_string(this->rs2) +
+        "\t\t# " + RISCV::to_string(this->rd) + " = ";
+
+    switch (this->instr) {
+        case RISCV::Instruction::add:
+            symbol = " + ";
             break;
-        case 1:
-            this->printOut += "sll ";
-            symbol = "<<";
+        case RISCV::Instruction::sub:
+            symbol = " - ";
             break;
-        case 2:
-            this->printOut += "slt ";
+        case RISCV::Instruction::Xor:
+            symbol = " ^ ";
             break;
-        case 3:
-            this->printOut += "sltu ";
+        case RISCV::Instruction::Or:
+            symbol = " | ";
             break;
-        case 4:
-            this->printOut += "xor ";
-            symbol = "^";
+        case RISCV::Instruction::And:
+            symbol = " & ";
             break;
-        case 5:
-            this->printOut += (this->funct7) ? "sra " : "srl ";
-            symbol = ">>";
+        case RISCV::Instruction::sll:
+            symbol = " << ";
             break;
-        case 6:
-            this->printOut += "or ";
-            symbol = "|";
+        case RISCV::Instruction::srl:
+            symbol = " >> ";
             break;
-        case 7:
-            this->printOut += "and ";
-            symbol = "&";
-            break;
-        default:
-            throw DisassemblyException(
-                "Invalid funct3 parameter on R-Type instruction.");
+        case RISCV::Instruction::sra:
+            symbol = " >> ";
     }
 
-    // Registers to be in the range 0-31 as it is parsed from a 5 bit number
-    this->printOut += std::string(registerNames[this->rd]) + " " +
-                      std::string(registerNames[this->rs1]) + " " +
-                      std::string(registerNames[this->rs2]);
-
-    if (this->funct3 == 2 || this->funct3 == 3) {
-        this->printOut += "\t\t# " + std::string(registerNames[this->rd]) +
-                          " = (" + std::string(registerNames[this->rs1]) +
-                          " < " + std::string(registerNames[this->rs2]) +
-                          ")?1:0";
+    if (this->instr == RISCV::Instruction::slt ||
+        this->instr == RISCV::Instruction::sltu) {
+        this->printOut += "(" + RISCV::to_string(this->rs1) + " < " +
+                          RISCV::to_string(this->rs2) + ")?1:0";
     } else {
-        this->printOut += "\t\t# " + std::string(registerNames[this->rd]) +
-                          " = " + std::string(registerNames[this->rs1]) + " " +
-                          symbol + " " + std::string(registerNames[this->rs2]);
+        this->printOut +=
+            RISCV::to_string(this->rs1) + symbol + RISCV::to_string(this->rs2);
     }
+
     return this->printOut;
 }
 
-IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
+IInstruction::IInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
     this->imm = (raw >> 20);
 
-    if ((this->op == Opcode::IMM_INSTR && this->funct3 != 3) ||
-        (this->op == Opcode::LOAD && this->funct3 != 4 && this->funct3 != 5))
+    if ((this->op == RISCV::Opcode::IMM_INSTR && this->funct3 != 3) ||
+        (this->op == RISCV::Opcode::LOAD && this->funct3 != 4 &&
+         this->funct3 != 5))
         this->imm = (this->imm << 20) >> 20;
 }
 
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    if (this->op == Opcode::JALR) {
+    if (this->op == RISCV::Opcode::JALR) {
         this->printOut =
             "jalr " + std::string(registerNames[this->rd]) + ", " +
             std::to_string(this->imm) + "(" +
@@ -97,11 +121,11 @@ const std::string& IInstruction::toString() {
             std::string(registerNames[this->rd]) +
             " = PC+4; PC = " + std::string(registerNames[this->rs1]) + " + " +
             std::to_string(this->imm);
-    } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
+    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 0) {
         this->printOut = "ecall\t\t# Transfer control to OS";
-    } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {
+    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 1) {
         this->printOut = "ebreak\t\t# Transfer control to debugger";
-    } else if (this->op == Opcode::LOAD) {
+    } else if (this->op == RISCV::Opcode::LOAD) {
         int upper;
         this->printOut = "";
         switch (this->funct3) {
@@ -204,7 +228,8 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
+SInstruction::SInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
     this->rs2 = (raw >> 20) & 0x1F;
@@ -250,7 +275,8 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
+BInstruction::BInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
     this->funct3 = (raw >> 12) & 0x07;
     this->rs1 = (raw >> 15) & 0x1F;
     this->rs2 = (raw >> 20) & 0x1F;
@@ -308,7 +334,8 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
+UInstruction::UInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->imm = (raw >> 12);
 }
@@ -317,7 +344,7 @@ const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     // Cannot be an unknown opcode as it will have been caught earlier
-    if (this->op == Opcode::LUI) {
+    if (this->op == RISCV::Opcode::LUI) {
         this->printOut = "lui " + std::string(registerNames[this->rd]) + " " +
                          std::to_string(this->imm) + "\t\t# " +
                          std::string(registerNames[this->rd]) + " = " +
@@ -332,7 +359,8 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op), printOut("") {
+JInstruction::JInstruction(RISCV::Opcode op, uint32_t raw)
+    : op(op), printOut("") {
     this->rd = (raw >> 7) & 0x1F;
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
                 (((raw >> 20) & 0x1) << 11) | (((raw >> 21) & 0x3FF) << 1);
