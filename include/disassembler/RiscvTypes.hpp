@@ -148,6 +148,7 @@ enum class Instruction : int {
     xori,
     ori,
     andi,
+    slli,
     srli,
     srai,
     slti,

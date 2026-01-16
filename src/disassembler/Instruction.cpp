@@ -54,10 +54,11 @@ const std::string& RInstruction::toString() {
 
     this->printOut = "";
 
-    this->printOut +=
-        RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rd) + " " +
-        RISCV::to_string(this->rs1) + " " + RISCV::to_string(this->rs2) +
-        "\t\t# " + RISCV::to_string(this->rd) + " = ";
+    this->printOut += RISCV::to_string(this->instr) + " " +
+                      RISCV::to_string(this->rd) + ", " +
+                      RISCV::to_string(this->rs1) + ", " +
+                      RISCV::to_string(this->rs2) + "\t\t# " +
+                      RISCV::to_string(this->rd) + " = ";
 
     switch (this->instr) {
         case RISCV::Instruction::add:
@@ -97,132 +98,176 @@ const std::string& RInstruction::toString() {
     return this->printOut;
 }
 
+// funct3 = (raw >> 12) & 0x07
+
 IInstruction::IInstruction(RISCV::Opcode op, uint32_t raw)
     : op(op), printOut("") {
-    this->rd = (raw >> 7) & 0x1F;
-    this->funct3 = (raw >> 12) & 0x07;
-    this->rs1 = (raw >> 15) & 0x1F;
+    this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
+    this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
     this->imm = (raw >> 20);
 
-    if ((this->op == RISCV::Opcode::IMM_INSTR && this->funct3 != 3) ||
-        (this->op == RISCV::Opcode::LOAD && this->funct3 != 4 &&
-         this->funct3 != 5))
-        this->imm = (this->imm << 20) >> 20;
+    this->imm = (this->imm << 20) >> 20;
+
+    if (this->op == RISCV::Opcode::JALR) {
+        this->instr = RISCV::Instruction::jalr;
+    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 0) {
+        this->instr = RISCV::Instruction::ecall;
+    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 1) {
+        this->instr = RISCV::Instruction::ebreak;
+    } else if (this->op == RISCV::Opcode::LOAD) {
+        switch ((raw >> 12) & 0x07) {
+            case 0:
+                this->instr = RISCV::Instruction::lb;
+                break;
+            case 1:
+                this->instr = RISCV::Instruction::lh;
+                break;
+            case 2:
+                this->instr = RISCV::Instruction::lw;
+                break;
+            case 4:
+                this->instr = RISCV::Instruction::lbu;
+                this->imm = (raw >> 20);
+                break;
+            case 5:
+                this->instr = RISCV::Instruction::lhu;
+                this->imm = (raw >> 20);
+                break;
+            default:
+                throw DisassemblyException(
+                    "Invalid funct3 parameter on I-Type instruction.");
+        }
+    } else {
+        switch ((raw >> 12) & 0x07) {
+            case 0:
+                this->instr = RISCV::Instruction::addi;
+                break;
+            case 1:
+                this->instr = RISCV::Instruction::slli;
+                break;
+            case 2:
+                this->instr = RISCV::Instruction::slti;
+                break;
+            case 3:
+                this->instr = RISCV::Instruction::sltiu;
+                this->imm = (raw >> 20);
+                break;
+            case 4:
+                this->instr = RISCV::Instruction::xori;
+                break;
+            case 5:
+                if (((imm >> 5) & 0x7F) == 2) {
+                    this->instr = RISCV::Instruction::srai;
+                } else if (((imm >> 5) & 0x7F) == 0) {
+                    this->instr = RISCV::Instruction::srli;
+                } else {
+                    throw DisassemblyException(
+                        "Invalid imm parameter on Shift Right instruction.");
+                }
+                break;
+            case 6:
+                this->instr = RISCV::Instruction::ori;
+                break;
+            case 7:
+                this->instr = RISCV::Instruction::andi;
+                break;
+            default:
+                throw DisassemblyException(
+                    "Invalid funct3 parameter on I-Type instruction.");
+        }
+    }
 }
 
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    if (this->op == RISCV::Opcode::JALR) {
+    if (this->instr == RISCV::Instruction::jalr) {
         this->printOut =
-            "jalr " + std::string(registerNames[this->rd]) + ", " +
-            std::to_string(this->imm) + "(" +
-            std::string(registerNames[this->rs1]) + ")\t\t# " +
-            std::string(registerNames[this->rd]) +
-            " = PC+4; PC = " + std::string(registerNames[this->rs1]) + " + " +
+            RISCV::to_string(this->instr) + RISCV::to_string(this->rd) + ", " +
+            std::to_string(this->imm) + "(" + RISCV::to_string(rs1) +
+            ")\t\t# " + RISCV::to_string(this->rd) +
+            " = PC+4; PC = " + RISCV::to_string(this->rs1) + " + " +
             std::to_string(this->imm);
-    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 0) {
+
+        return this->printOut;
+    }
+
+    if (this->instr == RISCV::Instruction::ecall) {
         this->printOut = "ecall\t\t# Transfer control to OS";
-    } else if (this->op == RISCV::Opcode::ENV_TYPE && this->imm == 1) {
+        return this->printOut;
+    }
+
+    if (this->instr == RISCV::Instruction::ebreak) {
         this->printOut = "ebreak\t\t# Transfer control to debugger";
-    } else if (this->op == RISCV::Opcode::LOAD) {
-        int upper;
-        this->printOut = "";
-        switch (this->funct3) {
-            case 0:
-                this->printOut += "lb ";
-                upper = 7;
+        return this->printOut;
+    }
+
+    if (this->op == RISCV::Opcode::LOAD) {
+        this->printOut =
+            RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rd) +
+            ", " + std::to_string(this->imm) + "(" +
+            RISCV::to_string(this->rs1) + ")\t\t# " +
+            RISCV::to_string(this->rd) + " = M[" + RISCV::to_string(this->rs1) +
+            "+" + std::to_string(this->imm) + "][0:";
+
+        switch (this->instr) {
+            case RISCV::Instruction::lb:
+            case RISCV::Instruction::lbu:
+                this->printOut += std::to_string(7) + "]";
                 break;
-            case 1:
-                this->printOut += "lh ";
-                upper = 15;
+            case RISCV::Instruction::lh:
+            case RISCV::Instruction::lhu:
+                this->printOut += std::to_string(15) + "]";
                 break;
-            case 2:
-                this->printOut += "lw ";
-                upper = 31;
+            case RISCV::Instruction::lw:
+                this->printOut += std::to_string(31) + "]";
                 break;
-            case 4:
-                this->printOut += "lbu ";
-                upper = 7;
-                break;
-            case 5:
-                this->printOut += "lhu ";
-                upper = 15;
-                break;
-            default:
-                throw DisassemblyException(
-                    "Invalid funct3 parameter on I-Type instruction.");
         }
 
-        this->printOut += std::string(registerNames[this->rd]) + ", " +
-                          std::to_string(this->imm) + "(" +
-                          std::string(registerNames[this->rs1]) + ")\t\t# " +
-                          std::string(registerNames[this->rd]) + " = M[" +
-                          std::string(registerNames[this->rs1]) + "+" +
-                          std::to_string(this->imm) +
-                          "][0:" + std::to_string(upper) + "]";
+        return this->printOut;
+    }
+
+    this->printOut =
+        RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rd) +
+        ", " + RISCV::to_string(this->rs1) + ", " + std::to_string(this->imm) +
+        "\t\t# " + RISCV::to_string(this->rd) + " = ";
+
+    std::string symbol;
+    switch (this->instr) {
+        case RISCV::Instruction::addi:
+            symbol = " + ";
+            break;
+        case RISCV::Instruction::slli:
+            symbol = " << ";
+            break;
+        case RISCV::Instruction::xori:
+            symbol = " ^ ";
+            break;
+        case RISCV::Instruction::srai:
+        case RISCV::Instruction::srli:
+            symbol = " >> ";
+            break;
+        case RISCV::Instruction::ori:
+            symbol = " | ";
+            break;
+        case RISCV::Instruction::andi:
+            symbol = " & ";
+            break;
+    }
+
+    if (this->instr == RISCV::Instruction::slti ||
+        this->instr == RISCV::Instruction::sltiu) {
+        this->printOut += "(" + RISCV::to_string(this->rs1) + " < " +
+                          std::to_string(this->imm) + ")?1:0";
     } else {
-        this->printOut = "";
-        std::string symbol;
-        switch (this->funct3) {
-            case 0:
-                this->printOut += "addi ";
-                symbol = "+";
-                break;
-            case 1:
-                this->printOut += "slli ";
-                symbol = "<<";
-                break;
-            case 2:
-                this->printOut += "slti ";
-                break;
-            case 3:
-                this->printOut += "sltiu ";
-                break;
-            case 4:
-                this->printOut += "xori ";
-                symbol = "^";
-                break;
-            case 5:
-                if (((imm >> 5) & 0x7F) == 2) {
-                    this->printOut += "srai ";
-                } else if (((imm >> 5) & 0x7F) == 0) {
-                    this->printOut += "srli ";
-                } else {
-                    throw DisassemblyException(
-                        "Invalid imm parameter on Shift Right instruction.");
-                }
-                symbol = ">>";
-                break;
-            case 6:
-                this->printOut += "ori ";
-                symbol = "|";
-                break;
-            case 7:
-                this->printOut += "andi ";
-                symbol = "&";
-                break;
-            default:
-                throw DisassemblyException(
-                    "Invalid funct3 parameter on I-Type instruction.");
-        }
+        this->printOut +=
+            RISCV::to_string(this->rs1) + symbol + std::to_string(this->imm);
+    }
 
-        this->printOut += std::string(registerNames[this->rd]) + " " +
-                          std::string(registerNames[this->rs1]) + " " +
-                          std::to_string(this->imm) + "\t\t# " +
-                          std::string(registerNames[this->rd]) + " = ";
-
-        if (this->funct3 == 2 || this->funct3 == 3) {
-            this->printOut += "(" + std::string(registerNames[this->rs1]) +
-                              " < " + std::to_string(this->imm) + ")?1:0";
-        } else {
-            this->printOut += std::string(registerNames[this->rs1]) + " " +
-                              symbol + " " + std::to_string(this->imm);
-        }
-
-        if (this->funct3 == 1 || this->funct3 == 5) {
-            this->printOut += "[0:4]";
-        }
+    if (this->instr == RISCV::Instruction::slli ||
+        this->instr == RISCV::Instruction::srli ||
+        this->instr == RISCV::Instruction::srai) {
+        this->printOut += "[0:4]";
     }
 
     return this->printOut;
@@ -230,60 +275,89 @@ const std::string& IInstruction::toString() {
 
 SInstruction::SInstruction(RISCV::Opcode op, uint32_t raw)
     : op(op), printOut("") {
-    this->funct3 = (raw >> 12) & 0x07;
-    this->rs1 = (raw >> 15) & 0x1F;
-    this->rs2 = (raw >> 20) & 0x1F;
-    this->imm = ((raw >> 7) & 0x17) | ((raw >> 25) << 5);
+    this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<RISCV::Register>((raw >> 20) & 0x1F);
 
-    this->imm = (this->imm << 20) >> 20;
-}
-
-const std::string& SInstruction::toString() {
-    if (this->printOut != "") return this->printOut;
-
-    this->printOut = "";
-
-    int upper = 0;
-
-    switch (this->funct3) {
+    switch ((raw >> 12) & 0x07) {
         case 0:
-            this->printOut += "sb ";
-            upper = 7;
+            this->instr = RISCV::Instruction::sb;
             break;
         case 1:
-            this->printOut += "sh ";
-            upper = 15;
+            this->instr = RISCV::Instruction::sh;
             break;
         case 2:
-            this->printOut += "sw ";
-            upper = 31;
+            this->instr = RISCV::Instruction::sw;
             break;
         default:
             throw DisassemblyException(
                 "Invalid funct3 parameter on S-Type instruction.");
     }
 
-    this->printOut += std::string(registerNames[this->rs2]) + ", " +
-                      std::to_string(this->imm) + "(" +
-                      std::string(registerNames[this->rs1]) + ")\t\t# M[" +
-                      std::string(registerNames[this->rs1]) + "+" +
-                      std::to_string(this->imm) +
-                      "][0:" + std::to_string(upper) +
-                      "] = " + std::string(registerNames[this->rs2]) +
-                      "[0:" + std::to_string(upper) + "]";
+    this->imm = ((raw >> 7) & 0x17) | ((raw >> 25) << 5);
+    this->imm = (this->imm << 20) >> 20;
+}
+
+const std::string& SInstruction::toString() {
+    if (this->printOut != "") return this->printOut;
+    int upper = 0;
+
+    switch (this->instr) {
+        case RISCV::Instruction::sb:
+            upper = 7;
+            break;
+        case RISCV::Instruction::sh:
+            upper = 15;
+            break;
+        case RISCV::Instruction::sw:
+            upper = 31;
+            break;
+    }
+
+    this->printOut =
+        RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rs2) +
+        ", " + std::to_string(this->imm) + "(" + RISCV::to_string(this->rs1) +
+        ")" + "\t\t# M[" + RISCV::to_string(this->rs1) + "+" +
+        std::to_string(this->imm) + "][0:" + std::to_string(upper) +
+        "] = " + RISCV::to_string(this->rs2) + "[0:" + std::to_string(upper) +
+        "]";
 
     return this->printOut;
 }
 
 BInstruction::BInstruction(RISCV::Opcode op, uint32_t raw)
     : op(op), printOut("") {
-    this->funct3 = (raw >> 12) & 0x07;
-    this->rs1 = (raw >> 15) & 0x1F;
-    this->rs2 = (raw >> 20) & 0x1F;
+    switch ((raw >> 12) & 0x07) {
+        case 0:
+            this->instr = RISCV::Instruction::beq;
+            break;
+        case 1:
+            this->instr = RISCV::Instruction::bne;
+            break;
+        case 4:
+            this->instr = RISCV::Instruction::blt;
+            break;
+        case 5:
+            this->instr = RISCV::Instruction::bge;
+            break;
+        case 6:
+            this->instr = RISCV::Instruction::bltu;
+            break;
+        case 7:
+            this->instr = RISCV::Instruction::bgeu;
+            break;
+        default:
+            throw DisassemblyException(
+                "Invalid funct3 parameter on B-Type instruction.");
+    }
+
+    this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<RISCV::Register>((raw >> 20) & 0x1F);
+
     this->imm = (((raw >> 31) & 0x01) << 12) | (((raw >> 7) & 0x01) << 11) |
                 (((raw >> 25) & 0x3F) << 5) | (((raw >> 8) & 0x0F) << 1);
 
-    if (this->funct3 != 6 && this->funct3 != 7)
+    if (this->instr != RISCV::Instruction::bltu &&
+        this->instr != RISCV::Instruction::bgeu)
         this->imm = (this->imm << 19) >> 19;
 }
 
@@ -292,68 +366,57 @@ const std::string& BInstruction::toString() {
 
     std::string symbol;
 
-    this->printOut = "";
-
-    switch (this->funct3) {
-        case 0:
-            this->printOut += "beq ";
+    switch (this->instr) {
+        case RISCV::Instruction::beq:
             symbol = "==";
             break;
-        case 1:
-            this->printOut += "bne ";
+        case RISCV::Instruction::bne:
             symbol = "!=";
             break;
-        case 4:
-            this->printOut += "blt ";
+        case RISCV::Instruction::blt:
             symbol = "<";
             break;
-        case 5:
-            this->printOut += "bge ";
+        case RISCV::Instruction::bge:
             symbol = ">=";
             break;
-        case 6:
-            this->printOut += "bltu ";
+        case RISCV::Instruction::bltu:
             symbol = "<";
             break;
-        case 7:
-            this->printOut += "bgeu ";
+        case RISCV::Instruction::bgeu:
             symbol = ">=";
             break;
-        default:
-            throw DisassemblyException(
-                "Invalid funct3 parameter on B-Type instruction.");
     }
 
-    this->printOut += std::string(registerNames[this->rs1]) + " " +
-                      std::string(registerNames[this->rs2]) + " " +
-                      std::to_string(this->imm) + "\t\t# if(" +
-                      std::string(registerNames[this->rs1]) + " " + symbol +
-                      " " + std::string(registerNames[this->rs2]) +
-                      ") PC += " + std::to_string(this->imm);
+    this->printOut =
+        RISCV::to_string(this->instr) + " " + RISCV::to_string(this->rs1) +
+        ", " + RISCV::to_string(this->rs2) + ", " + std::to_string(this->imm) +
+        "\t\t# if(" + RISCV::to_string(this->rs1) + " " + symbol + " " +
+        RISCV::to_string(this->rs2) + ") PC += " + std::to_string(this->imm);
 
     return this->printOut;
 }
 
 UInstruction::UInstruction(RISCV::Opcode op, uint32_t raw)
     : op(op), printOut("") {
-    this->rd = (raw >> 7) & 0x1F;
+    this->instr = (op == RISCV::Opcode::LUI) ? RISCV::Instruction::lui
+                                             : RISCV::Instruction::auipc;
+    this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
     this->imm = (raw >> 12);
 }
 
 const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
+    this->printOut = RISCV::to_string(this->instr) + " " +
+                     RISCV::to_string(this->rd) + ", " +
+                     std::to_string(this->imm) + "\t\t# " +
+                     RISCV::to_string(this->rd) + " = ";
+
     // Cannot be an unknown opcode as it will have been caught earlier
     if (this->op == RISCV::Opcode::LUI) {
-        this->printOut = "lui " + std::string(registerNames[this->rd]) + " " +
-                         std::to_string(this->imm) + "\t\t# " +
-                         std::string(registerNames[this->rd]) + " = " +
-                         std::to_string(this->imm) + " << 12";
+        this->printOut += std::to_string(this->imm) + " << 12";
     } else {
-        this->printOut = "auipc " + std::string(registerNames[this->rd]) + " " +
-                         std::to_string(this->imm) + "\t\t# " +
-                         std::string(registerNames[this->rd]) + " = PC + (" +
-                         std::to_string(this->imm) + " << 12)";
+        this->printOut += "PC + (" + std::to_string(this->imm) + " << 12)";
     }
 
     return this->printOut;
@@ -361,7 +424,8 @@ const std::string& UInstruction::toString() {
 
 JInstruction::JInstruction(RISCV::Opcode op, uint32_t raw)
     : op(op), printOut("") {
-    this->rd = (raw >> 7) & 0x1F;
+    this->instr = RISCV::Instruction::jal;
+    this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
                 (((raw >> 20) & 0x1) << 11) | (((raw >> 21) & 0x3FF) << 1);
 
@@ -371,10 +435,10 @@ JInstruction::JInstruction(RISCV::Opcode op, uint32_t raw)
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = "jal " + std::string(registerNames[this->rd]) + " " +
-                     std::to_string(this->imm) + "\t\t# " +
-                     std::string(registerNames[this->rd]) +
-                     " = PC+$; PC += " + std::to_string(this->imm);
+    this->printOut =
+        RISCV::to_string(this->instr) + RISCV::to_string(this->rd) + ", " +
+        std::to_string(this->imm) + "\t\t# " + RISCV::to_string(this->rd) +
+        " = PC+$; PC += " + std::to_string(this->imm);
 
     return this->printOut;
 }
