@@ -94,7 +94,8 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         offset += 4;
     }
 
-    asmFile->addSection(make_unique<TextSection>(move(textInstructions)));
+    asmFile->addSection(".text",
+                        move(make_unique<TextSection>(move(textInstructions))));
 
     std::cout << "Sections:\n";
 

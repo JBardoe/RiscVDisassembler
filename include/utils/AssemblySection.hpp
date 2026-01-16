@@ -11,13 +11,12 @@ class AssemblySection {
    public:
     AssemblySection() = default;
     AssemblySection(std::string name) : name(name), printOut("") {}
-    virtual ~AssemblySection() = default;
-    virtual const std::string& toString();
+    virtual const std::string& toString() { return this->printOut; };
     const std::string& getName() { return this->name; }
 
    protected:
-    std::string printOut;
     std::string name;
+    std::string printOut;
 };
 
 class TextSection : public AssemblySection {

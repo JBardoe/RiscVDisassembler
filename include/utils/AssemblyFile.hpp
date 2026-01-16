@@ -11,19 +11,17 @@
 
 class AssemblyFile {
    public:
-    AssemblyFile(
-        std::vector<std::unique_ptr<Disassembler::Instruction>> textSection)
-        : sections({}), printOut("") {};
+    AssemblyFile() : printOut("") {};
 
-    void addSection(std::unique_ptr<AssemblySection> section) {
-        sections.insert({section->getName(), std::move(section)});
+    void addSection(std::string name,
+                    std::unique_ptr<AssemblySection> section) {
+        sections.insert({name, std::move(section)});
     }
 
     const std::string& toString();
 
    private:
-    std::unordered_map<const std::string&, std::unique_ptr<AssemblySection>>
-        sections;
+    std::unordered_map<std::string, std::unique_ptr<AssemblySection>> sections;
     std::string printOut;
 };
 

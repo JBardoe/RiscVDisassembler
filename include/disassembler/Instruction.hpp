@@ -10,9 +10,12 @@ namespace Disassembler {
 
 class Instruction {
    public:
-    Instruction() = default;
+    Instruction() : printOut("") {};
     virtual ~Instruction() = default;
-    virtual const std::string& toString();
+    virtual const std::string& toString() { return this->printOut; };
+
+   protected:
+    std::string printOut;
 };
 
 class RInstruction : public virtual Instruction {
@@ -27,7 +30,6 @@ class RInstruction : public virtual Instruction {
     RISCV::Register rd;
     RISCV::Register rs1;
     RISCV::Register rs2;
-    std::string printOut;
 };
 
 class IInstruction : public virtual Instruction {
@@ -42,7 +44,6 @@ class IInstruction : public virtual Instruction {
     RISCV::Register rd;
     RISCV::Register rs1;
     int imm;
-    std::string printOut;
 };
 
 class SInstruction : public virtual Instruction {
@@ -57,7 +58,6 @@ class SInstruction : public virtual Instruction {
     RISCV::Register rs1;
     RISCV::Register rs2;
     int imm;
-    std::string printOut;
 };
 
 class BInstruction : public virtual Instruction {
@@ -72,7 +72,6 @@ class BInstruction : public virtual Instruction {
     RISCV::Register rs1;
     RISCV::Register rs2;
     int imm;
-    std::string printOut;
 };
 
 class UInstruction : public virtual Instruction {
@@ -86,7 +85,6 @@ class UInstruction : public virtual Instruction {
     RISCV::Instruction instr;
     RISCV::Register rd;
     int imm;
-    std::string printOut;
 };
 
 class JInstruction : public virtual Instruction {
@@ -100,7 +98,6 @@ class JInstruction : public virtual Instruction {
     RISCV::Instruction instr;
     RISCV::Register rd;
     int imm;
-    std::string printOut;
 };
 
 }  // namespace Disassembler

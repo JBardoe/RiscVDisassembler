@@ -7,8 +7,7 @@
 
 namespace Disassembler {
 
-RInstruction::RInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+RInstruction::RInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
             this->instr =
@@ -84,6 +83,8 @@ const std::string& RInstruction::toString() {
             break;
         case RISCV::Instruction::sra:
             symbol = " >> ";
+        default:
+            break;
     }
 
     if (this->instr == RISCV::Instruction::slt ||
@@ -98,10 +99,7 @@ const std::string& RInstruction::toString() {
     return this->printOut;
 }
 
-// funct3 = (raw >> 12) & 0x07
-
-IInstruction::IInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+IInstruction::IInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
     this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
     this->imm = (raw >> 20);
@@ -222,6 +220,8 @@ const std::string& IInstruction::toString() {
             case RISCV::Instruction::lw:
                 this->printOut += std::to_string(31) + "]";
                 break;
+            default:
+                break;
         }
 
         return this->printOut;
@@ -253,6 +253,8 @@ const std::string& IInstruction::toString() {
         case RISCV::Instruction::andi:
             symbol = " & ";
             break;
+        default:
+            break;
     }
 
     if (this->instr == RISCV::Instruction::slti ||
@@ -273,8 +275,7 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-SInstruction::SInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+SInstruction::SInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     this->rs1 = static_cast<RISCV::Register>((raw >> 15) & 0x1F);
     this->rs2 = static_cast<RISCV::Register>((raw >> 20) & 0x1F);
 
@@ -311,6 +312,8 @@ const std::string& SInstruction::toString() {
         case RISCV::Instruction::sw:
             upper = 31;
             break;
+        default:
+            break;
     }
 
     this->printOut =
@@ -324,8 +327,7 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-BInstruction::BInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+BInstruction::BInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
             this->instr = RISCV::Instruction::beq;
@@ -385,6 +387,8 @@ const std::string& BInstruction::toString() {
         case RISCV::Instruction::bgeu:
             symbol = ">=";
             break;
+        default:
+            break;
     }
 
     this->printOut =
@@ -396,8 +400,7 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-UInstruction::UInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+UInstruction::UInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     this->instr = (op == RISCV::Opcode::LUI) ? RISCV::Instruction::lui
                                              : RISCV::Instruction::auipc;
     this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
@@ -422,8 +425,7 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-JInstruction::JInstruction(RISCV::Opcode op, uint32_t raw)
-    : op(op), printOut("") {
+JInstruction::JInstruction(RISCV::Opcode op, uint32_t raw) : op(op) {
     this->instr = RISCV::Instruction::jal;
     this->rd = static_cast<RISCV::Register>((raw >> 7) & 0x1F);
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
