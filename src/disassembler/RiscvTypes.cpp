@@ -157,6 +157,8 @@ std::string to_string(Instruction i) {
 
 std::string to_string(SymbolType t) {
     switch (t) {
+        case SymbolType::NOTYPE:
+            return "no-type";
         case SymbolType::OBJECT:
             return "object";
         case SymbolType::FUNCTION:

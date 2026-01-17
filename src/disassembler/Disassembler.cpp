@@ -123,6 +123,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
             while (offset * sec.second->header->entrySize <
                    sec.second->header->size) {
+                std::cout << "1\n";
                 if (symbolData[offset].name < 1) {
                     offset++;
                     continue;
@@ -132,11 +133,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                     sections.at(".strtab")->header->size) {
                     throw ELFParser::BadFileException(
                         "Invalid symbol table entry.");
-                }
-                if (((symbolData[offset].name & 0x0F) != 1) &&
-                    ((symbolData[offset].name & 0x0F) != 2)) {
-                    offset++;
-                    continue;
                 }
 
                 std::string symbolName(reinterpret_cast<const char*>(

@@ -111,6 +111,7 @@ enum class Instruction : int {
 std::string to_string(Instruction i);
 
 enum class SymbolType : int {
+    NOTYPE = 0,
     OBJECT = 1,
     FUNCTION = 2,
 };
