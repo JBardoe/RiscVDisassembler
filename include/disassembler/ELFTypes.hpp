@@ -4,6 +4,10 @@
 #include <cstdint>
 
 namespace ELFParser {
+
+/**
+ * Header of an ELF file
+ */
 typedef struct ELFHeader {
     unsigned char identifiers[16];
     uint16_t fileType;
@@ -22,6 +26,9 @@ typedef struct ELFHeader {
                         // string table
 } ELFHeader;
 
+/**
+ * Header of a section from an ELF file
+ */
 typedef struct SectionHeader {
     uint32_t name;
     uint32_t type;
@@ -35,6 +42,9 @@ typedef struct SectionHeader {
     uint32_t entrySize;  // Entry size if the section holds a table
 } SectionHeader;
 
+/**
+ * Header of a segment from an ELF file
+ */
 typedef struct SegmentHeader {
     uint32_t type;
     uint32_t offset;    // Offset to the section in the file
@@ -46,6 +56,9 @@ typedef struct SegmentHeader {
     uint32_t align;
 } SegmentHeader;
 
+/**
+ * Single entry in an ELF file's symbol table
+ */
 typedef struct SymbolTableEntry {
     uint32_t name;        // Index into symbol string table of the name
     uint32_t value;       // Value of the symbol
