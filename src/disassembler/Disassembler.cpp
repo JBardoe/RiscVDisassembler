@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "disassembler/ELFFile.hpp"
+#include "disassembler/ELFTypes.hpp"
 #include "disassembler/Instruction.hpp"
 #include "disassembler/Parser.hpp"
 #include "disassembler/RiscvTypes.hpp"
@@ -97,11 +98,76 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     asmFile->addSection(".text",
                         move(make_unique<TextSection>(move(textInstructions))));
 
+    // Parse symbol tables if they exists
+    for (auto& sec : sections) {
+        if (sec.second->header->type == 11 || sec.second->header->type == 2) {
+            if (sections.find(".strtab") == sections.end()) {
+                throw ELFParser::BadFileException("Missing string table.");
+            }
+
+            const unsigned char* stringTable =
+                reinterpret_cast<const unsigned char*>(
+                    sections.at(".strtab")->getData());
+
+            if (sec.second->header->entrySize !=
+                    sizeof(ELFParser::SymbolTableEntry) ||
+                sec.second->header->size % sec.second->header->entrySize != 0) {
+                throw ELFParser::BadFileException("Malformed symbol table.");
+            }
+
+            const ELFParser::SymbolTableEntry* symbolData =
+                reinterpret_cast<const ELFParser::SymbolTableEntry*>(
+                    sec.second->getData());
+
+            offset = 0;
+
+            while (offset * sec.second->header->entrySize <
+                   sec.second->header->size) {
+                if (symbolData[offset].name < 1) {
+                    if (symbolData[offset].name >
+                        sections.at(".strtab")->header->size) {
+                        throw ELFParser::BadFileException(
+                            "Invalid symbol table entry.");
+                    }
+                    if (symbolData[offset].name & 0x0F != 1 &&
+                        symbolData[offset].name & 0x0F != 1) {
+                        offset++;
+                        continue;
+                    }
+
+                    std::string symbolName(reinterpret_cast<const char*>(
+                        stringTable + symbolData[offset].name));
+
+                    const std::string& sectionName =
+                        elffile->getSectionName(symbolData[offset].shndx);
+                    ELFParser::ELFSection* section =
+                        (sectionName == "" ||
+                         sections.find(sectionName) == sections.end())
+                            ? nullptr
+                            : sections.at(sectionName).get();
+
+                    asmFile->addSymbol(symbolName,
+                                       make_unique<RISCV::Symbol>(
+                                           symbolName, symbolData[offset].value,
+                                           symbolData[offset].size,
+                                           static_cast<RISCV::SymbolType>(
+                                               symbolData[offset].info >> 4),
+                                           static_cast<RISCV::SymbolBinding>(
+                                               symbolData[offset].info & 0x0F),
+                                           section),
+                                       sec.second->header->type);
+                }
+                offset++;
+            }
+        }
+    }
+
     std::cout << "Sections:\n";
 
     for (auto& sec : sections) {
         std::cout << "Name: " << sec.first
-                  << ". Offset: " << sec.second->header->offset << "\n";
+                  << ". Offset: " << sec.second->header->offset
+                  << ". Size: " << sec.second->header->size << "\n";
     }
 
     return asmFile;
