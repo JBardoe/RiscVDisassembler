@@ -10,3 +10,11 @@ const std::string& AssemblyFile::toString() {
 
     return this->printOut;
 }
+
+void AssemblyFile::addSymbol(std::string name,
+                             std::unique_ptr<RISCV::Symbol> sym,
+                             uint32_t type) {
+    if (symbolTable.find(name) == symbolTable.end() || type == 2) {
+        symbolTable.insert({name, std::move(sym)});
+    }
+}
