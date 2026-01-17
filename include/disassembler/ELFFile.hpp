@@ -33,10 +33,17 @@ class ELFFile {
     const std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
         return segments;
     };
+    const std::string& getSectionName(int index) {
+        if (sectionIndexes.find(index) == sectionIndexes.end()) {
+            return "";
+        }
+        return sectionIndexes[index];
+    }
 
    private:
     std::unique_ptr<ELFHeader> header;
     std::unordered_map<std::string, std::unique_ptr<ELFSection>> sections;
+    std::unordered_map<int, std::string> sectionIndexes;
     std::vector<std::unique_ptr<ELFSegment>> segments;
 };
 

@@ -34,6 +34,7 @@ void ELFFile::parseSections() {
             name = "Unknown Section" + std::to_string(i);  // Should not trigger
 
         sections[name] = std::move(section);
+        sectionIndexes[i] = name;
     }
 }
 void ELFFile::parseSegments() {
