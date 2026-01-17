@@ -155,4 +155,34 @@ std::string to_string(Instruction i) {
     }
 }
 
+std::string to_string(SymbolType t) {
+    switch (t) {
+        case SymbolType::OBJECT:
+            return "object";
+        case SymbolType::FUNCTION:
+            return "function";
+    }
+    return "<unknown_type>";
+}
+
+std::string to_string(SymbolBinding b) {
+    switch (b) {
+        case SymbolBinding::LOCAL:
+            return "local";
+        case SymbolBinding::GLOBAL:
+            return "global";
+        case SymbolBinding::WEAK:
+            return "weak";
+        case SymbolBinding::LOOS:
+            return "loos";
+        case SymbolBinding::HIOS:
+            return "hios";
+        case SymbolBinding::LOPROC:
+            return "loproc";
+        case SymbolBinding::HIPROC:
+            return "hiproc";
+    }
+    return "<unknown_binding>";
+}
+
 }  // namespace RISCV
