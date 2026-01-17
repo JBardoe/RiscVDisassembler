@@ -6,6 +6,8 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "disassembler/ELFFile.hpp"
+
 namespace RISCV {
 
 enum class Opcode : int {
@@ -107,6 +109,30 @@ enum class Instruction : int {
 };
 
 std::string to_string(Instruction i);
+
+enum class SymbolType : int {
+    OBJECT = 1,
+    FUNCTION = 2,
+};
+
+enum class SymbolBinding : int {
+    LOCAL = 0,
+    GLOBAL = 1,
+    WEAK = 2,
+    LOOS = 10,
+    HIOS = 12,
+    LOPROC = 13,
+    HIPROC = 15,
+};
+
+typedef struct Symbol {
+    std::string name;
+    uint32_t addr;
+    uint32_t size;
+    SymbolType type;
+    SymbolBinding binding;
+    ELFParser::ELFSection* section;
+} Symbol;
 
 }  // namespace RISCV
 

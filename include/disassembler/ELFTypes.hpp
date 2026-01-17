@@ -46,5 +46,14 @@ typedef struct SegmentHeader {
     uint32_t align;
 } SegmentHeader;
 
+typedef struct SymbolTableEntry {
+    uint32_t name;        // Index into symbol string table of the name
+    uint32_t value;       // Value of the symbol
+    uint32_t size;        // Size of the symbol
+    unsigned char info;   // Type and binding attributes
+    unsigned char other;  // Visibility
+    uint16_t shndx;       // Index of the section header containing the symbol
+} SymbolTableEntry;
+
 }  // namespace ELFParser
 #endif
