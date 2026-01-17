@@ -115,6 +115,8 @@ enum class SymbolType : int {
     FUNCTION = 2,
 };
 
+std::string to_string(SymbolType t);
+
 enum class SymbolBinding : int {
     LOCAL = 0,
     GLOBAL = 1,
@@ -125,13 +127,15 @@ enum class SymbolBinding : int {
     HIPROC = 15,
 };
 
+std::string to_string(SymbolBinding b);
+
 typedef struct Symbol {
     std::string name;
     uint32_t addr;
     uint32_t size;
     SymbolType type;
     SymbolBinding binding;
-    ELFParser::ELFSection* section;
+    std::string sectionName;
 } Symbol;
 
 }  // namespace RISCV

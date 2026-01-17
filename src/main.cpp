@@ -9,7 +9,7 @@
 int main() {
     std::cout << "About to disassemble the file\n";
 
-    auto asmFile = Disassembler::disassemble("data/elf/add.elf");
+    auto asmFile = Disassembler::disassemble("data/test/elf/add.elf");
 
     if (asmFile) {
         std::cout << "Disassembled file\n\n\n";

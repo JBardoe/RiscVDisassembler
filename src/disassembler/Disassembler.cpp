@@ -124,39 +124,38 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
             while (offset * sec.second->header->entrySize <
                    sec.second->header->size) {
                 if (symbolData[offset].name < 1) {
-                    if (symbolData[offset].name >
-                        sections.at(".strtab")->header->size) {
-                        throw ELFParser::BadFileException(
-                            "Invalid symbol table entry.");
-                    }
-                    if (symbolData[offset].name & 0x0F != 1 &&
-                        symbolData[offset].name & 0x0F != 1) {
-                        offset++;
-                        continue;
-                    }
-
-                    std::string symbolName(reinterpret_cast<const char*>(
-                        stringTable + symbolData[offset].name));
-
-                    const std::string& sectionName =
-                        elffile->getSectionName(symbolData[offset].shndx);
-                    ELFParser::ELFSection* section =
-                        (sectionName == "" ||
-                         sections.find(sectionName) == sections.end())
-                            ? nullptr
-                            : sections.at(sectionName).get();
-
-                    asmFile->addSymbol(symbolName,
-                                       make_unique<RISCV::Symbol>(
-                                           symbolName, symbolData[offset].value,
-                                           symbolData[offset].size,
-                                           static_cast<RISCV::SymbolType>(
-                                               symbolData[offset].info >> 4),
-                                           static_cast<RISCV::SymbolBinding>(
-                                               symbolData[offset].info & 0x0F),
-                                           section),
-                                       sec.second->header->type);
+                    offset++;
+                    continue;
                 }
+
+                if (symbolData[offset].name >
+                    sections.at(".strtab")->header->size) {
+                    throw ELFParser::BadFileException(
+                        "Invalid symbol table entry.");
+                }
+                if (((symbolData[offset].name & 0x0F) != 1) &&
+                    ((symbolData[offset].name & 0x0F) != 2)) {
+                    offset++;
+                    continue;
+                }
+
+                std::string symbolName(reinterpret_cast<const char*>(
+                    stringTable + symbolData[offset].name));
+
+                std::string sectionName =
+                    elffile->getSectionName(symbolData[offset].shndx);
+
+                asmFile->addSymbol(symbolName,
+                                   make_unique<RISCV::Symbol>(
+                                       symbolName, symbolData[offset].value,
+                                       symbolData[offset].size,
+                                       static_cast<RISCV::SymbolType>(
+                                           symbolData[offset].info & 0x0F),
+                                       static_cast<RISCV::SymbolBinding>(
+                                           symbolData[offset].info >> 4),
+                                       sectionName),
+                                   sec.second->header->type);
+
                 offset++;
             }
         }
@@ -168,6 +167,16 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         std::cout << "Name: " << sec.first
                   << ". Offset: " << sec.second->header->offset
                   << ". Size: " << sec.second->header->size << "\n";
+    }
+
+    std::cout << "\n\nSymbol Table:\n";
+
+    for (auto& sym : asmFile->getSymbolTable()) {
+        std::cout << "\tName: " << sym.first
+                  << " | Address: " << sym.second->addr
+                  << " | Type: " << to_string(sym.second->type)
+                  << " | Binding: " << to_string(sym.second->binding)
+                  << " | Section: " << sym.second->sectionName << "\n";
     }
 
     return asmFile;

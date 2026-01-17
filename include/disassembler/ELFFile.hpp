@@ -33,7 +33,8 @@ class ELFFile {
     const std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
         return segments;
     };
-    const std::string& getSectionName(int index) {
+
+    std::string getSectionName(int index) {
         if (sectionIndexes.find(index) == sectionIndexes.end()) {
             return "";
         }
