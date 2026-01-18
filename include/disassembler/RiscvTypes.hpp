@@ -10,6 +10,9 @@
 
 namespace RISCV {
 
+/**
+ * All possible RISC-V opcodes
+ */
 enum class Opcode : int {
     LOAD = 3,
     IMM_INSTR = 19,
@@ -23,12 +26,18 @@ enum class Opcode : int {
     ENV_TYPE = 115,
 };
 
+/**
+ * Constant lookup table to match opcodes to the enum
+ */
 static const std::unordered_map<unsigned char, Opcode> opcodeMap = {
     {0x03, Opcode::LOAD},    {0x13, Opcode::IMM_INSTR}, {0x17, Opcode::AUIPC},
     {0x23, Opcode::S_TYPE},  {0x33, Opcode::R_TYPE},    {0x37, Opcode::LUI},
     {0x63, Opcode::B_TYPE},  {0x67, Opcode::JALR},      {0x6F, Opcode::JAL},
     {0x73, Opcode::ENV_TYPE}};
 
+/**
+ * All RISC-V registers (underlying int value equals the address)
+ */
 enum class Register : int {
     zero,
     ra,
@@ -64,8 +73,17 @@ enum class Register : int {
     t6,
 };
 
+/**
+ * toString for the register enum
+ *
+ * @param r register enum
+ * @return string equivalent
+ */
 std::string to_string(Register r);
 
+/**
+ * All RISC-V instructions
+ */
 enum class Instruction : int {
     add,
     sub,
@@ -108,16 +126,38 @@ enum class Instruction : int {
     ebreak,
 };
 
+/**
+ * toString for the instruction enum
+ *
+ * @param i instruction enum
+ * @return string equivalent
+ */
 std::string to_string(Instruction i);
 
+/**
+ * Relevant types for entries in the symbol table
+ * Underlying value is the equivalent constant value that represents the type in
+ * the file
+ */
 enum class SymbolType : int {
     NOTYPE = 0,
     OBJECT = 1,
     FUNCTION = 2,
 };
 
+/**
+ * toString for the symbol type enum
+ *
+ * @param t symbol type enum
+ * @return string equivalent
+ */
 std::string to_string(SymbolType t);
 
+/**
+ * All possible bindings for entries in the symbol table
+ * Underlying value is the equivalent constant value that represents the binding
+ * in the file
+ */
 enum class SymbolBinding : int {
     LOCAL = 0,
     GLOBAL = 1,
@@ -128,15 +168,25 @@ enum class SymbolBinding : int {
     HIPROC = 15,
 };
 
+/**
+ * toString for the symbol binding enum
+ *
+ * @param b symbol binding enum
+ * @return string equivalent
+ */
 std::string to_string(SymbolBinding b);
 
+/**
+ * Represents an entry in the ELF symbol table
+ */
 typedef struct Symbol {
-    std::string name;
-    uint32_t addr;
+    std::string name;  // Name of the symbol
+    uint32_t addr;  // Value of the symbol (relative/absolute address or offset
+                    // into a section)
     uint32_t size;
-    SymbolType type;
-    SymbolBinding binding;
-    std::string sectionName;
+    SymbolType type;          // Type of the symbol (e.g. function)
+    SymbolBinding binding;    // Binding of the symbol (e.g. local)
+    std::string sectionName;  // Name of the section to which the symbol is tied
 } Symbol;
 
 }  // namespace RISCV

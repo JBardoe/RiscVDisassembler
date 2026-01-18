@@ -4,7 +4,11 @@
 #include <stdexcept>
 
 namespace ELFParser {
-
+/**
+ * Represents an exception caused by the ELF parser
+ * Indicates a problem with the ELF file such as due to corruption or incomplete
+ * data
+ */
 class BadFileException : public std::runtime_error {
    public:
     BadFileException() : runtime_error("File is not properly formatted.") {};
