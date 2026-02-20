@@ -44,4 +44,14 @@ std::vector<Symbol> SymbolTable::getSymbolSection(std::string sectionName) {
 
     return ret;
 }
+
+std::string SymbolTable::toString() {
+    std::string ret = "Symbol Table:\n";
+
+    for (auto sym : table) {
+        ret += to_string(sym) + "\n";
+    }
+
+    return ret;
+}
 }  // namespace Disassembler

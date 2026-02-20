@@ -23,6 +23,8 @@ class SymbolTable {
     std::vector<Symbol> getSymbolAddr(uint32_t addr);
     std::vector<Symbol> getSymbolSection(std::string sectionName);
 
+    std::string toString();
+
    private:
     std::vector<Symbol> table;
     std::unordered_map<std::string, int> nameLookup;
