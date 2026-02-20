@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cstdint>
 
 #include "disassembler/ELFTypes.hpp"
 
@@ -57,8 +58,7 @@ class ELFFile {
     std::unique_ptr<ELFHeader> header;  // Main file header
     std::unordered_map<std::string, std::unique_ptr<ELFSection>>
         sections;  // Mapping of section names to the section
-    std::unordered_map<int, std::string>
-        sectionIndexes;  // Mapping of the section index to its name
+    std::unordered_map<uint16_t, std::string> sectionIndexes;  // Mapping of the section index to its name
     std::vector<std::unique_ptr<ELFSegment>> segments;  // Vector of the
                                                         // segments
 };

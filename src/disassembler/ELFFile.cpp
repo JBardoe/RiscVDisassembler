@@ -31,7 +31,7 @@ void ELFFile::parseSections() {
         std::getline(*stream, name, '\0');
 
         if (name.empty())
-            name = "Unknown Section" + std::to_string(i);  // Should not trigger
+            name = "Unknown Section: " + std::to_string(i);  // Should not trigger
 
         sections[name] = std::move(section);
         sectionIndexes[i] = name;

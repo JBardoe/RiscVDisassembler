@@ -15,6 +15,8 @@ class AssemblySection {
     AssemblySection() = default;
     AssemblySection(std::string name) : name(name), printOut("") {}
 
+    virtual ~AssemblySection() = default;
+
     /**
      * Default toString method to print the section
      * Overridden for specific sections

@@ -108,13 +108,13 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
             const unsigned char* stringTable =
                 reinterpret_cast<const unsigned char*>(
                     sections.at(".strtab")->getData());
-
+		
             if (sec.second->header->entrySize !=
                     sizeof(ELFParser::SymbolTableEntry) ||
                 sec.second->header->size % sec.second->header->entrySize != 0) {
                 throw ELFParser::BadFileException("Malformed symbol table.");
             }
-
+	
             const ELFParser::SymbolTableEntry* symbolData =
                 reinterpret_cast<const ELFParser::SymbolTableEntry*>(
                     sec.second
@@ -124,7 +124,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
             while (offset * sec.second->header->entrySize <
                    sec.second->header->size) {
-                std::cout << "1\n";
+                    
                 if (symbolData[offset].name < 1) {
                     offset++;
                     continue;
