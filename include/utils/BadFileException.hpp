@@ -2,6 +2,7 @@
 #define BADFILEEXCEPTION_H
 
 #include <stdexcept>
+#include <string>
 
 namespace ELFParser {
 /**

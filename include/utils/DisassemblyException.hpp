@@ -2,6 +2,7 @@
 #define DISASSEMBLYEXCEPTION_H
 
 #include <stdexcept>
+#include <string>
 
 namespace Disassembler {
 

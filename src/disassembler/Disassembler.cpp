@@ -117,7 +117,8 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
             const ELFParser::SymbolTableEntry* symbolData =
                 reinterpret_cast<const ELFParser::SymbolTableEntry*>(
-                    sec.second->getData());
+                    sec.second
+                        ->getData());  // TODO: check if needs to be freed?
 
             offset = 0;
 

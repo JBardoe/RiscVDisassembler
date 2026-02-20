@@ -1,7 +1,6 @@
 #ifndef RISCVTYPES_H
 #define RISCVTYPES_H
 
-#include <array>
 #include <string>
 #include <string_view>
 #include <unordered_map>

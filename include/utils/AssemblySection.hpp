@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "disassembler/Instruction.hpp"
-// TODO: finish commenting
 
 /**
  * Represents a section of an assembly file
