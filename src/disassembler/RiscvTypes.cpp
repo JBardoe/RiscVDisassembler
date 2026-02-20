@@ -187,4 +187,11 @@ std::string to_string(SymbolBinding b) {
     return "<unknown_binding>";
 }
 
+std::string to_string(Symbol s) {
+    return "\tName: " + s.name + " | Address: " + std::to_string(s.addr) +
+           " | Type: " + to_string(s.type) +
+           " | Binding: " + to_string(s.binding) +
+           " | Section: " + s.sectionName + "\n";
+}
+
 }  // namespace Disassembler

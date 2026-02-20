@@ -142,16 +142,13 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                 std::string sectionName =
                     elffile->getSectionName(symbolData[offset].shndx);
 
-                asmFile->addSymbol(symbolName,
-                                   make_unique<Disassembler::Symbol>(
-                                       symbolName, symbolData[offset].value,
-                                       symbolData[offset].size,
-                                       static_cast<Disassembler::SymbolType>(
-                                           symbolData[offset].info & 0x0F),
-                                       static_cast<Disassembler::SymbolBinding>(
-                                           symbolData[offset].info >> 4),
-                                       sectionName),
-                                   sec.second->header->type);
+                asmFile->addSymbol(symbolName, symbolData[offset].value,
+                                   symbolData[offset].size,
+                                   static_cast<Disassembler::SymbolType>(
+                                       symbolData[offset].info & 0x0F),
+                                   static_cast<Disassembler::SymbolBinding>(
+                                       symbolData[offset].info >> 4),
+                                   sectionName);
 
                 offset++;
             }
@@ -166,15 +163,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                   << ". Size: " << sec.second->header->size << "\n";
     }
 
-    std::cout << "\n\nSymbol Table:\n";
-
-    for (auto& sym : asmFile->getSymbolTable()) {
-        std::cout << "\tName: " << sym.first
-                  << " | Address: " << sym.second->addr
-                  << " | Type: " << to_string(sym.second->type)
-                  << " | Binding: " << to_string(sym.second->binding)
-                  << " | Section: " << sym.second->sectionName << "\n";
-    }
+    std::cout << asmFile->printSymbolTable();
 
     return asmFile;
 }

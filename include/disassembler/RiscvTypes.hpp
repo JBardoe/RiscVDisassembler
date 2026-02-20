@@ -188,6 +188,8 @@ typedef struct Symbol {
     std::string sectionName;  // Name of the section to which the symbol is tied
 } Symbol;
 
+std::string to_string(Symbol s);
+
 }  // namespace Disassembler
 
 #endif

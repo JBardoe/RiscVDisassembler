@@ -49,7 +49,7 @@ std::string SymbolTable::toString() {
     std::string ret = "Symbol Table:\n";
 
     for (auto sym : table) {
-        ret += to_string(sym) + "\n";
+        ret += to_string(sym);
     }
 
     return ret;

@@ -10,6 +10,7 @@
 #include "disassembler/AssemblySection.hpp"
 #include "disassembler/Instruction.hpp"
 #include "disassembler/RiscvTypes.hpp"
+#include "disassembler/SymbolTable.hpp"
 
 namespace Disassembler {
 /**
@@ -17,7 +18,7 @@ namespace Disassembler {
  */
 class AssemblyFile {
    public:
-    AssemblyFile() : printOut("") {};
+    AssemblyFile() : printOut(""), symbolTable(SymbolTable()) {};
 
     /**
      * Adds a section that has been decoded from the file
@@ -34,17 +35,22 @@ class AssemblyFile {
      * Adds a decoded symbol to the symbol table
      *
      * @param name name of the symbol
-     * @param sym pointer to the symbol struct
-     * @param type type of the associated section
+     * @param addr address of the symbol
+     * @param size size of the symbol
+     * @param type type of the symbol
+     * @param binding binding of the symbol
+     * @param sectionName name of the section the symbol is in
      */
-    void addSymbol(std::string name, std::unique_ptr<Disassembler::Symbol> sym,
-                   uint32_t type);
+    void addSymbol(std::string name, uint32_t addr, uint32_t size,
+                   SymbolType type, SymbolBinding binding,
+                   std::string sectionName);
 
-    const std::unordered_map<std::string,
-                             std::unique_ptr<Disassembler::Symbol>>&
-    getSymbolTable() {
-        return this->symbolTable;
-    }
+    std::optional<std::reference_wrapper<const Symbol>> getSymbolName(
+        std::string name);
+    std::vector<Symbol> getSymbolAddr(uint32_t addr);
+    std::vector<Symbol> getSymbolSection(std::string sectionName);
+
+    std::string printSymbolTable();
 
     /**
      * Gives a string readout of the assembly file
@@ -55,10 +61,9 @@ class AssemblyFile {
 
    private:
     std::unordered_map<std::string, std::unique_ptr<AssemblySection>>
-        sections;  // Map of section names to sections
-    std::unordered_map<std::string, std::unique_ptr<Disassembler::Symbol>>
-        symbolTable;       // Map of symbol names to symbols
-    std::string printOut;  // String readout of the file
+        sections;             // Map of section names to sections
+    std::string printOut;     // String readout of the file
+    SymbolTable symbolTable;  // Map of symbol names to symbols
 };
 }  // namespace Disassembler
 #endif
