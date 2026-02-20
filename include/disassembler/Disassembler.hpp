@@ -1,6 +1,6 @@
 #include <memory>
 
-#include "utils/AssemblyFile.hpp"
+#include "disassembler/AssemblyFile.hpp"
 
 namespace Disassembler {
 std::unique_ptr<Instruction> parseInstruction(

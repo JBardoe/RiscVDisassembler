@@ -5,9 +5,9 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "disassembler/ELFFile.hpp"
+#include "parser/ELFFile.hpp"
 
-namespace RISCV {
+namespace Disassembler {
 
 /**
  * All possible RISC-V opcodes
@@ -83,7 +83,7 @@ std::string to_string(Register r);
 /**
  * All RISC-V instructions
  */
-enum class Instruction : int {
+enum class Operator : int {
     add,
     sub,
     Xor,
@@ -131,7 +131,7 @@ enum class Instruction : int {
  * @param i instruction enum
  * @return string equivalent
  */
-std::string to_string(Instruction i);
+std::string to_string(Operator i);
 
 /**
  * Relevant types for entries in the symbol table
@@ -188,6 +188,6 @@ typedef struct Symbol {
     std::string sectionName;  // Name of the section to which the symbol is tied
 } Symbol;
 
-}  // namespace RISCV
+}  // namespace Disassembler
 
 #endif

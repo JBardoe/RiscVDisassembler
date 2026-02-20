@@ -1,6 +1,6 @@
 #include "disassembler/RiscvTypes.hpp"
 
-namespace RISCV {
+namespace Disassembler {
 std::string to_string(Register r) {
     switch (r) {
         case Register::zero:
@@ -72,83 +72,83 @@ std::string to_string(Register r) {
     }
 }
 
-std::string to_string(Instruction i) {
+std::string to_string(Operator i) {
     switch (i) {
-        case Instruction::add:
+        case Operator::add:
             return "add";
-        case Instruction::sub:
+        case Operator::sub:
             return "sub";
-        case Instruction::Xor:
+        case Operator::Xor:
             return "xor";
-        case Instruction::Or:
+        case Operator::Or:
             return "or";
-        case Instruction::And:
+        case Operator::And:
             return "and";
-        case Instruction::sll:
+        case Operator::sll:
             return "sll";
-        case Instruction::srl:
+        case Operator::srl:
             return "srl";
-        case Instruction::sra:
+        case Operator::sra:
             return "sra";
-        case Instruction::slt:
+        case Operator::slt:
             return "slt";
-        case Instruction::sltu:
+        case Operator::sltu:
             return "sltu";
-        case Instruction::addi:
+        case Operator::addi:
             return "addi";
-        case Instruction::xori:
+        case Operator::xori:
             return "xori";
-        case Instruction::ori:
+        case Operator::ori:
             return "ori";
-        case Instruction::andi:
+        case Operator::andi:
             return "andi";
-        case Instruction::srli:
+        case Operator::srli:
             return "srli";
-        case Instruction::srai:
+        case Operator::srai:
             return "srai";
-        case Instruction::slti:
+        case Operator::slti:
             return "slti";
-        case Instruction::sltiu:
+        case Operator::sltiu:
             return "sltiu";
-        case Instruction::lb:
+        case Operator::lb:
             return "lb";
-        case Instruction::lh:
+        case Operator::lh:
             return "lh";
-        case Instruction::lw:
+        case Operator::lw:
             return "lw";
-        case Instruction::lbu:
+        case Operator::lbu:
             return "lbu";
-        case Instruction::lhu:
+        case Operator::lhu:
             return "lhu";
-        case Instruction::sb:
+        case Operator::sb:
             return "sb";
-        case Instruction::sh:
+        case Operator::sh:
             return "sh";
-        case Instruction::sw:
+        case Operator::sw:
             return "sw";
-        case Instruction::beq:
+        case Operator::beq:
             return "beq";
-        case Instruction::bne:
+        case Operator::bne:
             return "bne";
-        case Instruction::blt:
+        case Operator::blt:
             return "blt";
-        case Instruction::bge:
+        case Operator::bge:
             return "bge";
-        case Instruction::bltu:
+        case Operator::bltu:
             return "bltu";
-        case Instruction::bgeu:
+        case Operator::bgeu:
             return "bgeu";
-        case Instruction::jal:
+        case Operator::jal:
             return "jal";
-        case Instruction::jalr:
+        case Operator::jalr:
             return "jalr";
-        case Instruction::lui:
+        case Operator::lui:
             return "lui";
-        case Instruction::auipc:
+        case Operator::auipc:
             return "auipc";
-        case Instruction::ecall:
+        case Operator::ecall:
             return "ecall";
-        case Instruction::ebreak:
+        case Operator::ebreak:
             return "ebreak";
         default:
             return "<unknown_instruction>";
@@ -187,4 +187,4 @@ std::string to_string(SymbolBinding b) {
     return "<unknown_binding>";
 }
 
-}  // namespace RISCV
+}  // namespace Disassembler

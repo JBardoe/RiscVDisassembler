@@ -5,11 +5,11 @@
 #include <iostream>
 #include <vector>
 
-#include "disassembler/ELFFile.hpp"
-#include "disassembler/ELFTypes.hpp"
 #include "disassembler/Instruction.hpp"
-#include "disassembler/Parser.hpp"
 #include "disassembler/RiscvTypes.hpp"
+#include "parser/ELFFile.hpp"
+#include "parser/ELFTypes.hpp"
+#include "parser/Parser.hpp"
 #include "utils/BadFileException.hpp"
 #include "utils/DisassemblyException.hpp"
 
@@ -19,36 +19,37 @@ namespace Disassembler {
 
 unique_ptr<Instruction> parseInstruction(uint32_t raw) {
     // Get opcode
-    if (RISCV::opcodeMap.find(raw & 0x7F) == RISCV::opcodeMap.end()) {
-        throw DisassemblyException("Unknown RISCV::Opcode: " +
+    if (Disassembler::opcodeMap.find(raw & 0x7F) ==
+        Disassembler::opcodeMap.end()) {
+        throw DisassemblyException("Unknown Disassembler::Opcode: " +
                                    format("{:02X}", (raw & 0x7F)));
     }
 
-    RISCV::Opcode opcode = RISCV::opcodeMap.at(raw & 0x7F);
+    Disassembler::Opcode opcode = Disassembler::opcodeMap.at(raw & 0x7F);
 
     switch (opcode) {
         // R-Type
-        case RISCV::Opcode::R_TYPE:
+        case Disassembler::Opcode::R_TYPE:
             return make_unique<RInstruction>(opcode, raw);
 
         // I-Types
-        case RISCV::Opcode::LOAD:
-        case RISCV::Opcode::IMM_INSTR:
-        case RISCV::Opcode::JALR:
-        case RISCV::Opcode::ENV_TYPE:
+        case Disassembler::Opcode::LOAD:
+        case Disassembler::Opcode::IMM_INSTR:
+        case Disassembler::Opcode::JALR:
+        case Disassembler::Opcode::ENV_TYPE:
             return make_unique<IInstruction>(opcode, raw);
 
         // S-Type
-        case RISCV::Opcode::S_TYPE:
+        case Disassembler::Opcode::S_TYPE:
             return make_unique<SInstruction>(opcode, raw);
 
         // B-Type
-        case RISCV::Opcode::B_TYPE:
+        case Disassembler::Opcode::B_TYPE:
             return make_unique<BInstruction>(opcode, raw);
 
         // U-Type
-        case RISCV::Opcode::AUIPC:
-        case RISCV::Opcode::LUI:
+        case Disassembler::Opcode::AUIPC:
+        case Disassembler::Opcode::LUI:
             return make_unique<UInstruction>(opcode, raw);
 
         // J-Type
@@ -108,13 +109,13 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
             const unsigned char* stringTable =
                 reinterpret_cast<const unsigned char*>(
                     sections.at(".strtab")->getData());
-		
+
             if (sec.second->header->entrySize !=
                     sizeof(ELFParser::SymbolTableEntry) ||
                 sec.second->header->size % sec.second->header->entrySize != 0) {
                 throw ELFParser::BadFileException("Malformed symbol table.");
             }
-	
+
             const ELFParser::SymbolTableEntry* symbolData =
                 reinterpret_cast<const ELFParser::SymbolTableEntry*>(
                     sec.second
@@ -124,7 +125,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
             while (offset * sec.second->header->entrySize <
                    sec.second->header->size) {
-                    
                 if (symbolData[offset].name < 1) {
                     offset++;
                     continue;
@@ -143,12 +143,12 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                     elffile->getSectionName(symbolData[offset].shndx);
 
                 asmFile->addSymbol(symbolName,
-                                   make_unique<RISCV::Symbol>(
+                                   make_unique<Disassembler::Symbol>(
                                        symbolName, symbolData[offset].value,
                                        symbolData[offset].size,
-                                       static_cast<RISCV::SymbolType>(
+                                       static_cast<Disassembler::SymbolType>(
                                            symbolData[offset].info & 0x0F),
-                                       static_cast<RISCV::SymbolBinding>(
+                                       static_cast<Disassembler::SymbolBinding>(
                                            symbolData[offset].info >> 4),
                                        sectionName),
                                    sec.second->header->type);

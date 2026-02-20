@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "disassembler/Disassembler.hpp"
-#include "disassembler/ELFFile.hpp"
-#include "disassembler/Parser.hpp"
+#include "parser/ELFFile.hpp"
+#include "parser/Parser.hpp"
 
 int main() {
     std::cout << "About to disassemble the file\n";
