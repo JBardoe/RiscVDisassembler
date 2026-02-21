@@ -211,7 +211,7 @@ std::string to_string(Symbol s) {
 }
 
 std::string to_string(Variable v) {
-    return v.name + ":\t" + std::to_string(v.val) + "\n";
+    return v.name + ":\t" + std::to_string(v.val);
 }
 
 }  // namespace Disassembler
