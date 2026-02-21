@@ -198,6 +198,14 @@ typedef struct Symbol {
 
 std::string to_string(Symbol s);
 
+typedef struct Variable {
+    std::string name;
+    uint32_t addr;
+    uint32_t val;
+} Variable;
+
+std::string to_string(Variable v);
+
 }  // namespace Disassembler
 
 #endif

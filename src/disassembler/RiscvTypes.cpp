@@ -210,4 +210,8 @@ std::string to_string(Symbol s) {
            " | Section: " + s.sectionName + "\n";
 }
 
+std::string to_string(Variable v) {
+    return v.name + ":\t" + std::to_string(v.val) + "\n";
+}
+
 }  // namespace Disassembler
