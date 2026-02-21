@@ -163,6 +163,22 @@ std::string to_string(SymbolType t) {
             return "object";
         case SymbolType::FUNCTION:
             return "function";
+        case SymbolType::SECTION:
+            return "section";
+        case SymbolType::FILE:
+            return "file";
+        case SymbolType::COMMON:
+            return "common";
+        case SymbolType::TLS:
+            return "tls";
+        case SymbolType::LOOS:
+            return "loos";
+        case SymbolType::HIOS:
+            return "hios";
+        case SymbolType::LOPROC:
+            return "loproc";
+        case SymbolType::HIPROC:
+            return "hiproc";
     }
     return "<unknown_type>";
 }

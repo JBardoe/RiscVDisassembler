@@ -4,6 +4,8 @@ namespace Disassembler {
 const std::string& AssemblyFile::toString() {
     if (this->printOut != "") return this->printOut;
 
+    printOut += symbolTable.toString();
+
     for (auto& sec : this->sections) {
         printOut += sec.second->toString();
         printOut += "\n";

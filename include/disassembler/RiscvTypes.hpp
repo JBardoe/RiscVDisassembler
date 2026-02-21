@@ -142,6 +142,14 @@ enum class SymbolType : int {
     NOTYPE = 0,
     OBJECT = 1,
     FUNCTION = 2,
+    SECTION = 3,
+    FILE = 4,
+    COMMON = 5,
+    TLS = 6,
+    LOOS = 10,
+    HIOS = 12,
+    LOPROC = 13,
+    HIPROC = 15  // TODO bounds checking
 };
 
 /**
