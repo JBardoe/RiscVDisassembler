@@ -34,7 +34,7 @@ class Instruction {
  */
 class RInstruction : public virtual Instruction {
    public:
-    RInstruction(Disassembler::Opcode op, uint32_t raw);
+    RInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -44,17 +44,17 @@ class RInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * R-Type instructions have the form:
      *
      * instr rd, rs1, rs2
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rd;
-    Disassembler::Register rs1;
-    Disassembler::Register rs2;
+    Operator instr;
+    Register rd;
+    Register rs1;
+    Register rs2;
 };
 
 /**
@@ -62,7 +62,7 @@ class RInstruction : public virtual Instruction {
  */
 class IInstruction : public virtual Instruction {
    public:
-    IInstruction(Disassembler::Opcode op, uint32_t raw);
+    IInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -72,7 +72,7 @@ class IInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * I-Type instructions have the form:
@@ -81,9 +81,9 @@ class IInstruction : public virtual Instruction {
      * OR
      * intr rd, imm(rs1)
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rd;
-    Disassembler::Register rs1;
+    Operator instr;
+    Register rd;
+    Register rs1;
     int imm;
 };
 
@@ -92,7 +92,7 @@ class IInstruction : public virtual Instruction {
  */
 class SInstruction : public virtual Instruction {
    public:
-    SInstruction(Disassembler::Opcode op, uint32_t raw);
+    SInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -102,16 +102,16 @@ class SInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * S-Type instructions have the form:
      *
      * instr rs2, imm(rs1)
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rs1;
-    Disassembler::Register rs2;
+    Operator instr;
+    Register rs1;
+    Register rs2;
     int imm;
 };
 
@@ -120,7 +120,7 @@ class SInstruction : public virtual Instruction {
  */
 class BInstruction : public virtual Instruction {
    public:
-    BInstruction(Disassembler::Opcode op, uint32_t raw);
+    BInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -130,16 +130,16 @@ class BInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * B-Type instructions have the form:
      *
      * instr rs1, rs2, imm
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rs1;
-    Disassembler::Register rs2;
+    Operator instr;
+    Register rs1;
+    Register rs2;
     int imm;
 };
 
@@ -148,7 +148,7 @@ class BInstruction : public virtual Instruction {
  */
 class UInstruction : public virtual Instruction {
    public:
-    UInstruction(Disassembler::Opcode op, uint32_t raw);
+    UInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -158,15 +158,15 @@ class UInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * U-Type instructions have the form:
      *
      * instr rd, imm
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rd;
+    Operator instr;
+    Register rd;
     int imm;
 };
 
@@ -175,7 +175,7 @@ class UInstruction : public virtual Instruction {
  */
 class JInstruction : public virtual Instruction {
    public:
-    JInstruction(Disassembler::Opcode op, uint32_t raw);
+    JInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form
@@ -185,15 +185,15 @@ class JInstruction : public virtual Instruction {
     const std::string& toString() override;
 
    private:
-    Disassembler::Opcode op;  // Opcode
+    Opcode op;  // Opcode
 
     /**
      * J-Type instructions have the form:
      *
      * instr rd, imm
      */
-    Disassembler::Operator instr;
-    Disassembler::Register rd;
+    Operator instr;
+    Register rd;
     int imm;
 };
 

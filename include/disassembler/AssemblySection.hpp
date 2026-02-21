@@ -39,8 +39,7 @@ class AssemblySection {
  */
 class TextSection : public AssemblySection {
    public:
-    TextSection(
-        std::vector<std::unique_ptr<Disassembler::Instruction>> instructions)
+    TextSection(std::vector<std::unique_ptr<Instruction>> instructions)
         : AssemblySection(".text"), instructions(std::move(instructions)) {}
 
     /**
@@ -51,8 +50,19 @@ class TextSection : public AssemblySection {
     const std::string& toString() override;
 
    private:
-    std::vector<std::unique_ptr<Disassembler::Instruction>>
+    std::vector<std::unique_ptr<Instruction>>
         instructions;  // Vector of the instructions in the section
 };
+
+// class DataSection : public AssemblySection{
+//     public:
+//     DataSection()
+
+//     const std::string& toString() override;
+
+//     private:
+
+// };
+
 }  // namespace Disassembler
 #endif

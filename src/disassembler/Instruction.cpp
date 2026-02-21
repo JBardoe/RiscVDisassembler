@@ -7,33 +7,31 @@
 
 namespace Disassembler {
 
-RInstruction::RInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
+RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
-            this->instr = (raw >> 25) ? Disassembler::Operator::sub
-                                      : Disassembler::Operator::add;
+            this->instr = (raw >> 25) ? Operator::sub : Operator::add;
             break;
         case 1:
-            this->instr = Disassembler::Operator::sll;
+            this->instr = Operator::sll;
             break;
         case 2:
-            this->instr = Disassembler::Operator::slt;
+            this->instr = Operator::slt;
             break;
         case 3:
-            this->instr = Disassembler::Operator::sltu;
+            this->instr = Operator::sltu;
             break;
         case 4:
-            this->instr = Disassembler::Operator::Xor;
+            this->instr = Operator::Xor;
             break;
         case 5:
-            this->instr = (raw >> 25) ? Disassembler::Operator::sra
-                                      : Disassembler::Operator::srl;
+            this->instr = (raw >> 25) ? Operator::sra : Operator::srl;
             break;
         case 6:
-            this->instr = Disassembler::Operator::Or;
+            this->instr = Operator::Or;
             break;
         case 7:
-            this->instr = Disassembler::Operator::And;
+            this->instr = Operator::And;
             break;
         default:
             throw DisassemblyException(
@@ -41,9 +39,9 @@ RInstruction::RInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
     }
 
     // Registers to be in the range 0-31 as it is parsed from a 5 bit number
-    this->rd = static_cast<Disassembler::Register>((raw >> 7) & 0x1F);
-    this->rs1 = static_cast<Disassembler::Register>((raw >> 15) & 0x1F);
-    this->rs2 = static_cast<Disassembler::Register>((raw >> 20) & 0x1F);
+    this->rd = static_cast<Register>((raw >> 7) & 0x1F);
+    this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
 }
 
 const std::string& RInstruction::toString() {
@@ -53,82 +51,79 @@ const std::string& RInstruction::toString() {
 
     this->printOut = "";
 
-    this->printOut += Disassembler::to_string(this->instr) + " " +
-                      Disassembler::to_string(this->rd) + ", " +
-                      Disassembler::to_string(this->rs1) + ", " +
-                      Disassembler::to_string(this->rs2) + "\t\t# " +
-                      Disassembler::to_string(this->rd) + " = ";
+    this->printOut += to_string(this->instr) + " " + to_string(this->rd) +
+                      ", " + to_string(this->rs1) + ", " +
+                      to_string(this->rs2) + "\t\t# " + to_string(this->rd) +
+                      " = ";
 
     switch (this->instr) {
-        case Disassembler::Operator::add:
+        case Operator::add:
             symbol = " + ";
             break;
-        case Disassembler::Operator::sub:
+        case Operator::sub:
             symbol = " - ";
             break;
-        case Disassembler::Operator::Xor:
+        case Operator::Xor:
             symbol = " ^ ";
             break;
-        case Disassembler::Operator::Or:
+        case Operator::Or:
             symbol = " | ";
             break;
-        case Disassembler::Operator::And:
+        case Operator::And:
             symbol = " & ";
             break;
-        case Disassembler::Operator::sll:
+        case Operator::sll:
             symbol = " << ";
             break;
-        case Disassembler::Operator::srl:
+        case Operator::srl:
             symbol = " >> ";
             break;
-        case Disassembler::Operator::sra:
+        case Operator::sra:
             symbol = " >> ";
         default:
             break;
     }
 
-    if (this->instr == Disassembler::Operator::slt ||
-        this->instr == Disassembler::Operator::sltu) {
-        this->printOut += "(" + Disassembler::to_string(this->rs1) + " < " +
-                          Disassembler::to_string(this->rs2) + ")?1:0";
+    if (this->instr == Operator::slt || this->instr == Operator::sltu) {
+        this->printOut +=
+            "(" + to_string(this->rs1) + " < " + to_string(this->rs2) + ")?1:0";
     } else {
-        this->printOut += Disassembler::to_string(this->rs1) + symbol +
-                          Disassembler::to_string(this->rs2);
+        this->printOut += to_string(this->rs1) + symbol + to_string(this->rs2);
     }
 
     return this->printOut;
 }
 
-IInstruction::IInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
-    this->rd = static_cast<Disassembler::Register>((raw >> 7) & 0x1F);
-    this->rs1 = static_cast<Disassembler::Register>((raw >> 15) & 0x1F);
+IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
+    this->rd = static_cast<Register>((raw >> 7) & 0x1F);
+    this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
     this->imm = (raw >> 20);
 
     this->imm = (this->imm << 20) >> 20;
 
-    if (this->op == Disassembler::Opcode::JALR) {
-        this->instr = Disassembler::Operator::jalr;
-    } else if (this->op == Disassembler::Opcode::ENV_TYPE && this->imm == 0) {
-        this->instr = Disassembler::Operator::ecall;
-    } else if (this->op == Disassembler::Opcode::ENV_TYPE && this->imm == 1) {
-        this->instr = Disassembler::Operator::ebreak;
-    } else if (this->op == Disassembler::Opcode::LOAD) {
+    if (this->op == Opcode::JALR) {
+        this->instr = Operator::jalr;
+    } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
+        this->instr = Operator::ecall;
+    } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {
+        this->instr = Operator::ebreak;
+    } else if (this->op == Opcode::LOAD) {
         switch ((raw >> 12) & 0x07) {
             case 0:
-                this->instr = Disassembler::Operator::lb;
+                this->instr = Operator::lb;
                 break;
             case 1:
-                this->instr = Disassembler::Operator::lh;
+                this->instr = Operator::lh;
                 break;
             case 2:
-                this->instr = Disassembler::Operator::lw;
+                this->instr = Operator::lw;
                 break;
             case 4:
-                this->instr = Disassembler::Operator::lbu;
+                this->instr = Operator::lbu;
                 this->imm = (raw >> 20);
                 break;
             case 5:
-                this->instr = Disassembler::Operator::lhu;
+                this->instr = Operator::lhu;
                 this->imm = (raw >> 20);
                 break;
             default:
@@ -138,36 +133,36 @@ IInstruction::IInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
     } else {
         switch ((raw >> 12) & 0x07) {
             case 0:
-                this->instr = Disassembler::Operator::addi;
+                this->instr = Operator::addi;
                 break;
             case 1:
-                this->instr = Disassembler::Operator::slli;
+                this->instr = Operator::slli;
                 break;
             case 2:
-                this->instr = Disassembler::Operator::slti;
+                this->instr = Operator::slti;
                 break;
             case 3:
-                this->instr = Disassembler::Operator::sltiu;
+                this->instr = Operator::sltiu;
                 this->imm = (raw >> 20);
                 break;
             case 4:
-                this->instr = Disassembler::Operator::xori;
+                this->instr = Operator::xori;
                 break;
             case 5:
                 if (((imm >> 5) & 0x7F) == 2) {
-                    this->instr = Disassembler::Operator::srai;
+                    this->instr = Operator::srai;
                 } else if (((imm >> 5) & 0x7F) == 0) {
-                    this->instr = Disassembler::Operator::srli;
+                    this->instr = Operator::srli;
                 } else {
                     throw DisassemblyException(
                         "Invalid imm parameter on Shift Right instruction.");
                 }
                 break;
             case 6:
-                this->instr = Disassembler::Operator::ori;
+                this->instr = Operator::ori;
                 break;
             case 7:
-                this->instr = Disassembler::Operator::andi;
+                this->instr = Operator::andi;
                 break;
             default:
                 throw DisassemblyException(
@@ -179,47 +174,43 @@ IInstruction::IInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
 const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    if (this->instr == Disassembler::Operator::jalr) {
-        this->printOut = Disassembler::to_string(this->instr) +
-                         Disassembler::to_string(this->rd) + ", " +
-                         std::to_string(this->imm) + "(" +
-                         Disassembler::to_string(rs1) + ")\t\t# " +
-                         Disassembler::to_string(this->rd) +
-                         " = PC+4; PC = " + Disassembler::to_string(this->rs1) +
-                         " + " + std::to_string(this->imm);
+    if (this->instr == Operator::jalr) {
+        this->printOut = to_string(this->instr) + to_string(this->rd) + ", " +
+                         std::to_string(this->imm) + "(" + to_string(rs1) +
+                         ")\t\t# " + to_string(this->rd) +
+                         " = PC+4; PC = " + to_string(this->rs1) + " + " +
+                         std::to_string(this->imm);
 
         return this->printOut;
     }
 
-    if (this->instr == Disassembler::Operator::ecall) {
+    if (this->instr == Operator::ecall) {
         this->printOut = "ecall\t\t# Transfer control to OS";
         return this->printOut;
     }
 
-    if (this->instr == Disassembler::Operator::ebreak) {
+    if (this->instr == Operator::ebreak) {
         this->printOut = "ebreak\t\t# Transfer control to debugger";
         return this->printOut;
     }
 
-    if (this->op == Disassembler::Opcode::LOAD) {
-        this->printOut = Disassembler::to_string(this->instr) + " " +
-                         Disassembler::to_string(this->rd) + ", " +
-                         std::to_string(this->imm) + "(" +
-                         Disassembler::to_string(this->rs1) + ")\t\t# " +
-                         Disassembler::to_string(this->rd) + " = M[" +
-                         Disassembler::to_string(this->rs1) + "+" +
-                         std::to_string(this->imm) + "][0:";
+    if (this->op == Opcode::LOAD) {
+        this->printOut = to_string(this->instr) + " " + to_string(this->rd) +
+                         ", " + std::to_string(this->imm) + "(" +
+                         to_string(this->rs1) + ")\t\t# " +
+                         to_string(this->rd) + " = M[" + to_string(this->rs1) +
+                         "+" + std::to_string(this->imm) + "][0:";
 
         switch (this->instr) {
-            case Disassembler::Operator::lb:
-            case Disassembler::Operator::lbu:
+            case Operator::lb:
+            case Operator::lbu:
                 this->printOut += std::to_string(7) + "]";
                 break;
-            case Disassembler::Operator::lh:
-            case Disassembler::Operator::lhu:
+            case Operator::lh:
+            case Operator::lhu:
                 this->printOut += std::to_string(15) + "]";
                 break;
-            case Disassembler::Operator::lw:
+            case Operator::lw:
                 this->printOut += std::to_string(31) + "]";
                 break;
             default:
@@ -229,68 +220,64 @@ const std::string& IInstruction::toString() {
         return this->printOut;
     }
 
-    this->printOut = Disassembler::to_string(this->instr) + " " +
-                     Disassembler::to_string(this->rd) + ", " +
-                     Disassembler::to_string(this->rs1) + ", " +
-                     std::to_string(this->imm) + "\t\t# " +
-                     Disassembler::to_string(this->rd) + " = ";
+    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
+                     to_string(this->rs1) + ", " + std::to_string(this->imm) +
+                     "\t\t# " + to_string(this->rd) + " = ";
 
     std::string symbol;
     switch (this->instr) {
-        case Disassembler::Operator::addi:
+        case Operator::addi:
             symbol = " + ";
             break;
-        case Disassembler::Operator::slli:
+        case Operator::slli:
             symbol = " << ";
             break;
-        case Disassembler::Operator::xori:
+        case Operator::xori:
             symbol = " ^ ";
             break;
-        case Disassembler::Operator::srai:
-        case Disassembler::Operator::srli:
+        case Operator::srai:
+        case Operator::srli:
             symbol = " >> ";
             break;
-        case Disassembler::Operator::ori:
+        case Operator::ori:
             symbol = " | ";
             break;
-        case Disassembler::Operator::andi:
+        case Operator::andi:
             symbol = " & ";
             break;
         default:
             break;
     }
 
-    if (this->instr == Disassembler::Operator::slti ||
-        this->instr == Disassembler::Operator::sltiu) {
-        this->printOut += "(" + Disassembler::to_string(this->rs1) + " < " +
+    if (this->instr == Operator::slti || this->instr == Operator::sltiu) {
+        this->printOut += "(" + to_string(this->rs1) + " < " +
                           std::to_string(this->imm) + ")?1:0";
     } else {
-        this->printOut += Disassembler::to_string(this->rs1) + symbol +
-                          std::to_string(this->imm);
+        this->printOut +=
+            to_string(this->rs1) + symbol + std::to_string(this->imm);
     }
 
-    if (this->instr == Disassembler::Operator::slli ||
-        this->instr == Disassembler::Operator::srli ||
-        this->instr == Disassembler::Operator::srai) {
+    if (this->instr == Operator::slli || this->instr == Operator::srli ||
+        this->instr == Operator::srai) {
         this->printOut += "[0:4]";
     }
 
     return this->printOut;
 }
 
-SInstruction::SInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
-    this->rs1 = static_cast<Disassembler::Register>((raw >> 15) & 0x1F);
-    this->rs2 = static_cast<Disassembler::Register>((raw >> 20) & 0x1F);
+SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op) {
+    this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
 
     switch ((raw >> 12) & 0x07) {
         case 0:
-            this->instr = Disassembler::Operator::sb;
+            this->instr = Operator::sb;
             break;
         case 1:
-            this->instr = Disassembler::Operator::sh;
+            this->instr = Operator::sh;
             break;
         case 2:
-            this->instr = Disassembler::Operator::sw;
+            this->instr = Operator::sw;
             break;
         default:
             throw DisassemblyException(
@@ -306,13 +293,13 @@ const std::string& SInstruction::toString() {
     int upper = 0;
 
     switch (this->instr) {
-        case Disassembler::Operator::sb:
+        case Operator::sb:
             upper = 7;
             break;
-        case Disassembler::Operator::sh:
+        case Operator::sh:
             upper = 15;
             break;
-        case Disassembler::Operator::sw:
+        case Operator::sw:
             upper = 31;
             break;
         default:
@@ -320,50 +307,47 @@ const std::string& SInstruction::toString() {
     }
 
     this->printOut =
-        Disassembler::to_string(this->instr) + " " +
-        Disassembler::to_string(this->rs2) + ", " + std::to_string(this->imm) +
-        "(" + Disassembler::to_string(this->rs1) + ")" + "\t\t# M[" +
-        Disassembler::to_string(this->rs1) + "+" + std::to_string(this->imm) +
-        "][0:" + std::to_string(upper) +
-        "] = " + Disassembler::to_string(this->rs2) +
+        to_string(this->instr) + " " + to_string(this->rs2) + ", " +
+        std::to_string(this->imm) + "(" + to_string(this->rs1) + ")" +
+        "\t\t# M[" + to_string(this->rs1) + "+" + std::to_string(this->imm) +
+        "][0:" + std::to_string(upper) + "] = " + to_string(this->rs2) +
         "[0:" + std::to_string(upper) + "]";
 
     return this->printOut;
 }
 
-BInstruction::BInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
+BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
-            this->instr = Disassembler::Operator::beq;
+            this->instr = Operator::beq;
             break;
         case 1:
-            this->instr = Disassembler::Operator::bne;
+            this->instr = Operator::bne;
             break;
         case 4:
-            this->instr = Disassembler::Operator::blt;
+            this->instr = Operator::blt;
             break;
         case 5:
-            this->instr = Disassembler::Operator::bge;
+            this->instr = Operator::bge;
             break;
         case 6:
-            this->instr = Disassembler::Operator::bltu;
+            this->instr = Operator::bltu;
             break;
         case 7:
-            this->instr = Disassembler::Operator::bgeu;
+            this->instr = Operator::bgeu;
             break;
         default:
             throw DisassemblyException(
                 "Invalid funct3 parameter on B-Type instruction.");
     }
 
-    this->rs1 = static_cast<Disassembler::Register>((raw >> 15) & 0x1F);
-    this->rs2 = static_cast<Disassembler::Register>((raw >> 20) & 0x1F);
+    this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
+    this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
 
     this->imm = (((raw >> 31) & 0x01) << 12) | (((raw >> 7) & 0x01) << 11) |
                 (((raw >> 25) & 0x3F) << 5) | (((raw >> 8) & 0x0F) << 1);
 
-    if (this->instr != Disassembler::Operator::bltu &&
-        this->instr != Disassembler::Operator::bgeu)
+    if (this->instr != Operator::bltu && this->instr != Operator::bgeu)
         this->imm = (this->imm << 19) >> 19;
 }
 
@@ -373,57 +357,52 @@ const std::string& BInstruction::toString() {
     std::string symbol;
 
     switch (this->instr) {
-        case Disassembler::Operator::beq:
+        case Operator::beq:
             symbol = "==";
             break;
-        case Disassembler::Operator::bne:
+        case Operator::bne:
             symbol = "!=";
             break;
-        case Disassembler::Operator::blt:
+        case Operator::blt:
             symbol = "<";
             break;
-        case Disassembler::Operator::bge:
+        case Operator::bge:
             symbol = ">=";
             break;
-        case Disassembler::Operator::bltu:
+        case Operator::bltu:
             symbol = "<";
             break;
-        case Disassembler::Operator::bgeu:
+        case Operator::bgeu:
             symbol = ">=";
             break;
         default:
             break;
     }
 
-    this->printOut = Disassembler::to_string(this->instr) + " " +
-                     Disassembler::to_string(this->rs1) + ", " +
-                     Disassembler::to_string(this->rs2) + ", " +
-                     std::to_string(this->imm) + "\t\t# if(" +
-                     Disassembler::to_string(this->rs1) + " " + symbol + " " +
-                     Disassembler::to_string(this->rs2) +
-                     ") PC += " + std::to_string(this->imm);
+    this->printOut =
+        to_string(this->instr) + " " + to_string(this->rs1) + ", " +
+        to_string(this->rs2) + ", " + std::to_string(this->imm) + "\t\t# if(" +
+        to_string(this->rs1) + " " + symbol + " " + to_string(this->rs2) +
+        ") PC += " + std::to_string(this->imm);
 
     return this->printOut;
 }
 
-UInstruction::UInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
-    this->instr = (op == Disassembler::Opcode::LUI)
-                      ? Disassembler::Operator::lui
-                      : Disassembler::Operator::auipc;
-    this->rd = static_cast<Disassembler::Register>((raw >> 7) & 0x1F);
+UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op) {
+    this->instr = (op == Opcode::LUI) ? Operator::lui : Operator::auipc;
+    this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->imm = (raw >> 12);
 }
 
 const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = Disassembler::to_string(this->instr) + " " +
-                     Disassembler::to_string(this->rd) + ", " +
+    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
                      std::to_string(this->imm) + "\t\t# " +
-                     Disassembler::to_string(this->rd) + " = ";
+                     to_string(this->rd) + " = ";
 
     // Cannot be an unknown opcode as it will have been caught earlier
-    if (this->op == Disassembler::Opcode::LUI) {
+    if (this->op == Opcode::LUI) {
         this->printOut += std::to_string(this->imm) + " << 12";
     } else {
         this->printOut += "PC + (" + std::to_string(this->imm) + " << 12)";
@@ -432,9 +411,9 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-JInstruction::JInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
-    this->instr = Disassembler::Operator::jal;
-    this->rd = static_cast<Disassembler::Register>((raw >> 7) & 0x1F);
+JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
+    this->instr = Operator::jal;
+    this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
                 (((raw >> 20) & 0x1) << 11) | (((raw >> 21) & 0x3FF) << 1);
 
@@ -444,10 +423,9 @@ JInstruction::JInstruction(Disassembler::Opcode op, uint32_t raw) : op(op) {
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = Disassembler::to_string(this->instr) +
-                     Disassembler::to_string(this->rd) + ", " +
+    this->printOut = to_string(this->instr) + to_string(this->rd) + ", " +
                      std::to_string(this->imm) + "\t\t# " +
-                     Disassembler::to_string(this->rd) +
+                     to_string(this->rd) +
                      " = PC+$; PC += " + std::to_string(this->imm);
 
     return this->printOut;

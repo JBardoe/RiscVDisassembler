@@ -19,37 +19,36 @@ namespace Disassembler {
 
 unique_ptr<Instruction> parseInstruction(uint32_t raw) {
     // Get opcode
-    if (Disassembler::opcodeMap.find(raw & 0x7F) ==
-        Disassembler::opcodeMap.end()) {
-        throw DisassemblyException("Unknown Disassembler::Opcode: " +
+    if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
+        throw DisassemblyException("Unknown Opcode: " +
                                    format("{:02X}", (raw & 0x7F)));
     }
 
-    Disassembler::Opcode opcode = Disassembler::opcodeMap.at(raw & 0x7F);
+    Opcode opcode = opcodeMap.at(raw & 0x7F);
 
     switch (opcode) {
         // R-Type
-        case Disassembler::Opcode::R_TYPE:
+        case Opcode::R_TYPE:
             return make_unique<RInstruction>(opcode, raw);
 
         // I-Types
-        case Disassembler::Opcode::LOAD:
-        case Disassembler::Opcode::IMM_INSTR:
-        case Disassembler::Opcode::JALR:
-        case Disassembler::Opcode::ENV_TYPE:
+        case Opcode::LOAD:
+        case Opcode::IMM_INSTR:
+        case Opcode::JALR:
+        case Opcode::ENV_TYPE:
             return make_unique<IInstruction>(opcode, raw);
 
         // S-Type
-        case Disassembler::Opcode::S_TYPE:
+        case Opcode::S_TYPE:
             return make_unique<SInstruction>(opcode, raw);
 
         // B-Type
-        case Disassembler::Opcode::B_TYPE:
+        case Opcode::B_TYPE:
             return make_unique<BInstruction>(opcode, raw);
 
         // U-Type
-        case Disassembler::Opcode::AUIPC:
-        case Disassembler::Opcode::LUI:
+        case Opcode::AUIPC:
+        case Opcode::LUI:
             return make_unique<UInstruction>(opcode, raw);
 
         // J-Type
@@ -118,8 +117,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
             const ELFParser::SymbolTableEntry* symbolData =
                 reinterpret_cast<const ELFParser::SymbolTableEntry*>(
-                    sec.second
-                        ->getData());  // TODO: check if needs to be freed?
+                    sec.second->getData());
 
             offset = 0;
 
@@ -142,18 +140,19 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                 std::string sectionName =
                     elffile->getSectionName(symbolData[offset].shndx);
 
-                asmFile->addSymbol(symbolName, symbolData[offset].value,
-                                   symbolData[offset].size,
-                                   static_cast<Disassembler::SymbolType>(
-                                       symbolData[offset].info & 0x0F),
-                                   static_cast<Disassembler::SymbolBinding>(
-                                       symbolData[offset].info >> 4),
-                                   sectionName);
+                asmFile->addSymbol(
+                    symbolName, symbolData[offset].value,
+                    symbolData[offset].size,
+                    static_cast<SymbolType>(symbolData[offset].info & 0x0F),
+                    static_cast<SymbolBinding>(symbolData[offset].info >> 4),
+                    sectionName);
 
                 offset++;
             }
         }
     }
+
+    // TODO: Parse data section
 
     std::cout << "Sections:\n";
 
@@ -162,8 +161,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                   << ". Offset: " << sec.second->header->offset
                   << ". Size: " << sec.second->header->size << "\n";
     }
-
-    std::cout << asmFile->printSymbolTable();
 
     return asmFile;
 }
