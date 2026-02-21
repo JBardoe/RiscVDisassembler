@@ -72,7 +72,7 @@ std::string to_string(Register r) {
     }
 }
 
-std::string to_string(Operator i) {
+std::string to_string(Operator i) {  // TODO add pseudos
     switch (i) {
         case Operator::add:
             return "add";

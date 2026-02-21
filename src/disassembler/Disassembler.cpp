@@ -66,37 +66,9 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
         elffile->getSections();
 
-    // Decode .text section
-    if (sections.find(".text") == sections.end()) {
-        throw ELFParser::BadFileException("No text section found.");
-    }
-
-    if (sections.at(".text")->header->size % 4 != 0) {
-        throw ELFParser::BadFileException(
-            "Text section is of an invalid size.");
-    }
-
-    const unsigned char* textData =
-        reinterpret_cast<const unsigned char*>(sections.at(".text")->getData());
-    vector<unique_ptr<Instruction>> textInstructions;
-
     uint32_t offset = 0;
 
-    while (offset < sections.at(".text")->header->size) {
-        uint32_t instr;
-        if (elffile->isLittleEndian) {
-            instr = (textData[offset]) | (textData[offset + 1] << 8) |
-                    (textData[offset + 2] << 16) | (textData[offset + 3] << 24);
-        } else {
-            instr = (textData[offset + 3]) | (textData[offset + 2] << 8) |
-                    (textData[offset + 1] << 16) | (textData[offset] << 24);
-        }
-        textInstructions.push_back(move(parseInstruction(instr)));
-        offset += 4;
-    }
-
-    asmFile->addSection(".text",
-                        move(make_unique<TextSection>(move(textInstructions))));
+    uint32_t gpAddress = 0;
 
     // Parse symbol tables if they exists
     for (auto& sec : sections) {
@@ -134,10 +106,10 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                         "Invalid symbol table entry.");
                 }
 
-                std::string symbolName(reinterpret_cast<const char*>(
+                string symbolName(reinterpret_cast<const char*>(
                     stringTable + symbolData[offset].name));
 
-                std::string sectionName =
+                string sectionName =
                     elffile->getSectionName(symbolData[offset].shndx);
 
                 asmFile->addSymbol(
@@ -147,19 +119,63 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                     static_cast<SymbolBinding>(symbolData[offset].info >> 4),
                     sectionName);
 
+                if (symbolName == "__global_pointer$") {
+                    gpAddress = symbolData[offset].value;
+                }
+
                 offset++;
             }
         }
     }
 
-    // TODO: Parse data section
+    // Decode .text section
+    if (sections.find(".text") == sections.end()) {
+        throw ELFParser::BadFileException("No text section found.");
+    }
 
-    std::cout << "Sections:\n";
+    if (sections.at(".text")->header->size % 4 != 0) {
+        throw ELFParser::BadFileException(
+            "Text section is of an invalid size.");
+    }
+
+    const unsigned char* textData =
+        reinterpret_cast<const unsigned char*>(sections.at(".text")->getData());
+    vector<unique_ptr<Instruction>> textInstructions;
+
+    while (offset < sections.at(".text")->header->size) {
+        uint32_t instr;
+        if (elffile->isLittleEndian) {
+            instr = (textData[offset]) | (textData[offset + 1] << 8) |
+                    (textData[offset + 2] << 16) | (textData[offset + 3] << 24);
+        } else {
+            instr = (textData[offset + 3]) | (textData[offset + 2] << 8) |
+                    (textData[offset + 1] << 16) | (textData[offset] << 24);
+        }
+        textInstructions.push_back(move(parseInstruction(instr)));
+        offset += 4;
+    }
+
+    if (gpAddress != 0) {
+        for (auto& instr : textInstructions) {
+            auto* casted = dynamic_cast<IInstruction*>(instr.get());
+            if (casted && casted->instr == Operator::addi &&
+                casted->rs1 == Register::gp) {
+                instr = move(make_unique<IInstruction>());
+            }
+        }
+    }
+
+    asmFile->addSection(".text",
+                        move(make_unique<TextSection>(move(textInstructions))));
+
+    asmFile->addSection(".data", move(make_unique<DataSection>()));
+
+    cout << "Sections:\n";
 
     for (auto& sec : sections) {
-        std::cout << "Name: " << sec.first
-                  << ". Offset: " << sec.second->header->offset
-                  << ". Size: " << sec.second->header->size << "\n";
+        cout << "Name: " << sec.first
+             << ". Offset: " << sec.second->header->offset
+             << ". Size: " << sec.second->header->size << "\n";
     }
 
     return asmFile;

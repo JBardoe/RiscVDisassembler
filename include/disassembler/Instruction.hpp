@@ -24,7 +24,7 @@ class Instruction {
      */
     virtual const std::string& toString() { return this->printOut; };
 
-   protected:
+    Operator instr;
     std::string printOut;  // String version of the instruction if it has
                            // already been generated
 };
@@ -43,7 +43,6 @@ class RInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -51,7 +50,6 @@ class RInstruction : public virtual Instruction {
      *
      * instr rd, rs1, rs2
      */
-    Operator instr;
     Register rd;
     Register rs1;
     Register rs2;
@@ -62,7 +60,7 @@ class RInstruction : public virtual Instruction {
  */
 class IInstruction : public virtual Instruction {
    public:
-    IInstruction(Opcode op, uint32_t raw);
+    IInstruction(Opcode op, uint32_t raw);  // TODO add new cosntructor
 
     /**
      * toString method to print the instruction in assembly form
@@ -71,7 +69,6 @@ class IInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -81,7 +78,6 @@ class IInstruction : public virtual Instruction {
      * OR
      * intr rd, imm(rs1)
      */
-    Operator instr;
     Register rd;
     Register rs1;
     int imm;
@@ -101,7 +97,6 @@ class SInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -109,7 +104,6 @@ class SInstruction : public virtual Instruction {
      *
      * instr rs2, imm(rs1)
      */
-    Operator instr;
     Register rs1;
     Register rs2;
     int imm;
@@ -129,7 +123,6 @@ class BInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -137,7 +130,6 @@ class BInstruction : public virtual Instruction {
      *
      * instr rs1, rs2, imm
      */
-    Operator instr;
     Register rs1;
     Register rs2;
     int imm;
@@ -157,7 +149,6 @@ class UInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -165,7 +156,6 @@ class UInstruction : public virtual Instruction {
      *
      * instr rd, imm
      */
-    Operator instr;
     Register rd;
     int imm;
 };
@@ -184,7 +174,6 @@ class JInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-   private:
     Opcode op;  // Opcode
 
     /**
@@ -192,7 +181,6 @@ class JInstruction : public virtual Instruction {
      *
      * instr rd, imm
      */
-    Operator instr;
     Register rd;
     int imm;
 };
