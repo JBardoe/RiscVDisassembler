@@ -1,8 +1,11 @@
 #ifndef ASSEMBLYSECTION_H
 #define ASSEMBLYSECTION_H
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "disassembler/Instruction.hpp"
@@ -54,15 +57,23 @@ class TextSection : public AssemblySection {
         instructions;  // Vector of the instructions in the section
 };
 
-// class DataSection : public AssemblySection{
-//     public:
-//     DataSection()
+class DataSection : public AssemblySection {
+   public:
+    DataSection() = default;
 
-//     const std::string& toString() override;
+    void addVariable(std::string name, uint32_t addr, uint32_t val);
 
-//     private:
+    std::optional<std::reference_wrapper<const Variable>> getVar(
+        std::string name);
+    std::optional<std::reference_wrapper<const Variable>> getVar(uint32_t addr);
 
-// };
+    const std::string& toString() override;
+
+   private:
+    std::unordered_map<std::string, Variable>
+        vars;  // TODO check if name lookup will be needed
+    std::unordered_map<uint32_t, std::vector<std::string>> addrLookup;
+};
 
 }  // namespace Disassembler
 #endif
