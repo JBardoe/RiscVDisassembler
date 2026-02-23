@@ -72,7 +72,7 @@ std::string to_string(Register r) {
     }
 }
 
-std::string to_string(Operator i) {  // TODO add pseudos
+std::string to_string(Operator i) {
     switch (i) {
         case Operator::add:
             return "add";
@@ -150,6 +150,8 @@ std::string to_string(Operator i) {  // TODO add pseudos
             return "ecall";
         case Operator::ebreak:
             return "ebreak";
+        case Operator::la:
+            return "la";
         default:
             return "<unknown_instruction>";
     }

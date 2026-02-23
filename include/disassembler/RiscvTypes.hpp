@@ -83,7 +83,7 @@ std::string to_string(Register r);
 /**
  * All RISC-V instructions
  */
-enum class Operator : int {  // TODO add pseudos
+enum class Operator : int {
     add,
     sub,
     Xor,
@@ -123,6 +123,7 @@ enum class Operator : int {  // TODO add pseudos
     auipc,
     ecall,
     ebreak,
+    la,
 };
 
 /**

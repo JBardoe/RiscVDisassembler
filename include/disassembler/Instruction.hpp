@@ -14,6 +14,7 @@ namespace Disassembler {
 class Instruction {
    public:
     Instruction() : printOut("") {};
+    Instruction(Operator instr) : instr(instr) {};
     virtual ~Instruction() = default;
 
     /**
@@ -183,6 +184,30 @@ class JInstruction : public virtual Instruction {
      */
     Register rd;
     int imm;
+};
+
+class PseudoLoadInstruction : public virtual Instruction {
+   public:
+    PseudoLoadInstruction(Operator instr, Register rd, std::string symbol)
+        : Instruction(instr), rd(rd), symbol(symbol) {};
+
+    const std::string& toString() override;
+
+    Register rd;
+    std::string symbol;
+};
+
+class PseudoStoreInstruction : public virtual Instruction {
+   public:
+    PseudoStoreInstruction(Operator instr, Register rd, std::string symbol,
+                           Register rt)
+        : Instruction(instr), rd(rd), symbol(symbol), rt(rt) {}
+
+    const std::string& toString() override;
+
+    Register rd;
+    std::string symbol;
+    Register rt;
 };
 
 }  // namespace Disassembler

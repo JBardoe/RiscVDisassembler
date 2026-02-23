@@ -423,10 +423,41 @@ JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = to_string(this->instr) + to_string(this->rd) + ", " +
+    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
                      std::to_string(this->imm) + "\t\t# " +
                      to_string(this->rd) +
                      " = PC+$; PC += " + std::to_string(this->imm);
+
+    return this->printOut;
+}
+
+const std::string& PseudoLoadInstruction::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    this->printOut =
+        to_string(instr) + " " + to_string(rd) + ", " + symbol + "\t\t# ";
+
+    if (instr == Operator::la) {
+        this->printOut += to_string(rd) + " = " + "&" + symbol;
+    } else {
+        this->printOut += to_string(rd) + " = M[&" + symbol + "]";
+    }
+
+    return this->printOut;
+}
+
+const std::string& PseudoStoreInstruction::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    this->printOut = to_string(instr) + " " + to_string(rd) + ", " + symbol +
+                     ", " + to_string(rt) + "\t\t# M[&" + symbol +
+                     "] = " + to_string(rt);
+
+    if (instr == Operator::sb) {
+        this->printOut += "[7:0]";
+    } else if (instr == Operator::sh) {
+        this->printOut += "[15:0]";
+    }
 
     return this->printOut;
 }
