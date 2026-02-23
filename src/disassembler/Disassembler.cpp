@@ -141,6 +141,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     const unsigned char* textData =
         reinterpret_cast<const unsigned char*>(sections.at(".text")->getData());
     vector<unique_ptr<Instruction>> textInstructions;
+    offset = 0;
 
     while (offset < sections.at(".text")->header->size) {
         uint32_t instr;
@@ -155,15 +156,36 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         offset += 4;
     }
 
+    // uint32_t dataSectionAddress;
+    auto dataIt = sections.find(".data");
+
+    // If there's no .data section, skip the code that needs ut
+    if (dataIt == sections.end()) {
+        goto nodata;
+    }
+
+    // dataSectionAddress = sections.at(".data")->header->offset;
+
     if (gpAddress != 0) {
         for (auto& instr : textInstructions) {
             auto* casted = dynamic_cast<IInstruction*>(instr.get());
             if (casted && casted->instr == Operator::addi &&
                 casted->rs1 == Register::gp) {
-                instr = move(make_unique<IInstruction>());
+                uint32_t symbolAddress = gpAddress + casted->imm;
+                auto var = asmFile->getSymbolAddr(symbolAddress);
+
+                if (var.empty()) continue;
+
+                instr = move(make_unique<PseudoLoadInstruction>(
+                    Operator::la, casted->rd, var[0].name));
             }
         }
     }
+
+    // TODO deal with PC relative addressing
+    // TODO add data section
+
+nodata:
 
     asmFile->addSection(".text",
                         move(make_unique<TextSection>(move(textInstructions))));
