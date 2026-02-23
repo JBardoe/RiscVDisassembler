@@ -388,7 +388,8 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-UInstruction::UInstruction(Opcode op, uint32_t raw) : op(op) {
+UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
+    : op(op), addr(addr) {
     this->instr = (op == Opcode::LUI) ? Operator::lui : Operator::auipc;
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->imm = (raw >> 12);

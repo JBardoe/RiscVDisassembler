@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Disassembler {
 
-unique_ptr<Instruction> parseInstruction(uint32_t raw) {
+unique_ptr<Instruction> parseInstruction(uint32_t raw, uint32_t offset) {
     // Get opcode
     if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
         throw DisassemblyException("Unknown Opcode: " +
@@ -49,7 +49,8 @@ unique_ptr<Instruction> parseInstruction(uint32_t raw) {
         // U-Type
         case Opcode::AUIPC:
         case Opcode::LUI:
-            return make_unique<UInstruction>(opcode, raw);
+            return make_unique<UInstruction>(opcode, raw,
+                                             offset);  // TODO pass address
 
         // J-Type
         default:
@@ -152,8 +153,66 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
             instr = (textData[offset + 3]) | (textData[offset + 2] << 8) |
                     (textData[offset + 1] << 16) | (textData[offset] << 24);
         }
-        textInstructions.push_back(move(parseInstruction(instr)));
+        textInstructions.push_back(move(parseInstruction(
+            instr, sections.at(".text")->header->address + offset)));
         offset += 4;
+    }
+
+    size_t i = 0;
+    // Translate unravelled pseudo-intructions that use symbols
+    while (i < textInstructions.size()) {
+        auto& instr = textInstructions[i];
+        uint32_t symbolAddress;
+        vector<Disassembler::Symbol> vars;
+
+        // If it uses a gp relative address, convert from that
+        if (gpAddress != 0) {
+            auto* castedI = dynamic_cast<IInstruction*>(instr.get());
+            if (castedI && castedI->instr == Operator::addi &&
+                castedI->rs1 == Register::gp) {
+                symbolAddress = gpAddress + castedI->imm;
+                vars = asmFile->getSymbolAddr(symbolAddress);
+
+                if (vars.empty()) {
+                    i++;
+                    continue;
+                }
+
+                textInstructions[i] = move(make_unique<PseudoLoadInstruction>(
+                    Operator::la, castedI->rd, vars[0].name));
+                i++;
+                continue;
+            }
+        }
+
+        // If it uses pc-relative address, convert from that
+        if (instr->instr == Operator::auipc &&
+            i < textInstructions.size() - 1 &&
+            textInstructions[i + 1]->instr == Operator::addi) {
+            auto* castedAUIPC = dynamic_cast<UInstruction*>(instr.get());
+            auto* castedADDI =
+                dynamic_cast<IInstruction*>(textInstructions[i + 1].get());
+
+            if (castedADDI && castedAUIPC &&
+                castedADDI->rd == castedAUIPC->rd &&
+                castedADDI->rd == castedADDI->rs1) {
+                symbolAddress = castedAUIPC->addr + (castedAUIPC->imm << 12) +
+                                castedADDI->imm;
+
+                vars = asmFile->getSymbolAddr(symbolAddress);
+
+                if (vars.empty()) {
+                    i++;
+                    continue;
+                }
+
+                textInstructions[i] = move(make_unique<PseudoLoadInstruction>(
+                    Operator::la, castedADDI->rd, vars[0].name));
+                textInstructions.erase(textInstructions.begin() + i + 1,
+                                       textInstructions.begin() + i + 2);
+            }
+        }
+        i++;
     }
 
     // uint32_t dataSectionAddress;
@@ -165,22 +224,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     }
 
     // dataSectionAddress = sections.at(".data")->header->offset;
-
-    if (gpAddress != 0) {
-        for (auto& instr : textInstructions) {
-            auto* casted = dynamic_cast<IInstruction*>(instr.get());
-            if (casted && casted->instr == Operator::addi &&
-                casted->rs1 == Register::gp) {
-                uint32_t symbolAddress = gpAddress + casted->imm;
-                auto var = asmFile->getSymbolAddr(symbolAddress);
-
-                if (var.empty()) continue;
-
-                instr = move(make_unique<PseudoLoadInstruction>(
-                    Operator::la, casted->rd, var[0].name));
-            }
-        }
-    }
 
     // TODO deal with PC relative addressing
     // TODO add data section

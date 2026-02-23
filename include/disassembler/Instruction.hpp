@@ -141,7 +141,7 @@ class BInstruction : public virtual Instruction {
  */
 class UInstruction : public virtual Instruction {
    public:
-    UInstruction(Opcode op, uint32_t raw);
+    UInstruction(Opcode op, uint32_t raw, uint32_t addr);
 
     /**
      * toString method to print the instruction in assembly form
@@ -159,6 +159,7 @@ class UInstruction : public virtual Instruction {
      */
     Register rd;
     int imm;
+    uint32_t addr;
 };
 
 /**
