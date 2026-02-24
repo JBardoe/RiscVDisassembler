@@ -18,24 +18,6 @@ const std::string& TextSection::toString() {
     return this->printOut;
 }
 
-void TextSection::addEntryPoints(const std::vector<Symbol>& entries,
-                                 uint32_t base) {
-    int added = 0;
-
-    for (std::size_t i = 0; i < entries.size(); i++) {
-        auto entry = entries[i];
-        uint32_t entryAddr = entry.addr - base;
-
-        if (entryAddr % 4 != 0 || entryAddr / 4 > instructions.size() - added)
-            continue;
-
-        instructions.insert(instructions.begin() + (entryAddr / 4) + added,
-                            std::make_unique<EntryPoint>(entry.name));
-        entryPoints.push_back(std::make_pair(entry.name, entry.binding));
-        added++;
-    }
-}
-
 void DataSection::addVariable(std::string name, uint32_t addr, uint32_t val,
                               uint32_t size) {
     vars[name] = Variable(name, addr, val, size);

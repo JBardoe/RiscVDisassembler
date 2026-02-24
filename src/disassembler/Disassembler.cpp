@@ -2,6 +2,7 @@
 
 #include <format>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "disassembler/Instruction.hpp"
@@ -232,6 +233,29 @@ unique_ptr<TextSection> disassembleTextSection(
         offset += 4;
     }
 
+    auto entries = asmFile->getSymbolSection(".text");
+    vector<pair<string, SymbolBinding>> entryPoints;
+
+    int added = 0;
+
+    for (size_t i = 0; i < entries.size(); i++) {
+        auto entry = entries[i];
+        uint32_t entryAddr =
+            entry.addr - ((asmFile->getFileType() == FileType::REL)
+                              ? 0
+                              : textSection->header->address);
+
+        if (entryAddr % 4 != 0 ||
+            entryAddr / 4 > textInstructions.size() - added)
+            continue;
+
+        textInstructions.insert(
+            textInstructions.begin() + (entryAddr / 4) + added,
+            make_unique<EntryPoint>(entry.name));
+        entryPoints.push_back(make_pair(entry.name, entry.binding));
+        added++;
+    }
+
     size_t i = 0;
     // Translate unravelled pseudo-intructions that use symbols
     while (i < textInstructions.size()) {
@@ -289,7 +313,7 @@ unique_ptr<TextSection> disassembleTextSection(
         i++;
     }
 
-    return make_unique<TextSection>(move(textInstructions));
+    return make_unique<TextSection>(move(textInstructions), entryPoints);
 }
 
 unique_ptr<AssemblyFile> disassemble(const string& filepath) {
@@ -322,13 +346,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
     auto textSection = disassembleTextSection(
         asmFile, (*textIt).second, gpAddress, elffile->isLittleEndian);
-
-    auto entries = asmFile->getSymbolSection(".text");
-
-    textSection->addEntryPoints(entries,
-                                (asmFile->getFileType() == FileType::REL)
-                                    ? 0
-                                    : (*textIt).second->header->address);
 
     asmFile->addSection(".text", move(textSection));
 

@@ -43,8 +43,11 @@ class AssemblySection {
  */
 class TextSection : public AssemblySection {
    public:
-    TextSection(std::vector<std::unique_ptr<Instruction>> instructions)
-        : AssemblySection(".text"), instructions(std::move(instructions)) {}
+    TextSection(std::vector<std::unique_ptr<Instruction>> instructions,
+                std::vector<std::pair<std::string, SymbolBinding>> entryPoints)
+        : AssemblySection(".text"),
+          instructions(std::move(instructions)),
+          entryPoints(entryPoints) {}
 
     /**
      * toString method to print the text section in assembly form
@@ -52,8 +55,6 @@ class TextSection : public AssemblySection {
      * @return string readout version of the section
      */
     const std::string& toString() override;
-
-    void addEntryPoints(const std::vector<Symbol>& entries, uint32_t base);
 
    private:
     std::vector<std::unique_ptr<Instruction>>
