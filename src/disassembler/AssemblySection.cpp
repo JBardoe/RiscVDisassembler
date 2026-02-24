@@ -61,10 +61,42 @@ const std::string& DataSection::toString() {
         }
 
         for (auto var : addrList.second) {
-            printOut += "\t" + vars[var].name + ":\n";
+            printOut += "\t" + var + ":\n";
         }
         printOut +=
             "\t\t" + std::to_string(vars[addrList.second[0]].val) + "\n";
+    }
+
+    printOut += "\n";
+
+    return printOut;
+}
+
+const std::string& BSSSection::toString() {
+    if (printOut != "") return printOut;
+
+    printOut = ".bss\n";
+
+    if (addrLookup.empty()) {
+        printOut += "<Empty>\n\n";
+        return printOut;
+    }
+
+    for (auto& addrList : addrLookup) {
+        if (addrList.second.empty()) continue;  // Should not trigger
+
+        if (addrList.second.size() == 1) {
+            auto var = vars[addrList.second[0]];
+            printOut +=
+                "\t" + var.name + " .space " + std::to_string(var.size) + "\n";
+            continue;
+        }
+
+        for (auto var : addrList.second) {
+            printOut += "\t" + var + ":\n";
+        }
+        printOut += "\t\t .space " +
+                    std::to_string(vars[addrList.second[0]].size) + "\n";
     }
 
     printOut += "\n";
