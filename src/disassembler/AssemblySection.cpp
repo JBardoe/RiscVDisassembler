@@ -14,8 +14,9 @@ const std::string& TextSection::toString() {
     return this->printOut;
 }
 
-void DataSection::addVariable(std::string name, uint32_t addr, uint32_t val) {
-    vars[name] = Variable(name, addr, val);
+void DataSection::addVariable(std::string name, uint32_t addr, uint32_t val,
+                              uint32_t size) {
+    vars[name] = Variable(name, addr, val, size);
     addrLookup[addr].push_back(name);
 }
 
@@ -41,6 +42,11 @@ const std::string& DataSection::toString() {
     if (printOut != "") return printOut;
 
     printOut = ".data\n";
+
+    if (addrLookup.empty()) {
+        printOut += "<Empty>\n\n";
+        return printOut;
+    }
 
     for (auto& addrList : addrLookup) {
         if (addrList.second.empty()) continue;  // Should not trigger

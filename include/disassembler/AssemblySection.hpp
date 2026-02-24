@@ -61,7 +61,8 @@ class DataSection : public AssemblySection {
    public:
     DataSection() = default;
 
-    void addVariable(std::string name, uint32_t addr, uint32_t val);
+    void addVariable(std::string name, uint32_t addr, uint32_t val,
+                     uint32_t size);
 
     std::optional<std::reference_wrapper<const Variable>> getVar(
         std::string name);

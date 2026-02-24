@@ -19,7 +19,8 @@ std::optional<std::reference_wrapper<const Symbol>> SymbolTable::getSymbolName(
     return std::nullopt;
 }
 
-std::vector<Symbol> SymbolTable::getSymbolAddr(uint32_t addr) {
+std::vector<Symbol> SymbolTable::getSymbolAddr(
+    uint32_t addr) {  // NOTE: could be optimised
     auto it = addrLookup.find(addr);
     if (it == addrLookup.end()) return {};
 
@@ -32,7 +33,8 @@ std::vector<Symbol> SymbolTable::getSymbolAddr(uint32_t addr) {
     return ret;
 }
 
-std::vector<Symbol> SymbolTable::getSymbolSection(std::string sectionName) {
+std::vector<Symbol> SymbolTable::getSymbolSection(
+    std::string sectionName) {  // NOTE: could be optimised
     auto it = sectionLookup.find(sectionName);
     if (it == sectionLookup.end()) return {};
 
