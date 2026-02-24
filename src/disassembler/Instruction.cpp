@@ -49,12 +49,9 @@ const std::string& RInstruction::toString() {
 
     std::string symbol;
 
-    this->printOut = "";
-
-    this->printOut += to_string(this->instr) + " " + to_string(this->rd) +
-                      ", " + to_string(this->rs1) + ", " +
-                      to_string(this->rs2) + "\t\t# " + to_string(this->rd) +
-                      " = ";
+    this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
+                     ", " + to_string(this->rs1) + ", " + to_string(this->rs2) +
+                     "\t\t# " + to_string(this->rd) + " = ";
 
     switch (this->instr) {
         case Operator::add:
@@ -175,9 +172,9 @@ const std::string& IInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     if (this->instr == Operator::jalr) {
-        this->printOut = to_string(this->instr) + to_string(this->rd) + ", " +
-                         std::to_string(this->imm) + "(" + to_string(rs1) +
-                         ")\t\t# " + to_string(this->rd) +
+        this->printOut = "\t" + to_string(this->instr) + to_string(this->rd) +
+                         ", " + std::to_string(this->imm) + "(" +
+                         to_string(rs1) + ")\t\t# " + to_string(this->rd) +
                          " = PC+4; PC = " + to_string(this->rs1) + " + " +
                          std::to_string(this->imm);
 
@@ -185,21 +182,21 @@ const std::string& IInstruction::toString() {
     }
 
     if (this->instr == Operator::ecall) {
-        this->printOut = "ecall\t\t# Transfer control to OS";
+        this->printOut = "\tecall\t\t# Transfer control to OS";
         return this->printOut;
     }
 
     if (this->instr == Operator::ebreak) {
-        this->printOut = "ebreak\t\t# Transfer control to debugger";
+        this->printOut = "\tebreak\t\t# Transfer control to debugger";
         return this->printOut;
     }
 
     if (this->op == Opcode::LOAD) {
-        this->printOut = to_string(this->instr) + " " + to_string(this->rd) +
-                         ", " + std::to_string(this->imm) + "(" +
-                         to_string(this->rs1) + ")\t\t# " +
-                         to_string(this->rd) + " = M[" + to_string(this->rs1) +
-                         "+" + std::to_string(this->imm) + "][0:";
+        this->printOut =
+            "\t" + to_string(this->instr) + " " + to_string(this->rd) + ", " +
+            std::to_string(this->imm) + "(" + to_string(this->rs1) + ")\t\t# " +
+            to_string(this->rd) + " = M[" + to_string(this->rs1) + "+" +
+            std::to_string(this->imm) + "][0:";
 
         switch (this->instr) {
             case Operator::lb:
@@ -220,9 +217,10 @@ const std::string& IInstruction::toString() {
         return this->printOut;
     }
 
-    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
-                     to_string(this->rs1) + ", " + std::to_string(this->imm) +
-                     "\t\t# " + to_string(this->rd) + " = ";
+    this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
+                     ", " + to_string(this->rs1) + ", " +
+                     std::to_string(this->imm) + "\t\t# " +
+                     to_string(this->rd) + " = ";
 
     std::string symbol;
     switch (this->instr) {
@@ -307,7 +305,7 @@ const std::string& SInstruction::toString() {
     }
 
     this->printOut =
-        to_string(this->instr) + " " + to_string(this->rs2) + ", " +
+        "\t" + to_string(this->instr) + " " + to_string(this->rs2) + ", " +
         std::to_string(this->imm) + "(" + to_string(this->rs1) + ")" +
         "\t\t# M[" + to_string(this->rs1) + "+" + std::to_string(this->imm) +
         "][0:" + std::to_string(upper) + "] = " + to_string(this->rs2) +
@@ -380,7 +378,7 @@ const std::string& BInstruction::toString() {
     }
 
     this->printOut =
-        to_string(this->instr) + " " + to_string(this->rs1) + ", " +
+        "\t" + to_string(this->instr) + " " + to_string(this->rs1) + ", " +
         to_string(this->rs2) + ", " + std::to_string(this->imm) + "\t\t# if(" +
         to_string(this->rs1) + " " + symbol + " " + to_string(this->rs2) +
         ") PC += " + std::to_string(this->imm);
@@ -398,8 +396,8 @@ UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
 const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
-                     std::to_string(this->imm) + "\t\t# " +
+    this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
+                     ", " + std::to_string(this->imm) + "\t\t# " +
                      to_string(this->rd) + " = ";
 
     // Cannot be an unknown opcode as it will have been caught earlier
@@ -424,8 +422,8 @@ JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
 const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = to_string(this->instr) + " " + to_string(this->rd) + ", " +
-                     std::to_string(this->imm) + "\t\t# " +
+    this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
+                     ", " + std::to_string(this->imm) + "\t\t# " +
                      to_string(this->rd) +
                      " = PC+$; PC += " + std::to_string(this->imm);
 
@@ -435,8 +433,8 @@ const std::string& JInstruction::toString() {
 const std::string& PseudoLoadInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut =
-        to_string(instr) + " " + to_string(rd) + ", " + symbol + "\t\t# ";
+    this->printOut = "\t" + to_string(instr) + " " + to_string(rd) + ", " +
+                     symbol + "\t\t# ";
 
     if (instr == Operator::la) {
         this->printOut += to_string(rd) + " = " + "&" + symbol;
@@ -450,8 +448,8 @@ const std::string& PseudoLoadInstruction::toString() {
 const std::string& PseudoStoreInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = to_string(instr) + " " + to_string(rd) + ", " + symbol +
-                     ", " + to_string(rt) + "\t\t# M[&" + symbol +
+    this->printOut = "\t" + to_string(instr) + " " + to_string(rd) + ", " +
+                     symbol + ", " + to_string(rt) + "\t\t# M[&" + symbol +
                      "] = " + to_string(rt);
 
     if (instr == Operator::sb) {
@@ -466,7 +464,7 @@ const std::string& PseudoStoreInstruction::toString() {
 const std::string& EntryPoint::toString() {
     if (this->printOut != "") return this->printOut;
 
-    printOut = "\n" + name + ": \n";
+    printOut = "\n" + name + ":";
 
     return printOut;
 }

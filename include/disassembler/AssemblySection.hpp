@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "disassembler/Instruction.hpp"
@@ -52,9 +53,12 @@ class TextSection : public AssemblySection {
      */
     const std::string& toString() override;
 
+    void addEntryPointsOffset(const std::vector<Symbol>& entries);
+
    private:
     std::vector<std::unique_ptr<Instruction>>
         instructions;  // Vector of the instructions in the section
+    std::vector<std::pair<std::string, SymbolBinding>> entryPoints;
 };
 
 class DataSection : public AssemblySection {

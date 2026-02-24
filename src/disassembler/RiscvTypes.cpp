@@ -190,19 +190,19 @@ std::string to_string(SymbolType t) {
 std::string to_string(SymbolBinding b) {
     switch (b) {
         case SymbolBinding::LOCAL:
-            return "local";
+            return ".local";
         case SymbolBinding::GLOBAL:
-            return "global";
+            return ".globl";
         case SymbolBinding::WEAK:
-            return "weak";
+            return ".weak";
         case SymbolBinding::LOOS:
-            return "loos";
+            return ".loos";
         case SymbolBinding::HIOS:
-            return "hios";
+            return ".hios";
         case SymbolBinding::LOPROC:
-            return "loproc";
+            return ".loproc";
         case SymbolBinding::HIPROC:
-            return "hiproc";
+            return ".hiproc";
     }
     return "<unknown_binding>";
 }

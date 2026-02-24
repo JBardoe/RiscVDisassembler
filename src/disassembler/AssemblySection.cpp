@@ -7,11 +7,31 @@ const std::string& TextSection::toString() {
 
     this->printOut = ".text\n";
 
+    for (auto entry : entryPoints) {
+        printOut += to_string(entry.second) + " " + entry.first + "\n";
+    }
+
     for (auto& instr : this->instructions) {
-        printOut += "\t" + instr->toString() + "\n";
+        printOut += instr->toString() + "\n";
     }
 
     return this->printOut;
+}
+
+void TextSection::addEntryPointsOffset(const std::vector<Symbol>& entries) {
+    int added = 0;
+
+    for (std::size_t i = 0; i < entries.size(); i++) {
+        auto entry = entries[i];
+
+        if (entry.addr % 4 != 0 || entry.addr / 4 > instructions.size() - added)
+            continue;
+
+        instructions.insert(instructions.begin() + (entry.addr / 4) + added,
+                            std::make_unique<EntryPoint>(entry.name));
+        entryPoints.push_back(std::make_pair(entry.name, entry.binding));
+        added++;
+    }
 }
 
 void DataSection::addVariable(std::string name, uint32_t addr, uint32_t val,

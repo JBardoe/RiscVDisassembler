@@ -7,7 +7,7 @@
 #include "parser/Parser.hpp"
 
 int main() {
-    auto asmFile = Disassembler::disassemble("data/test/elf/multipleEntry.elf");
+    auto asmFile = Disassembler::disassemble("data/test/elf/add.elf");
 
     std::cout << asmFile->toString();
 
