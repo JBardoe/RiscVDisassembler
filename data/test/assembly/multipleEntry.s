@@ -15,3 +15,4 @@ entry_a:
 entry_b:
     addi x3, x0, 3
     jal  x0, entry_b
+

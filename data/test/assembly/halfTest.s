@@ -10,3 +10,4 @@ _start:
 
 .data
 my_half:	.half 0x1234
+
