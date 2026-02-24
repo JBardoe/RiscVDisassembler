@@ -61,7 +61,7 @@ class RInstruction : public virtual Instruction {
  */
 class IInstruction : public virtual Instruction {
    public:
-    IInstruction(Opcode op, uint32_t raw);  // TODO add new cosntructor
+    IInstruction(Opcode op, uint32_t raw);
 
     /**
      * toString method to print the instruction in assembly form

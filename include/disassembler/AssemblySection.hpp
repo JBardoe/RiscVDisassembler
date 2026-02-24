@@ -53,7 +53,7 @@ class TextSection : public AssemblySection {
      */
     const std::string& toString() override;
 
-    void addEntryPointsOffset(const std::vector<Symbol>& entries);
+    void addEntryPoints(const std::vector<Symbol>& entries, uint32_t base);
 
    private:
     std::vector<std::unique_ptr<Instruction>>

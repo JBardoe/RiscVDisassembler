@@ -213,6 +213,12 @@ typedef struct Variable {
 
 std::string to_string(Variable v);
 
+enum class FileType : int {
+    REL = 1,
+    EXEC = 2,
+    DYN = 3,
+};
+
 }  // namespace Disassembler
 
 #endif

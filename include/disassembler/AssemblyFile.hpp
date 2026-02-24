@@ -18,7 +18,8 @@ namespace Disassembler {
  */
 class AssemblyFile {
    public:
-    AssemblyFile() : printOut(""), symbolTable(SymbolTable()) {};
+    AssemblyFile(FileType type)
+        : printOut(""), symbolTable(SymbolTable()), type(type) {};
 
     /**
      * Adds a section that has been decoded from the file
@@ -59,11 +60,14 @@ class AssemblyFile {
      */
     const std::string& toString();
 
+    FileType getFileType() { return type; }
+
    private:
     std::unordered_map<std::string, std::unique_ptr<AssemblySection>>
         sections;             // Map of section names to sections
     std::string printOut;     // String readout of the file
     SymbolTable symbolTable;  // Map of symbol names to symbols
+    FileType type;
 };
 }  // namespace Disassembler
 #endif

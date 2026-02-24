@@ -117,13 +117,14 @@ void disassembleSymbolTable(
     }
 }
 
-// TODO deal with file types
 unique_ptr<DataSection> disassembleDataSection(
     const unique_ptr<AssemblyFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
     auto data = make_unique<DataSection>();
 
-    uint32_t dataBase = dataSection->header->offset;
+    uint32_t dataBase = (asmFile->getFileType() == FileType::REL)
+                            ? 0
+                            : dataSection->header->address;
     uint32_t dataUpper = dataBase + dataSection->header->size;
 
     auto vars = asmFile->getSymbolSection(".data");
@@ -295,7 +296,8 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
     unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
-    auto asmFile = make_unique<AssemblyFile>();
+    auto asmFile = make_unique<AssemblyFile>(
+        static_cast<FileType>(elffile->getHeader()->fileType));
 
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
         elffile->getSections();
@@ -315,8 +317,7 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         throw ELFParser::BadFileException("No text section found.");
     }
 
-    auto gpSym = asmFile->getSymbolName(
-        "__global_pointer$");  // TODO deal with file types
+    auto gpSym = asmFile->getSymbolName("__global_pointer$");
     uint32_t gpAddress = gpSym.has_value() ? gpSym.value().get().addr : 0;
 
     auto textSection = disassembleTextSection(
@@ -324,9 +325,23 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
 
     auto entries = asmFile->getSymbolSection(".text");
 
-    textSection->addEntryPointsOffset(entries);
+    textSection->addEntryPoints(entries,
+                                (asmFile->getFileType() == FileType::REL)
+                                    ? 0
+                                    : (*textIt).second->header->address);
 
     asmFile->addSection(".text", move(textSection));
+
+    // TODO remove
+    cout << "Sections:\n";
+
+    for (auto& sec : sections) {
+        cout << "Name: " << sec.first
+             << ". Offset: " << sec.second->header->offset
+             << ". Size: " << sec.second->header->size
+             << ". VA: " << sec.second->header->address << "\n";
+    }
+    cout << "\n";
 
     return asmFile;
 }
