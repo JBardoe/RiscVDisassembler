@@ -1,6 +1,5 @@
 #include "disassembler/Disassembler.hpp"
 
-#include <cstdint>
 #include <format>
 #include <iostream>
 #include <vector>
@@ -57,6 +56,67 @@ unique_ptr<Instruction> parseInstruction(uint32_t raw, uint32_t offset) {
     }
 }
 
+void disassembleSymbolTable(
+    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<ELFParser::ELFFile>& elffile,
+    const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections) {
+    uint32_t offset = 0;
+
+    // Parse symbol tables if they exists
+    for (auto& sec : sections) {
+        if (sec.second->header->type == 11 || sec.second->header->type == 2) {
+            if (sections.find(".strtab") == sections.end()) {
+                throw ELFParser::BadFileException("Missing string table.");
+            }
+
+            const unsigned char* stringTable =
+                reinterpret_cast<const unsigned char*>(
+                    sections.at(".strtab")->getData());
+
+            if (sec.second->header->entrySize !=
+                    sizeof(ELFParser::SymbolTableEntry) ||
+                sec.second->header->size % sec.second->header->entrySize != 0) {
+                throw ELFParser::BadFileException("Malformed symbol table.");
+            }
+
+            const ELFParser::SymbolTableEntry* symbolData =
+                reinterpret_cast<const ELFParser::SymbolTableEntry*>(
+                    sec.second->getData());
+
+            offset = 0;
+
+            while (offset * sec.second->header->entrySize <
+                   sec.second->header->size) {
+                if (symbolData[offset].name < 1) {
+                    offset++;
+                    continue;
+                }
+
+                if (symbolData[offset].name >
+                    sections.at(".strtab")->header->size) {
+                    throw ELFParser::BadFileException(
+                        "Invalid symbol table entry.");
+                }
+
+                string symbolName(reinterpret_cast<const char*>(
+                    stringTable + symbolData[offset].name));
+
+                string sectionName =
+                    elffile->getSectionName(symbolData[offset].shndx);
+
+                asmFile->addSymbol(
+                    symbolName, symbolData[offset].value,
+                    symbolData[offset].size,
+                    static_cast<SymbolType>(symbolData[offset].info & 0x0F),
+                    static_cast<SymbolBinding>(symbolData[offset].info >> 4),
+                    sectionName);
+
+                offset++;
+            }
+        }
+    }
+}
+
 unique_ptr<DataSection> disassembleDataSection(
     const unique_ptr<AssemblyFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
@@ -74,7 +134,7 @@ unique_ptr<DataSection> disassembleDataSection(
 
     const char* dataData = dataSection->getData();
 
-    string current = vars[0].name;  // TODO change
+    string current = vars[0].name;
     uint32_t currentAddress = vars[0].addr;
     uint32_t currentSize;
     uint32_t currentVal;
@@ -142,109 +202,31 @@ unique_ptr<DataSection> disassembleDataSection(
     return data;
 }
 
-unique_ptr<AssemblyFile> disassemble(const string& filepath) {
-    unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
-    if (!elffile) return nullptr;
-
-    auto asmFile = make_unique<AssemblyFile>();
-
-    const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
-        elffile->getSections();
-
-    uint32_t offset = 0;
-
-    uint32_t gpAddress = 0;
-
-    // Parse symbol tables if they exists
-    for (auto& sec : sections) {
-        if (sec.second->header->type == 11 || sec.second->header->type == 2) {
-            if (sections.find(".strtab") == sections.end()) {
-                throw ELFParser::BadFileException("Missing string table.");
-            }
-
-            const unsigned char* stringTable =
-                reinterpret_cast<const unsigned char*>(
-                    sections.at(".strtab")->getData());
-
-            if (sec.second->header->entrySize !=
-                    sizeof(ELFParser::SymbolTableEntry) ||
-                sec.second->header->size % sec.second->header->entrySize != 0) {
-                throw ELFParser::BadFileException("Malformed symbol table.");
-            }
-
-            const ELFParser::SymbolTableEntry* symbolData =
-                reinterpret_cast<const ELFParser::SymbolTableEntry*>(
-                    sec.second->getData());
-
-            offset = 0;
-
-            while (offset * sec.second->header->entrySize <
-                   sec.second->header->size) {
-                if (symbolData[offset].name < 1) {
-                    offset++;
-                    continue;
-                }
-
-                if (symbolData[offset].name >
-                    sections.at(".strtab")->header->size) {
-                    throw ELFParser::BadFileException(
-                        "Invalid symbol table entry.");
-                }
-
-                string symbolName(reinterpret_cast<const char*>(
-                    stringTable + symbolData[offset].name));
-
-                string sectionName =
-                    elffile->getSectionName(symbolData[offset].shndx);
-
-                asmFile->addSymbol(
-                    symbolName, symbolData[offset].value,
-                    symbolData[offset].size,
-                    static_cast<SymbolType>(symbolData[offset].info & 0x0F),
-                    static_cast<SymbolBinding>(symbolData[offset].info >> 4),
-                    sectionName);
-
-                if (symbolName == "__global_pointer$") {
-                    gpAddress = symbolData[offset].value;
-                }
-
-                offset++;
-            }
-        }
-    }
-
-    if (auto dataIt = sections.find(".data"); dataIt != sections.end()) {
-        auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
-                                                  elffile->isLittleEndian);
-        asmFile->addSection(".data", move(dataSection));
-    }
-
-    // Decode .text section
-    if (sections.find(".text") == sections.end()) {
-        throw ELFParser::BadFileException("No text section found.");
-    }
-
-    if (sections.at(".text")->header->size % 4 != 0) {
+unique_ptr<TextSection> disassembleTextSection(
+    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<ELFParser::ELFSection>& textSection, uint32_t gpAddress,
+    bool isLittleEndian) {
+    if (textSection->header->size % 4 != 0) {
         throw ELFParser::BadFileException(
             "Text section is of an invalid size.");
     }
 
     const unsigned char* textData =
-        reinterpret_cast<const unsigned char*>(sections.at(".text")->getData());
+        reinterpret_cast<const unsigned char*>(textSection->getData());
     vector<unique_ptr<Instruction>> textInstructions;
-    offset = 0;
+    uint32_t offset = 0;
 
-    while (offset < sections.at(".text")->header->size) {
+    while (offset < textSection->header->size) {
         uint32_t instr;
-        if (elffile->isLittleEndian) {
+        if (isLittleEndian) {
             instr = (textData[offset]) | (textData[offset + 1] << 8) |
                     (textData[offset + 2] << 16) | (textData[offset + 3] << 24);
         } else {
             instr = (textData[offset + 3]) | (textData[offset + 2] << 8) |
                     (textData[offset + 1] << 16) | (textData[offset] << 24);
         }
-        textInstructions.push_back(move(parseInstruction(
-            instr, sections.at(".text")->header->address + offset)));
+        textInstructions.push_back(move(
+            parseInstruction(instr, textSection->header->address + offset)));
         offset += 4;
     }
 
@@ -305,8 +287,39 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         i++;
     }
 
-    asmFile->addSection(".text",
-                        move(make_unique<TextSection>(move(textInstructions))));
+    return make_unique<TextSection>(move(textInstructions));
+}
+
+unique_ptr<AssemblyFile> disassemble(const string& filepath) {
+    unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
+    if (!elffile) return nullptr;
+
+    auto asmFile = make_unique<AssemblyFile>();
+
+    const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
+        elffile->getSections();
+
+    disassembleSymbolTable(asmFile, elffile, sections);
+
+    if (auto dataIt = sections.find(".data"); dataIt != sections.end()) {
+        auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
+                                                  elffile->isLittleEndian);
+        asmFile->addSection(".data", move(dataSection));
+    }
+
+    auto textIt = sections.find(".text");
+
+    // Decode .text section
+    if (textIt == sections.end()) {
+        throw ELFParser::BadFileException("No text section found.");
+    }
+
+    auto gpSym = asmFile->getSymbolName("__global_pointer$");
+    uint32_t gpAddress = gpSym.has_value() ? gpSym.value().get().addr : 0;
+
+    asmFile->addSection(".text", move(disassembleTextSection(
+                                     asmFile, (*textIt).second, gpAddress,
+                                     elffile->isLittleEndian)));
 
     // TODO remove
     cout << "Sections:\n";
