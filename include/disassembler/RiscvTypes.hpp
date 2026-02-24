@@ -1,6 +1,7 @@
 #ifndef RISCVTYPES_H
 #define RISCVTYPES_H
 
+#include <array>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -33,6 +34,9 @@ static const std::unordered_map<unsigned char, Opcode> opcodeMap = {
     {0x23, Opcode::S_TYPE},  {0x33, Opcode::R_TYPE},    {0x37, Opcode::LUI},
     {0x63, Opcode::B_TYPE},  {0x67, Opcode::JALR},      {0x6F, Opcode::JAL},
     {0x73, Opcode::ENV_TYPE}};
+
+static constexpr std::array<std::string_view, 4> variableTypes{
+    ".byte", ".half", "<unknown_type>", ".word"};
 
 /**
  * All RISC-V registers (underlying int value equals the address)
@@ -203,6 +207,7 @@ typedef struct Variable {
     std::string name;
     uint32_t addr;
     uint32_t val;
+    uint32_t size;
 } Variable;
 
 std::string to_string(Variable v);
