@@ -54,6 +54,8 @@ std::string SymbolTable::toString() {
         ret += to_string(sym);
     }
 
+    ret += "\n";
+
     return ret;
 }
 }  // namespace Disassembler

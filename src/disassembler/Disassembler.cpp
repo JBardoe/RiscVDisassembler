@@ -49,13 +49,97 @@ unique_ptr<Instruction> parseInstruction(uint32_t raw, uint32_t offset) {
         // U-Type
         case Opcode::AUIPC:
         case Opcode::LUI:
-            return make_unique<UInstruction>(opcode, raw,
-                                             offset);  // TODO pass address
+            return make_unique<UInstruction>(opcode, raw, offset);
 
         // J-Type
         default:
             return make_unique<JInstruction>(opcode, raw);
     }
+}
+
+unique_ptr<DataSection> disassembleDataSection(
+    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
+    auto data = make_unique<DataSection>();
+
+    uint32_t dataBase = dataSection->header->offset;
+    uint32_t dataUpper = dataBase + dataSection->header->size;
+
+    auto vars = asmFile->getSymbolSection(".data");
+
+    if (vars.empty()) return data;
+
+    sort(vars.begin(), vars.end(),
+         [](auto& a, auto& b) { return a.addr < b.addr; });
+
+    const char* dataData = dataSection->getData();
+
+    string current = vars[0].name;  // TODO change
+    uint32_t currentAddress = vars[0].addr;
+    uint32_t currentSize;
+    uint32_t currentVal;
+    uint32_t offset;
+
+    for (size_t i = 1; i < vars.size(); i++) {
+        if (vars[i].addr != currentAddress) {
+            currentVal = 0;
+
+            offset = currentAddress - dataBase;
+            currentSize = vars[i].addr - currentAddress;
+
+            if (currentSize < 1 || currentSize > 4) {
+                throw DisassemblyException("Invalid Symbol Size: " +
+                                           std::to_string(currentSize));
+            }
+
+            // Get all the required bytes out of the file
+            for (uint32_t j = 0; j < currentSize; j++) {
+                if (isLittleEndian) {
+                    currentVal |= (dataData[offset + j] << (j * 8));
+                } else {
+                    currentVal |=
+                        (dataData[offset + j] << ((currentSize - j - 1) * 8));
+                }
+            }
+
+            data->addVariable(current, currentAddress, currentVal,
+                              currentSize);  // Currently erasing other symbols
+                                             // with same address as they will
+                                             // never be emitted anyway
+
+            currentAddress = vars[i].addr;
+            current = vars[i].name;
+        }
+    }
+
+    if (currentAddress < dataUpper) {
+        currentVal = 0;
+
+        offset = currentAddress - dataBase;
+        currentSize = dataUpper - currentAddress;
+
+        if (currentSize < 1 || currentSize > 4) {
+            throw DisassemblyException("Invalid Symbol Size: " +
+                                       std::to_string(currentSize));
+        }
+
+        // Get all the required bytes out of the file
+        for (uint32_t j = 0; j < currentSize; j++) {
+            if (isLittleEndian) {
+                currentVal |= (dataData[offset + j] << (j * 8));
+            } else {
+                currentVal |=
+                    (dataData[offset + j] << ((currentSize - j - 1) * 8));
+            }
+        }
+
+        data->addVariable(current, currentAddress, currentVal,
+                          currentSize);  // Currently erasing other symbols
+                                         // with same address as they will
+                                         // never be emitted anyway
+    }
+
+    return data;
 }
 
 unique_ptr<AssemblyFile> disassemble(const string& filepath) {
@@ -127,6 +211,12 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
                 offset++;
             }
         }
+    }
+
+    if (auto dataIt = sections.find(".data"); dataIt != sections.end()) {
+        auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
+                                                  elffile->isLittleEndian);
+        asmFile->addSection(".data", move(dataSection));
     }
 
     // Decode .text section
@@ -215,26 +305,10 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         i++;
     }
 
-    // uint32_t dataSectionAddress;
-    auto dataIt = sections.find(".data");
-
-    // If there's no .data section, skip the code that needs ut
-    if (dataIt == sections.end()) {
-        goto nodata;
-    }
-
-    // dataSectionAddress = sections.at(".data")->header->offset;
-
-    // TODO deal with PC relative addressing
-    // TODO add data section
-
-nodata:
-
     asmFile->addSection(".text",
                         move(make_unique<TextSection>(move(textInstructions))));
 
-    asmFile->addSection(".data", move(make_unique<DataSection>()));
-
+    // TODO remove
     cout << "Sections:\n";
 
     for (auto& sec : sections) {
@@ -242,6 +316,7 @@ nodata:
              << ". Offset: " << sec.second->header->offset
              << ". Size: " << sec.second->header->size << "\n";
     }
+    cout << "\n";
 
     return asmFile;
 }

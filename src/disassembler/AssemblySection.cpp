@@ -52,14 +52,15 @@ const std::string& DataSection::toString() {
         if (addrList.second.empty()) continue;  // Should not trigger
 
         if (addrList.second.size() == 1) {
-            printOut += to_string(vars[addrList.second[0]]) + "\n";
+            printOut += "\t" + to_string(vars[addrList.second[0]]) + "\n";
             continue;
         }
 
         for (auto var : addrList.second) {
-            printOut += vars[var].name + ":\n";
+            printOut += "\t" + vars[var].name + ":\n";
         }
-        printOut += "\t" + std::to_string(vars[addrList.second[0]].val) + "\n";
+        printOut +=
+            "\t\t" + std::to_string(vars[addrList.second[0]].val) + "\n";
     }
 
     printOut += "\n";
