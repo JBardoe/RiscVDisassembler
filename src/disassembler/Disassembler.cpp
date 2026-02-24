@@ -205,6 +205,72 @@ unique_ptr<DataSection> disassembleDataSection(
     return data;
 }
 
+unique_ptr<BSSSection> disassembleBSSSection(
+    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<ELFParser::ELFSection>& bssSection) {
+    auto bss = make_unique<BSSSection>();
+
+    uint32_t bssBase = (asmFile->getFileType() == FileType::REL)
+                           ? 0
+                           : bssSection->header->address;
+    uint32_t bssUpper = bssBase + bssSection->header->size;
+
+    auto vars = asmFile->getSymbolSection(".bss");
+
+    if (vars.empty()) return bss;
+
+    sort(vars.begin(), vars.end(),
+         [](auto& a, auto& b) { return a.addr < b.addr; });
+
+    while (vars[0].name == "__bss_start" || vars[0].name == "__BSS_END__" ||
+           vars[0].name == "_end") {
+        vars.erase(vars.begin(), vars.begin() + 1);
+    }
+
+    string current = vars[0].name;
+    uint32_t currentAddress = vars[0].addr;
+    uint32_t currentSize;
+
+    for (size_t i = 1; i < vars.size(); i++) {
+        if (vars[i].name == "__bss_start" || vars[i].name == "__BSS_END__" ||
+            vars[i].name == "_end" || vars[i].name == "_edata") {
+            continue;
+        }
+        if (vars[i].addr != currentAddress) {
+            currentSize = vars[i].addr - currentAddress;
+
+            if (currentSize < 1 || currentSize > 4) {
+                throw DisassemblyException("Invalid Symbol Size: " +
+                                           std::to_string(currentSize));
+            }
+
+            bss->addVariable(current, currentAddress,
+                             currentSize);  // Currently erasing other symbols
+                                            // with same address as they will
+                                            // never be emitted anyway
+
+            currentAddress = vars[i].addr;
+            current = vars[i].name;
+        }
+    }
+
+    if (currentAddress < bssUpper) {
+        currentSize = bssUpper - currentAddress;
+
+        if (currentSize < 1 || currentSize > 4) {
+            throw DisassemblyException("Invalid Symbol Size: " +
+                                       std::to_string(currentSize));
+        }
+
+        bss->addVariable(current, currentAddress,
+                         currentSize);  // Currently erasing other symbols
+                                        // with same address as they will
+                                        // never be emitted anyway
+    }
+
+    return bss;
+}
+
 unique_ptr<TextSection> disassembleTextSection(
     const unique_ptr<AssemblyFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& textSection, uint32_t gpAddress,
@@ -332,6 +398,11 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
                                                   elffile->isLittleEndian);
         asmFile->addSection(".data", move(dataSection));
+    }
+
+    if (auto bssIt = sections.find(".bss"); bssIt != sections.end()) {
+        auto bssSection = disassembleBSSSection(asmFile, (*bssIt).second);
+        asmFile->addSection(".bss", move(bssSection));
     }
 
     auto textIt = sections.find(".text");
