@@ -128,6 +128,7 @@ enum class Operator : int {
     ecall,
     ebreak,
     la,
+    entry,  // Fake instruction denoting an entry point
 };
 
 /**

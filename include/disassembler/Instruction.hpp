@@ -211,6 +211,15 @@ class PseudoStoreInstruction : public virtual Instruction {
     Register rt;
 };
 
+class EntryPoint : public virtual Instruction {
+   public:
+    EntryPoint(std::string name) : Instruction(Operator::entry), name(name) {};
+
+    const std::string& toString() override;
+
+    std::string name;
+};
+
 }  // namespace Disassembler
 
 #endif

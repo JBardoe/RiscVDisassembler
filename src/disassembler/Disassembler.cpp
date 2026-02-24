@@ -117,6 +117,7 @@ void disassembleSymbolTable(
     }
 }
 
+// TODO deal with file types
 unique_ptr<DataSection> disassembleDataSection(
     const unique_ptr<AssemblyFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
@@ -314,7 +315,8 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         throw ELFParser::BadFileException("No text section found.");
     }
 
-    auto gpSym = asmFile->getSymbolName("__global_pointer$");
+    auto gpSym = asmFile->getSymbolName(
+        "__global_pointer$");  // TODO deal with file types
     uint32_t gpAddress = gpSym.has_value() ? gpSym.value().get().addr : 0;
 
     asmFile->addSection(".text", move(disassembleTextSection(

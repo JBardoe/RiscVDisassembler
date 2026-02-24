@@ -39,7 +39,9 @@ class ELFFile {
     };
     const std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
         return segments;
-    };
+    }
+
+    const std::unique_ptr<ELFHeader>& getHeader() { return header; }
 
     /**
      * Matches a section index to the name of the section

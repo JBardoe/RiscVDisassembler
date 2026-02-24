@@ -152,6 +152,8 @@ std::string to_string(Operator i) {
             return "ebreak";
         case Operator::la:
             return "la";
+        case Operator::entry:
+            return "Entry Point";
         default:
             return "<unknown_instruction>";
     }

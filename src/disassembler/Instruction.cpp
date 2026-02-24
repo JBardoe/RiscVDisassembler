@@ -463,4 +463,12 @@ const std::string& PseudoStoreInstruction::toString() {
     return this->printOut;
 }
 
+const std::string& EntryPoint::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    printOut = "\n" + name + ": \n";
+
+    return printOut;
+}
+
 }  // namespace Disassembler
