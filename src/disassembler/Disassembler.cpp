@@ -323,6 +323,49 @@ unique_ptr<TextSection> disassembleTextSection(
         added++;
     }
 
+    for (size_t i = 0; i < textInstructions.size(); i++) {
+        if (textInstructions[i]->instr == Operator::jal) {
+            auto* castedJ =
+                dynamic_cast<JInstruction*>(textInstructions[i].get());
+            if (!castedJ) continue;
+            size_t offset =
+                max(i + (castedJ->imm / 4), static_cast<unsigned long>(1));
+            if (offset >= textInstructions.size()) continue;
+            if (castedJ->imm < 0) offset--;
+            if (auto* castedE =
+                    dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
+                textInstructions[i] = move(
+                    make_unique<JInstructionEntry>(castedJ, castedE->name));
+            }
+        } else if (textInstructions[i]->instr == Operator::jalr) {
+            auto* castedI =
+                dynamic_cast<IInstruction*>(textInstructions[i].get());
+            if (!castedI) continue;
+            size_t offset =
+                max(i + (castedI->imm / 4), static_cast<unsigned long>(1));
+            if (offset >= textInstructions.size()) continue;
+            if (castedI->imm < 0) offset--;
+            if (auto* castedE =
+                    dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
+                textInstructions[i] = move(
+                    make_unique<JALRInstructionEntry>(castedI, castedE->name));
+            }
+        } else if (textInstructions[i]->op == Opcode::B_TYPE) {
+            auto* castedB =
+                dynamic_cast<BInstruction*>(textInstructions[i].get());
+            if (!castedB) continue;
+            size_t offset =
+                max(i + (castedB->imm / 4), static_cast<unsigned long>(1));
+            if (offset >= textInstructions.size()) continue;
+            if (castedB->imm < 0) offset--;
+            if (auto* castedE =
+                    dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
+                textInstructions[i] = move(
+                    make_unique<BInstructionEntry>(castedB, castedE->name));
+            }
+        }
+    }
+
     size_t i = 0;
     // Translate unravelled pseudo-intructions that use symbols
     while (i < textInstructions.size()) {

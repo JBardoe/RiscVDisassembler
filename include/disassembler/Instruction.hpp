@@ -212,10 +212,10 @@ class EntryPoint : public virtual Instruction {
 
 class BInstructionEntry : public virtual Instruction {
    public:
-    BInstructionEntry(const BInstruction& old, std::string entryPoint)
-        : Instruction(old.instr),
-          rs1(old.rs1),
-          rs2(old.rs2),
+    BInstructionEntry(BInstruction* old, std::string entryPoint)
+        : Instruction(old->instr),
+          rs1(old->rs1),
+          rs2(old->rs2),
           entryPoint(entryPoint) {}
 
     const std::string& toString() override;
@@ -227,8 +227,8 @@ class BInstructionEntry : public virtual Instruction {
 
 class JInstructionEntry : public virtual Instruction {
    public:
-    JInstructionEntry(const JInstruction& old, std::string entryPoint)
-        : Instruction(old.instr), rd(old.rd), entryPoint(entryPoint) {}
+    JInstructionEntry(JInstruction* old, std::string entryPoint)
+        : Instruction(old->instr), rd(old->rd), entryPoint(entryPoint) {}
 
     const std::string& toString() override;
 
@@ -238,10 +238,10 @@ class JInstructionEntry : public virtual Instruction {
 
 class JALRInstructionEntry : public virtual Instruction {
    public:
-    JALRInstructionEntry(const IInstruction& old, std::string entryPoint)
-        : Instruction(old.instr),
-          rd(old.rd),
-          rs1(old.rs1),
+    JALRInstructionEntry(IInstruction* old, std::string entryPoint)
+        : Instruction(old->instr),
+          rd(old->rd),
+          rs1(old->rs1),
           entryPoint(entryPoint) {}
 
     const std::string& toString() override;
