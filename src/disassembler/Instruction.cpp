@@ -475,7 +475,7 @@ const std::string& JInstructionEntry::toString() {
     printOut = this->printOut = "\t" + to_string(this->instr) + " " +
                                 to_string(this->rd) + ", " + entryPoint +
                                 "\t\t# " + to_string(this->rd) +
-                                " = PC+$; PC += &" + entryPoint;
+                                " = PC+$; PC = &" + entryPoint;
 
     return this->printOut;
 }
@@ -511,7 +511,7 @@ const std::string& BInstructionEntry::toString() {
     this->printOut = "\t" + to_string(this->instr) + " " +
                      to_string(this->rs1) + ", " + to_string(this->rs2) + ", " +
                      entryPoint + "\t\t# if(" + to_string(this->rs1) + " " +
-                     symbol + " " + to_string(this->rs2) + ") PC += &" +
+                     symbol + " " + to_string(this->rs2) + ") PC = &" +
                      entryPoint;
 
     return this->printOut;
