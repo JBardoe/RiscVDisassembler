@@ -13,7 +13,7 @@ int main() {
     while (true) {
         std::string fileName = "";
 
-        std::cout << "Enter file name:";
+        std::cout << "Enter file name: ";
         std::cin >> fileName;
 
         if (fileName == "q" || fileName == "") break;
@@ -28,5 +28,3 @@ int main() {
 
     return 0;
 }
-
-// Reassemble byteTest, halfTest, multipleEntry

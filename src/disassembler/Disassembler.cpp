@@ -135,7 +135,8 @@ unique_ptr<DataSection> disassembleDataSection(
     sort(vars.begin(), vars.end(),
          [](auto& a, auto& b) { return a.addr < b.addr; });
 
-    const char* dataData = dataSection->getData();
+    const unsigned char* dataData =
+        reinterpret_cast<const unsigned char*>(dataSection->getData());
 
     string current = vars[0].name;
     uint32_t currentAddress = vars[0].addr;
@@ -223,7 +224,7 @@ unique_ptr<BSSSection> disassembleBSSSection(
          [](auto& a, auto& b) { return a.addr < b.addr; });
 
     while (vars[0].name == "__bss_start" || vars[0].name == "__BSS_END__" ||
-           vars[0].name == "_end") {
+           vars[0].name == "_end" || vars[0].name == "_edata") {
         vars.erase(vars.begin(), vars.begin() + 1);
     }
 
