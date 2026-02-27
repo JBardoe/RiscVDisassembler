@@ -1,6 +1,8 @@
 #ifndef AARCHTYPES_HPP
 #define ARRCHTYPES_HPP
 
+#include <string>
+
 namespace Translator {
 enum class Register : int {
     wzr,
@@ -36,6 +38,8 @@ enum class Register : int {
     w15,
 };
 
-}
+std::string to_string(Register r);
+
+}  // namespace Translator
 
 #endif
