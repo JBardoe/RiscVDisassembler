@@ -15,6 +15,7 @@ class Instruction {
    public:
     Instruction() : printOut("") {};
     Instruction(Operator instr) : instr(instr) {};
+    Instruction(Opcode op) : op(op) {}
     virtual ~Instruction() = default;
 
     /**
@@ -26,6 +27,7 @@ class Instruction {
     virtual const std::string& toString() { return this->printOut; };
 
     Operator instr;
+    Opcode op;
     std::string printOut;  // String version of the instruction if it has
                            // already been generated
 };
@@ -43,8 +45,6 @@ class RInstruction : public virtual Instruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
-
-    Opcode op;  // Opcode
 
     /**
      * R-Type instructions have the form:
@@ -69,8 +69,6 @@ class IInstruction : public virtual Instruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
-
-    Opcode op;  // Opcode
 
     /**
      * I-Type instructions have the form:
@@ -98,8 +96,6 @@ class SInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-    Opcode op;  // Opcode
-
     /**
      * S-Type instructions have the form:
      *
@@ -123,8 +119,6 @@ class BInstruction : public virtual Instruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
-
-    Opcode op;  // Opcode
 
     /**
      * B-Type instructions have the form:
@@ -150,8 +144,6 @@ class UInstruction : public virtual Instruction {
      */
     const std::string& toString() override;
 
-    Opcode op;  // Opcode
-
     /**
      * U-Type instructions have the form:
      *
@@ -175,8 +167,6 @@ class JInstruction : public virtual Instruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
-
-    Opcode op;  // Opcode
 
     /**
      * J-Type instructions have the form:
@@ -218,6 +208,47 @@ class EntryPoint : public virtual Instruction {
     const std::string& toString() override;
 
     std::string name;
+};
+
+class BInstructionEntry : public virtual Instruction {
+   public:
+    BInstructionEntry(const BInstruction& old, std::string entryPoint)
+        : Instruction(old.instr),
+          rs1(old.rs1),
+          rs2(old.rs2),
+          entryPoint(entryPoint) {}
+
+    const std::string& toString() override;
+
+    Register rs1;
+    Register rs2;
+    std::string entryPoint;
+};
+
+class JInstructionEntry : public virtual Instruction {
+   public:
+    JInstructionEntry(const JInstruction& old, std::string entryPoint)
+        : Instruction(old.instr), rd(old.rd), entryPoint(entryPoint) {}
+
+    const std::string& toString() override;
+
+    Register rd;
+    std::string entryPoint;
+};
+
+class JALRInstructionEntry : public virtual Instruction {
+   public:
+    JALRInstructionEntry(const IInstruction& old, std::string entryPoint)
+        : Instruction(old.instr),
+          rd(old.rd),
+          rs1(old.rs1),
+          entryPoint(entryPoint) {}
+
+    const std::string& toString() override;
+
+    Register rd;
+    Register rs1;
+    std::string entryPoint;
 };
 
 }  // namespace Disassembler

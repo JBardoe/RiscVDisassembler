@@ -7,7 +7,7 @@
 
 namespace Disassembler {
 
-RInstruction::RInstruction(Opcode op, uint32_t raw) : op(op) {
+RInstruction::RInstruction(Opcode op, uint32_t raw) : Instruction(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
             this->instr = (raw >> 25) ? Operator::sub : Operator::add;
@@ -91,7 +91,7 @@ const std::string& RInstruction::toString() {
     return this->printOut;
 }
 
-IInstruction::IInstruction(Opcode op, uint32_t raw) : op(op) {
+IInstruction::IInstruction(Opcode op, uint32_t raw) : Instruction(op) {
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
     this->imm = (raw >> 20);
@@ -263,7 +263,7 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-SInstruction::SInstruction(Opcode op, uint32_t raw) : op(op) {
+SInstruction::SInstruction(Opcode op, uint32_t raw) : Instruction(op) {
     this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
     this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
 
@@ -314,7 +314,7 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-BInstruction::BInstruction(Opcode op, uint32_t raw) : op(op) {
+BInstruction::BInstruction(Opcode op, uint32_t raw) : Instruction(op) {
     switch ((raw >> 12) & 0x07) {
         case 0:
             this->instr = Operator::beq;
@@ -387,7 +387,7 @@ const std::string& BInstruction::toString() {
 }
 
 UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
-    : op(op), addr(addr) {
+    : Instruction(op), addr(addr) {
     this->instr = (op == Opcode::LUI) ? Operator::lui : Operator::auipc;
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->imm = (raw >> 12);
@@ -410,7 +410,7 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-JInstruction::JInstruction(Opcode op, uint32_t raw) : op(op) {
+JInstruction::JInstruction(Opcode op, uint32_t raw) : Instruction(op) {
     this->instr = Operator::jal;
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->imm = (((raw >> 31) & 0x1) << 20) | (((raw >> 12) & 0xFF) << 12) |
@@ -467,6 +467,65 @@ const std::string& EntryPoint::toString() {
     printOut = "\n" + name + ":";
 
     return printOut;
+}
+
+const std::string& JInstructionEntry::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    printOut = this->printOut = "\t" + to_string(this->instr) + " " +
+                                to_string(this->rd) + ", " + entryPoint +
+                                "\t\t# " + to_string(this->rd) +
+                                " = PC+$; PC += &" + entryPoint;
+
+    return this->printOut;
+}
+
+const std::string& BInstructionEntry::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    std::string symbol;
+
+    switch (this->instr) {
+        case Operator::beq:
+            symbol = "==";
+            break;
+        case Operator::bne:
+            symbol = "!=";
+            break;
+        case Operator::blt:
+            symbol = "<";
+            break;
+        case Operator::bge:
+            symbol = ">=";
+            break;
+        case Operator::bltu:
+            symbol = "<";
+            break;
+        case Operator::bgeu:
+            symbol = ">=";
+            break;
+        default:
+            break;
+    }
+
+    this->printOut = "\t" + to_string(this->instr) + " " +
+                     to_string(this->rs1) + ", " + to_string(this->rs2) + ", " +
+                     entryPoint + "\t\t# if(" + to_string(this->rs1) + " " +
+                     symbol + " " + to_string(this->rs2) + ") PC += &" +
+                     entryPoint;
+
+    return this->printOut;
+}
+
+const std::string& JALRInstructionEntry::toString() {
+    if (this->printOut != "") return this->printOut;
+
+    this->printOut =
+        "\t" + to_string(this->instr) + to_string(this->rd) + ", " +
+        entryPoint + "(" + to_string(rs1) + ")\t\t# " + to_string(this->rd) +
+        " = PC+4; PC = " + to_string(this->rs1) + " + &" + entryPoint;
+
+    return this->printOut;
 }
 
 }  // namespace Disassembler
