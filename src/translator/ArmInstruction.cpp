@@ -63,11 +63,42 @@ const std::string& RIInstruction::toString() {  // TODO implement
     if (printOut != "") return printOut;
 }
 
-const std::string& BIInstruction::toString() {  // TODO implement
+const std::string& BIInstruction::toString() {
     if (printOut != "") return printOut;
+
+    printOut = "\t" + to_string(instr) + " " + std::to_string(imm) +
+               "\t// PC+=" + std::to_string(imm) + " ";
+
+    switch (instr) {
+        case Operator::beq:
+            printOut += "if most_recent_cmp was equal";
+            break;
+        case Operator::bne:
+            printOut += "if most_recent_cmp was not equal";
+            break;
+        case Operator::blt:
+            printOut += "if most_recent_cmp was less than";
+            break;
+        case Operator::bge:
+            printOut += "if most_recent_cmp was greater than or equal to";
+            break;
+        case Operator::blo:
+            printOut += "if most_recent_cmp was less than (unsigned)";
+            break;
+        case Operator::bhs:
+            printOut +=
+                "if most_recent_cmp was greater than or equal to (unsigned)";
+            break;
+        case Operator::bl:
+            printOut += "and set lr to PC+4";
+            break;
+        default:
+    }
+
+    return printOut;
 }
 
-const std::string& BLInstruction::toString() {  // TODO implement
+const std::string& BLInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut =
@@ -97,6 +128,19 @@ const std::string& BLInstruction::toString() {  // TODO implement
             printOut += "and set lr to PC+4";
             break;
         default:
+    }
+
+    return printOut;
+}
+
+const std::string& BRInstruction::toString() {
+    if (printOut != "") return printOut;
+
+    printOut = "\t" + to_string(instr) + " " + to_string(wd) +
+               "\t// PC+=" + to_string(wd) + " ";
+
+    if (instr == Operator::blr) {
+        printOut += "and set lr to PC+4";
     }
 
     return printOut;

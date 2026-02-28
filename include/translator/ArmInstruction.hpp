@@ -110,8 +110,6 @@ bhs
 
 bl
 b
-blr
-br
 */
 class BIInstruction : public virtual ArmInstruction {
    public:
@@ -144,6 +142,19 @@ class BLInstruction : public virtual ArmInstruction {
 };
 
 /*
+blr
+br
+*/
+class BRInstruction : public virtual ArmInstruction {
+   public:
+    BRInstruction(Operator op, Register wd) : ArmInstruction(op), wd(wd) {}
+
+    const std::string& toString() override;
+
+    Register wd;
+};
+
+/*
 svc
 brk
 */
@@ -163,8 +174,6 @@ class EntryPoint : public virtual ArmInstruction {
 
     std::string name;
 };
-
-// TODO blr + br
 
 }  // namespace Translator
 
