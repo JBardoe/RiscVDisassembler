@@ -516,16 +516,4 @@ const std::string& BInstructionEntry::toString() {
 
     return this->printOut;
 }
-
-const std::string& JALRInstructionEntry::toString() {
-    if (this->printOut != "") return this->printOut;
-
-    this->printOut =
-        "\t" + to_string(this->instr) + to_string(this->rd) + ", " +
-        entryPoint + "(" + to_string(rs1) + ")\t\t# " + to_string(this->rd) +
-        " = PC+4; PC = " + to_string(this->rs1) + " + &" + entryPoint;
-
-    return this->printOut;
-}
-
 }  // namespace Disassembler

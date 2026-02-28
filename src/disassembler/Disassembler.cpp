@@ -337,19 +337,6 @@ unique_ptr<TextSection> disassembleTextSection(
                 textInstructions[i] = move(
                     make_unique<JInstructionEntry>(castedJ, castedE->name));
             }
-        } else if (textInstructions[i]->instr == Operator::jalr) {
-            auto* castedI =
-                dynamic_cast<IInstruction*>(textInstructions[i].get());
-            if (!castedI) continue;
-            size_t offset =
-                max(i + (castedI->imm / 4), static_cast<unsigned long>(1));
-            if (offset >= textInstructions.size()) continue;
-            if (castedI->imm < 0) offset--;
-            if (auto* castedE =
-                    dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
-                textInstructions[i] = move(
-                    make_unique<JALRInstructionEntry>(castedI, castedE->name));
-            }
         } else if (textInstructions[i]->op == Opcode::B_TYPE) {
             auto* castedB =
                 dynamic_cast<BInstruction*>(textInstructions[i].get());

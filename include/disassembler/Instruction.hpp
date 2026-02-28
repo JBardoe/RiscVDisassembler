@@ -236,21 +236,6 @@ class JInstructionEntry : public virtual Instruction {
     std::string entryPoint;
 };
 
-class JALRInstructionEntry : public virtual Instruction {
-   public:
-    JALRInstructionEntry(IInstruction* old, std::string entryPoint)
-        : Instruction(old->instr),
-          rd(old->rd),
-          rs1(old->rs1),
-          entryPoint(entryPoint) {}
-
-    const std::string& toString() override;
-
-    Register rd;
-    Register rs1;
-    std::string entryPoint;
-};
-
 }  // namespace Disassembler
 
 #endif
