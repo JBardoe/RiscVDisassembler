@@ -1,6 +1,7 @@
+#include "disassembler/RiscvInstruction.hpp"
+
 #include <iostream>
 
-#include "disassembler/RiscvInstruction.hpp"
 #include "disassembler/RiscvTypes.hpp"
 #include "utils/DisassemblyException.hpp"
 

@@ -41,7 +41,7 @@ class RRRInstruction : public virtual ArmInstruction {
 
 /*
 cmp
-cset - TODO make lo,
+cset
 */
 class RRInstruction : public virtual ArmInstruction {
    public:
@@ -154,6 +154,16 @@ class EInstruction : public virtual ArmInstruction {
     EInstruction(Operator op) : ArmInstruction(op) {}
 
     const std::string& toString() override;
+};
+
+class EntryPoint : public virtual ArmInstruction {
+   public:
+    EntryPoint(std::string name)
+        : ArmInstruction(Operator::entry), name(name) {}
+
+    const std::string& toString() override;
+
+    std::string name;
 };
 
 }  // namespace Translator

@@ -76,6 +76,7 @@ enum class Operator : int {
     movz,
     svc,
     brk,
+    entry,
 };
 
 std::string to_string(Operator i);
