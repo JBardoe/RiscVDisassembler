@@ -5,11 +5,12 @@
 #include <utility>
 #include <vector>
 
-#include "disassembler/Instruction.hpp"
+#include "disassembler/RiscvInstruction.hpp"
 #include "disassembler/RiscvTypes.hpp"
 #include "parser/ELFFile.hpp"
 #include "parser/ELFTypes.hpp"
 #include "parser/Parser.hpp"
+#include "utils/AssemblySection.hpp"
 #include "utils/BadFileException.hpp"
 #include "utils/DisassemblyException.hpp"
 
@@ -17,7 +18,7 @@ using namespace std;
 
 namespace Disassembler {
 
-unique_ptr<Instruction> parseInstruction(uint32_t raw, uint32_t offset) {
+unique_ptr<RiscvInstruction> parseInstruction(uint32_t raw, uint32_t offset) {
     // Get opcode
     if (opcodeMap.find(raw & 0x7F) == opcodeMap.end()) {
         throw DisassemblyException("Unknown Opcode: " +
@@ -58,7 +59,7 @@ unique_ptr<Instruction> parseInstruction(uint32_t raw, uint32_t offset) {
 }
 
 void disassembleSymbolTable(
-    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFFile>& elffile,
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections) {
     uint32_t offset = 0;
@@ -109,7 +110,8 @@ void disassembleSymbolTable(
                     symbolName, symbolData[offset].value,
                     symbolData[offset].size,
                     static_cast<SymbolType>(symbolData[offset].info & 0x0F),
-                    static_cast<SymbolBinding>(symbolData[offset].info >> 4),
+                    static_cast<Assembly::SymbolBinding>(
+                        symbolData[offset].info >> 4),
                     sectionName);
 
                 offset++;
@@ -118,10 +120,10 @@ void disassembleSymbolTable(
     }
 }
 
-unique_ptr<DataSection> disassembleDataSection(
-    const unique_ptr<AssemblyFile>& asmFile,
+unique_ptr<Assembly::DataSection> disassembleDataSection(
+    const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
-    auto data = make_unique<DataSection>();
+    auto data = make_unique<Assembly::DataSection>();
 
     uint32_t dataBase = (asmFile->getFileType() == FileType::REL)
                             ? 0
@@ -206,10 +208,10 @@ unique_ptr<DataSection> disassembleDataSection(
     return data;
 }
 
-unique_ptr<BSSSection> disassembleBSSSection(
-    const unique_ptr<AssemblyFile>& asmFile,
+unique_ptr<Assembly::BSSSection> disassembleBSSSection(
+    const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& bssSection) {
-    auto bss = make_unique<BSSSection>();
+    auto bss = make_unique<Assembly::BSSSection>();
 
     uint32_t bssBase = (asmFile->getFileType() == FileType::REL)
                            ? 0
@@ -273,7 +275,7 @@ unique_ptr<BSSSection> disassembleBSSSection(
 }
 
 unique_ptr<TextSection> disassembleTextSection(
-    const unique_ptr<AssemblyFile>& asmFile,
+    const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& textSection, uint32_t gpAddress,
     bool isLittleEndian) {
     if (textSection->header->size % 4 != 0) {
@@ -283,7 +285,7 @@ unique_ptr<TextSection> disassembleTextSection(
 
     const unsigned char* textData =
         reinterpret_cast<const unsigned char*>(textSection->getData());
-    vector<unique_ptr<Instruction>> textInstructions;
+    vector<unique_ptr<RiscvInstruction>> textInstructions;
     uint32_t offset = 0;
 
     while (offset < textSection->header->size) {
@@ -301,7 +303,7 @@ unique_ptr<TextSection> disassembleTextSection(
     }
 
     auto entries = asmFile->getSymbolSection(".text");
-    vector<pair<string, SymbolBinding>> entryPoints;
+    vector<pair<string, Assembly::SymbolBinding>> entryPoints;
 
     int added = 0;
 
@@ -413,11 +415,11 @@ unique_ptr<TextSection> disassembleTextSection(
     return make_unique<TextSection>(move(textInstructions), entryPoints);
 }
 
-unique_ptr<AssemblyFile> disassemble(const string& filepath) {
+unique_ptr<RiscvFile> disassemble(const string& filepath) {
     unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
-    auto asmFile = make_unique<AssemblyFile>(
+    auto asmFile = make_unique<RiscvFile>(
         static_cast<FileType>(elffile->getHeader()->fileType));
 
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
@@ -450,17 +452,6 @@ unique_ptr<AssemblyFile> disassemble(const string& filepath) {
         asmFile, (*textIt).second, gpAddress, elffile->isLittleEndian);
 
     asmFile->addSection(".text", move(textSection));
-
-    // TODO remove
-    cout << "Sections:\n";
-
-    for (auto& sec : sections) {
-        cout << "Name: " << sec.first
-             << ". Offset: " << sec.second->header->offset
-             << ". Size: " << sec.second->header->size
-             << ". VA: " << sec.second->header->address << "\n";
-    }
-    cout << "\n";
 
     return asmFile;
 }
