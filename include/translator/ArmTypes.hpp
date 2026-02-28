@@ -17,6 +17,7 @@ enum class Register : int {
     w19,
     w0,
     w1,
+    w2,
     w3,
     w4,
     w5,
@@ -36,6 +37,8 @@ enum class Register : int {
     w13,
     w14,
     w15,
+    lt,
+    lo,
 };
 
 std::string to_string(Register r);

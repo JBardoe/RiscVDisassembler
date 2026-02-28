@@ -13,8 +13,8 @@ namespace Disassembler {
  */
 class RiscvInstruction {
    public:
-    RiscvInstruction() : printOut("") {};
-    RiscvInstruction(Operator instr) : instr(instr) {};
+    RiscvInstruction() : printOut("") {}
+    RiscvInstruction(Operator instr) : instr(instr) {}
     RiscvInstruction(Opcode op) : op(op) {}
     virtual ~RiscvInstruction() = default;
 
