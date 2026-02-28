@@ -132,8 +132,6 @@ bhs
 
 bl
 b
-blr
-br
 */
 class BLInstruction : public virtual ArmInstruction {
    public:
@@ -165,6 +163,8 @@ class EntryPoint : public virtual ArmInstruction {
 
     std::string name;
 };
+
+// TODO blr + br
 
 }  // namespace Translator
 
