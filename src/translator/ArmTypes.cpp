@@ -28,6 +28,8 @@ std::string to_string(Register r) {
             return "w0";
         case Register::w1:
             return "w1";
+        case Register::w2:
+            return "w2";
         case Register::w3:
             return "w3";
         case Register::w4:
@@ -66,6 +68,10 @@ std::string to_string(Register r) {
             return "w14";
         case Register::w15:
             return "w15";
+        case Register::lt:
+            return "lt";
+        case Register::lo:
+            return "lo";
         default:
             return "<unknown_register>";
     }
@@ -137,6 +143,8 @@ std::string to_string(Operator i) {
             return "svc";
         case Operator::brk:
             return "brk";
+        case Operator::entry:
+            return "Entry Point: ";
         default:
             return "<unknown_operator>";
     }
