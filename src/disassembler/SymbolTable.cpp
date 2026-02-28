@@ -3,7 +3,7 @@
 namespace Disassembler {
 
 void SymbolTable::addSymbol(std::string name, uint32_t addr, uint32_t size,
-                            SymbolType type, SymbolBinding binding,
+                            SymbolType type, Assembly::SymbolBinding binding,
                             std::string sectionName) {
     table.emplace_back(name, addr, size, type, binding, sectionName);
     nameLookup[name] = table.size() - 1;

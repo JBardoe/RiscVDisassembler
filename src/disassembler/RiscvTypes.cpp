@@ -187,36 +187,11 @@ std::string to_string(SymbolType t) {
     return "<unknown_type>";
 }
 
-std::string to_string(SymbolBinding b) {
-    switch (b) {
-        case SymbolBinding::LOCAL:
-            return ".local";
-        case SymbolBinding::GLOBAL:
-            return ".globl";
-        case SymbolBinding::WEAK:
-            return ".weak";
-        case SymbolBinding::LOOS:
-            return ".loos";
-        case SymbolBinding::HIOS:
-            return ".hios";
-        case SymbolBinding::LOPROC:
-            return ".loproc";
-        case SymbolBinding::HIPROC:
-            return ".hiproc";
-    }
-    return "<unknown_binding>";
-}
-
 std::string to_string(Symbol s) {
     return "\tName: " + s.name + " | Address: " + std::to_string(s.addr) +
            " | Type: " + to_string(s.type) +
            " | Binding: " + to_string(s.binding) +
            " | Section: " + s.sectionName + "\n";
-}
-
-std::string to_string(Variable v) {
-    return v.name + ":\t" + std::string(variableTypes[v.size - 1]) + " " +
-           std::to_string(v.val);
 }
 
 }  // namespace Disassembler

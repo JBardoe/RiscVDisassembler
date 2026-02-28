@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "parser/ELFFile.hpp"
+#include "utils/AssemblyTypes.hpp"
 
 namespace Disassembler {
 
@@ -34,9 +35,6 @@ static const std::unordered_map<unsigned char, Opcode> opcodeMap = {
     {0x23, Opcode::S_TYPE},  {0x33, Opcode::R_TYPE},    {0x37, Opcode::LUI},
     {0x63, Opcode::B_TYPE},  {0x67, Opcode::JALR},      {0x6F, Opcode::JAL},
     {0x73, Opcode::ENV_TYPE}};
-
-static constexpr std::array<std::string_view, 4> variableTypes{
-    ".byte", ".half", "<unknown_type>", ".word"};
 
 /**
  * All RISC-V registers (underlying int value equals the address)
@@ -167,29 +165,6 @@ enum class SymbolType : int {
 std::string to_string(SymbolType t);
 
 /**
- * All possible bindings for entries in the symbol table
- * Underlying value is the equivalent constant value that represents the binding
- * in the file
- */
-enum class SymbolBinding : int {
-    LOCAL = 0,
-    GLOBAL = 1,
-    WEAK = 2,
-    LOOS = 10,
-    HIOS = 12,
-    LOPROC = 13,
-    HIPROC = 15,
-};
-
-/**
- * toString for the symbol binding enum
- *
- * @param b symbol binding enum
- * @return string equivalent
- */
-std::string to_string(SymbolBinding b);
-
-/**
  * Represents an entry in the ELF symbol table
  */
 typedef struct Symbol {
@@ -197,21 +172,12 @@ typedef struct Symbol {
     uint32_t addr;  // Value of the symbol (relative/absolute address or offset
                     // into a section)
     uint32_t size;
-    SymbolType type;          // Type of the symbol (e.g. function)
-    SymbolBinding binding;    // Binding of the symbol (e.g. local)
+    SymbolType type;                  // Type of the symbol (e.g. function)
+    Assembly::SymbolBinding binding;  // Binding of the symbol (e.g. local)
     std::string sectionName;  // Name of the section to which the symbol is tied
 } Symbol;
 
 std::string to_string(Symbol s);
-
-typedef struct Variable {
-    std::string name;
-    uint32_t addr;
-    uint32_t val;
-    uint32_t size;
-} Variable;
-
-std::string to_string(Variable v);
 
 enum class FileType : int {
     REL = 1,
