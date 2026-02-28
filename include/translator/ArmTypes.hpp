@@ -40,7 +40,42 @@ enum class Register : int {
 
 std::string to_string(Register r);
 
-// TODO add operators for arm
+enum class Operator : int {
+    add,
+    sub,
+    eor,
+    orr,
+    And,
+    lsl,
+    lsr,
+    asr,
+    cmp,
+    cset,
+    ldrsb,
+    ldrsh,
+    ldrsw,
+    ldrb,
+    ldrh,
+    strb,
+    strh,
+    str,
+    beq,
+    bne,
+    blt,
+    bge,
+    blo,
+    bhs,
+    bl,
+    b,
+    adr,
+    blr,
+    br,
+    movz,
+    svc,
+    brk,
+};
+
+std::string to_string(Operator i);
 
 }  // namespace Translator
 

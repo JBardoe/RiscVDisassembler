@@ -70,4 +70,75 @@ std::string to_string(Register r) {
             return "<unknown_register>";
     }
 }
+
+std::string to_string(Operator i) {
+    switch (i) {
+        case Operator::add:
+            return "add";
+        case Operator::sub:
+            return "sub";
+        case Operator::eor:
+            return "eor";
+        case Operator::orr:
+            return "orr";
+        case Operator::And:
+            return "and";
+        case Operator::lsl:
+            return "lsl";
+        case Operator::lsr:
+            return "lsr";
+        case Operator::asr:
+            return "asr";
+        case Operator::cmp:
+            return "cmp";
+        case Operator::cset:
+            return "cset";
+        case Operator::ldrsb:
+            return "ldrsb";
+        case Operator::ldrsh:
+            return "ldrsh";
+        case Operator::ldrsw:
+            return "ldrsw";
+        case Operator::ldrb:
+            return "ldrb";
+        case Operator::ldrh:
+            return "ldrh";
+        case Operator::strb:
+            return "strb";
+        case Operator::strh:
+            return "strh";
+        case Operator::str:
+            return "str";
+        case Operator::beq:
+            return "b.eq";
+        case Operator::bne:
+            return "b.ne";
+        case Operator::blt:
+            return "b.lt";
+        case Operator::bge:
+            return "b.ge";
+        case Operator::blo:
+            return "b.lo";
+        case Operator::bhs:
+            return "b.hs";
+        case Operator::bl:
+            return "bl";
+        case Operator::b:
+            return "b";
+        case Operator::adr:
+            return "adr";
+        case Operator::blr:
+            return "blr";
+        case Operator::br:
+            return "br";
+        case Operator::movz:
+            return "movz";
+        case Operator::svc:
+            return "svc";
+        case Operator::brk:
+            return "brk";
+        default:
+            return "<unknown_operator>";
+    }
+}
 }  // namespace Translator
