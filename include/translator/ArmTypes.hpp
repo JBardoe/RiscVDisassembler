@@ -40,6 +40,8 @@ enum class Register : int {
 
 std::string to_string(Register r);
 
+// TODO add operators for arm
+
 }  // namespace Translator
 
 #endif

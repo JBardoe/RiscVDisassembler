@@ -1,4 +1,4 @@
-#include "translator/AArchTypes.hpp"
+#include "translator/ArmTypes.hpp"
 
 namespace Translator {
 
