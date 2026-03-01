@@ -62,7 +62,7 @@ const std::string& RRInstruction::toString() {
     return printOut;
 }
 
-const std::string& RRIInstruction::toString() {  // TODO implement
+const std::string& RRIInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
@@ -251,6 +251,50 @@ const std::string& EInstruction::toString() {
         printOut += " Transfer control to OS";
     } else {
         printOut += " Transfer control to debugger";
+    }
+
+    return printOut;
+}
+
+const std::string& RSInstruction::toString() {
+    if (printOut != "") return printOut;
+
+    printOut = "\t" + to_string(instr) + ", " + to_string(wd) + ", ";
+
+    if (instr == Operator::ldrsb || instr == Operator::ldrsh ||
+        instr == Operator::ldrsw) {
+        printOut += "[" + symbol + "]\t// ";
+    } else {
+        printOut += symbol + "\t// ";
+    }
+
+    std::string suffix = "";
+
+    switch (instr) {
+        case Operator::ldrsb:
+            suffix = "[0:7]";
+            goto loads;
+        case Operator::ldrsh:
+            suffix = "[0:15]";
+            goto loads;
+        case Operator::ldrsw:
+            suffix = "[0:31]";
+        loads:
+            printOut += to_string(wd) + " = " + symbol + suffix;
+            break;
+        case Operator::strb:
+            suffix = "[0:7]";
+            goto stores;
+        case Operator::strh:
+            suffix = "[0:15]";
+            goto stores;
+        case Operator::str:
+            suffix = "[0:31]";
+        stores:
+            printOut += symbol + suffix + " = " + to_string(wd);
+            break;
+        default:
+            printOut += to_string(wd) + " = &" + symbol;
     }
 
     return printOut;

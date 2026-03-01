@@ -170,6 +170,26 @@ class EInstruction : public virtual ArmInstruction {
     const std::string& toString() override;
 };
 
+/*
+adr
+ldrsb
+ldrsh
+ldrsw
+strb
+strh
+str
+*/
+class RSInstruction : public virtual ArmInstruction {
+   public:
+    RSInstruction(Operator op, Register wd, std::string symbol)
+        : ArmInstruction(op), wd(wd), symbol(symbol) {}
+
+    const std::string& toString() override;
+
+    Register wd;
+    std::string symbol;
+};
+
 class EntryPoint : public virtual ArmInstruction {
    public:
     EntryPoint(std::string name)
@@ -179,11 +199,6 @@ class EntryPoint : public virtual ArmInstruction {
 
     std::string name;
 };
-
-/*
-TODO load and store for symbol
-TODO register symbol adr
-*/
 
 }  // namespace Translator
 
