@@ -64,6 +64,81 @@ const std::string& RRInstruction::toString() {
 
 const std::string& RRIInstruction::toString() {  // TODO implement
     if (printOut != "") return printOut;
+
+    printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
+
+    printOut += "\t// ";
+
+    std::string suffix = "";
+
+    switch (instr) {
+        case Operator::ldrsb:
+            suffix = "[0:7] (sign-extends)";
+            goto loads;
+        case Operator::ldrsh:
+            suffix = "[0:15] (sign-extends)";
+            goto loads;
+        case Operator::ldrsw:
+            suffix = "[0:31] (sign-extends)";
+            goto loads;
+        case Operator::ldrb:
+            suffix = "[0:7] (zero-entends)";
+            goto loads;
+        case Operator::ldrh:
+            suffix = "[0:15] (zero-extends)";
+        loads:
+            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) +
+                        "]\t// " + to_string(wd) + " = Memory[" +
+                        to_string(wn) + "+" + std::to_string(imm) + "]" +
+                        suffix;
+            break;
+
+        case Operator::strb:
+            suffix = "[0:7]";
+            goto stores;
+        case Operator::strh:
+            suffix = "[0:15]";
+            goto stores;
+        case Operator::str:
+            suffix = "[0:31]";
+        stores:
+            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) +
+                        "]\t// Memory[" + to_string(wd) + "+" +
+                        std::to_string(imm) + "]" + suffix + " = " +
+                        to_string(wn) + suffix;
+            break;
+
+        case Operator::add:
+            suffix = " + ";
+            goto ops;
+        case Operator::eor:
+            suffix = " ^ ";
+            goto ops;
+        case Operator::orr:
+            suffix = " | ";
+            goto ops;
+        case Operator::And:
+            suffix = " & ";
+            goto ops;
+        case Operator::lsl:
+            suffix = " << ";
+            goto ops;
+        case Operator::lsr:
+            suffix = " >> ";
+            goto ops;
+        case Operator::asr:
+            suffix = " >> ";
+        ops:
+            printOut += to_string(wn) + ", #" + std::to_string(imm);
+            if (shift) printOut += ", lsl #12";
+
+            printOut += "\t// " + to_string(wd) + " = " + to_string(wn) +
+                        suffix + std::to_string(imm);
+
+            break;
+    }
+
+    return printOut;
 }
 
 const std::string& RIInstruction::toString() {

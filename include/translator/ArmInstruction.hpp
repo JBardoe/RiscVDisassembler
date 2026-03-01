@@ -70,6 +70,8 @@ ldrsh
 lsrsw
 ldrb
 ldrh
+
+
 strb
 strh
 str
@@ -177,6 +179,11 @@ class EntryPoint : public virtual ArmInstruction {
 
     std::string name;
 };
+
+/*
+TODO load and store for symbol
+TODO register symbol adr
+*/
 
 }  // namespace Translator
 
