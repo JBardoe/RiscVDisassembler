@@ -29,14 +29,16 @@ asr
 */
 class RRRInstruction : public virtual ArmInstruction {
    public:
-    RRRInstruction(Operator op, Register wd, Register wn, Register wm)
-        : ArmInstruction(op), wd(wd), wn(wn), wm(wm) {}
+    RRRInstruction(Operator op, Register wd, Register wn, Register wm,
+                   bool shift)
+        : ArmInstruction(op), wd(wd), wn(wn), wm(wm), shift(shift) {}
 
     const std::string& toString() override;
 
     Register wd;
     Register wn;
     Register wm;
+    bool shift;
 };
 
 /*
@@ -74,14 +76,15 @@ str
 */
 class RRIInstruction : public virtual ArmInstruction {
    public:
-    RRIInstruction(Operator op, Register wd, Register wn, int imm)
-        : ArmInstruction(op), wd(wd), wn(wn), imm(imm) {}
+    RRIInstruction(Operator op, Register wd, Register wn, int imm, bool shift)
+        : ArmInstruction(op), wd(wd), wn(wn), imm(imm), shift(shift) {}
 
     const std::string& toString() override;
 
     Register wd;
     Register wn;
     int imm;
+    bool shift;
 };
 
 /*

@@ -5,8 +5,11 @@ const std::string& RRRInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", " +
-               to_string(wn) + ", " + to_string(wm) + "\t// " + to_string(wd) +
-               " = " + to_string(wn) + " ";
+               to_string(wn) + ", " + to_string(wm);
+
+    if (shift) printOut += ", lsl #12";
+
+    printOut += "\t// " + to_string(wd) + " = " + to_string(wn) + " ";
 
     switch (instr) {
         case Operator::add:
@@ -37,6 +40,10 @@ const std::string& RRRInstruction::toString() {
     }
 
     printOut += to_string(wm);
+
+    if (shift) printOut += " << #12";
+
+    return printOut;
 }
 
 const std::string& RRInstruction::toString() {
@@ -59,8 +66,23 @@ const std::string& RRIInstruction::toString() {  // TODO implement
     if (printOut != "") return printOut;
 }
 
-const std::string& RIInstruction::toString() {  // TODO implement
+const std::string& RIInstruction::toString() {
     if (printOut != "") return printOut;
+
+    printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
+
+    if (instr == Operator::adr) {
+        printOut += ".+" + std::to_string(imm) + "\t// " + to_string(wd) +
+                    " = PC + " + std::to_string(imm);
+    } else if (instr == Operator::cmp) {
+        printOut += "#" + std::to_string(imm) + "set flags for " +
+                    to_string(wd) + " - " + std::to_string(imm);
+    } else {
+        printOut += "#" + std::to_string(imm) + "\t// " + to_string(wd) +
+                    " = " + std::to_string(imm) + " (zero-extended)";
+    }
+
+    return printOut;
 }
 
 const std::string& BIInstruction::toString() {
