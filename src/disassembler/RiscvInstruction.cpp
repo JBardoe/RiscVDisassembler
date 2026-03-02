@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "disassembler/RiscvTypes.hpp"
+#include "translator/ArmTypes.hpp"
 #include "utils/DisassemblyException.hpp"
 
 namespace Disassembler {
@@ -89,6 +90,10 @@ const std::string& RInstruction::toString() {
     }
 
     return this->printOut;
+}
+
+std::vector<Translator::ArmInstruction>
+RInstruction::toArm() {  // TODO implement
 }
 
 IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -263,6 +268,10 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
+std::vector<Translator::ArmInstruction>
+IInstruction::toArm() {  // TODO implement
+}
+
 SInstruction::SInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
     this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
     this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
@@ -312,6 +321,10 @@ const std::string& SInstruction::toString() {
         "[0:" + std::to_string(upper) + "]";
 
     return this->printOut;
+}
+
+std::vector<Translator::ArmInstruction>
+SInstruction::toArm() {  // TODO implement
 }
 
 BInstruction::BInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -386,6 +399,10 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
+std::vector<Translator::ArmInstruction>
+BInstruction::toArm() {  // TODO implement
+}
+
 UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
     : RiscvInstruction(op), addr(addr) {
     this->instr = (op == Opcode::LUI) ? Operator::lui : Operator::auipc;
@@ -410,6 +427,10 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
+std::vector<Translator::ArmInstruction>
+UInstruction::toArm() {  // TODO implement
+}
+
 JInstruction::JInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
     this->instr = Operator::jal;
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
@@ -430,6 +451,10 @@ const std::string& JInstruction::toString() {
     return this->printOut;
 }
 
+std::vector<Translator::ArmInstruction>
+JInstruction::toArm() {  // TODO implement
+}
+
 const std::string& PseudoLoadInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
@@ -443,6 +468,10 @@ const std::string& PseudoLoadInstruction::toString() {
     }
 
     return this->printOut;
+}
+
+std::vector<Translator::ArmInstruction>
+PseudoLoadInstruction::toArm() {  // TODO implement
 }
 
 const std::string& PseudoStoreInstruction::toString() {
@@ -461,12 +490,19 @@ const std::string& PseudoStoreInstruction::toString() {
     return this->printOut;
 }
 
+std::vector<Translator::ArmInstruction>
+PseudoStoreInstruction::toArm() {  // TODO implement
+}
+
 const std::string& EntryPoint::toString() {
     if (this->printOut != "") return this->printOut;
 
     printOut = "\n" + name + ":";
 
     return printOut;
+}
+
+std::vector<Translator::ArmInstruction> EntryPoint::toArm() {  // TODO implement
 }
 
 const std::string& JInstructionEntry::toString() {
@@ -478,6 +514,10 @@ const std::string& JInstructionEntry::toString() {
                                 " = PC+$; PC = &" + entryPoint;
 
     return this->printOut;
+}
+
+std::vector<Translator::ArmInstruction>
+JInstructionEntry::toArm() {  // TODO implement
 }
 
 const std::string& BInstructionEntry::toString() {
@@ -515,5 +555,9 @@ const std::string& BInstructionEntry::toString() {
                      entryPoint;
 
     return this->printOut;
+}
+
+std::vector<Translator::ArmInstruction>
+BInstructionEntry::toArm() {  // TODO implement
 }
 }  // namespace Disassembler
