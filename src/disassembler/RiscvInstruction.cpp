@@ -94,6 +94,47 @@ const std::string& RInstruction::toString() {
 
 std::vector<Translator::ArmInstruction>
 RInstruction::toArm() {  // TODO implement
+
+    Translator::Register wd = static_cast<Translator::Register>(rd);
+    Translator::Register wn = static_cast<Translator::Register>(rs1);
+    Translator::Register wm = static_cast<Translator::Register>(rs2);
+
+    switch (instr) {
+        case Disassembler::Operator::add:
+            return {Translator::RRRInstruction(Translator::Operator::add, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::sub:
+            return {Translator::RRRInstruction(Translator::Operator::sub, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::Xor:
+            return {Translator::RRRInstruction(Translator::Operator::eor, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::Or:
+            return {Translator::RRRInstruction(Translator::Operator::orr, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::And:
+            return {Translator::RRRInstruction(Translator::Operator::And, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::sll:
+            return {Translator::RRRInstruction(Translator::Operator::lsl, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::srl:
+            return {Translator::RRRInstruction(Translator::Operator::lsr, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::sra:
+            return {Translator::RRRInstruction(Translator::Operator::asr, wd,
+                                               wn, wm)};
+        case Disassembler::Operator::slt:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
+                Translator::RRInstruction(Translator::Operator::cset, wd,
+                                          Translator::Register::lt)};
+        case Disassembler::Operator::sltu:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
+                Translator::RRInstruction(Translator::Operator::cset, wd,
+                                          Translator::Register::lo)};
+    }
 }
 
 IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {

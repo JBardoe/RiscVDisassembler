@@ -29,8 +29,7 @@ asr
 */
 class RRRInstruction : public virtual ArmInstruction {
    public:
-    RRRInstruction(Operator op, Register wd, Register wn, Register wm,
-                   bool shift)
+    RRRInstruction(Operator op, Register wd, Register wn, Register wm)
         : ArmInstruction(op), wd(wd), wn(wn), wm(wm), shift(shift) {}
 
     const std::string& toString() override;
