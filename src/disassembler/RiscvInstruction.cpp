@@ -507,8 +507,16 @@ const std::string& JInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-JInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> JInstruction::toArm() {
+    if (rd == Register::ra) {
+        return {Translator::BIInstruction(Translator::Operator::bl, imm)};
+    } else if (rd == Register::zero) {
+        return {Translator::BIInstruction(Translator::Operator::b, imm)};
+    }
+
+    return {Translator::RIInstruction(Translator::Operator::adr,
+                                      static_cast<Translator::Register>(rd), 8),
+            Translator::BIInstruction(Translator::Operator::b, imm)};
 }
 
 const std::string& PseudoLoadInstruction::toString() {
@@ -572,8 +580,17 @@ const std::string& JInstructionEntry::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-JInstructionEntry::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> JInstructionEntry::toArm() {
+    if (rd == Register::ra) {
+        return {
+            Translator::BLInstruction(Translator::Operator::bl, entryPoint)};
+    } else if (rd == Register::zero) {
+        return {Translator::BLInstruction(Translator::Operator::b, entryPoint)};
+    }
+
+    return {Translator::RIInstruction(Translator::Operator::adr,
+                                      static_cast<Translator::Register>(rd), 8),
+            Translator::BLInstruction(Translator::Operator::b, entryPoint)};
 }
 
 const std::string& BInstructionEntry::toString() {
