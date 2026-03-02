@@ -309,8 +309,84 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-IInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> IInstruction::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rd);
+    Translator::Register wn = static_cast<Translator::Register>(rs1);
+
+    switch (instr) {
+        case Operator::addi:
+            return {Translator::RRIInstruction(Translator::Operator::add, wd,
+                                               wn, imm, false)};
+        case Operator::xori:
+            return {Translator::RRIInstruction(Translator::Operator::eor, wd,
+                                               wn, imm, false)};
+        case Operator::ori:
+            return {Translator::RRIInstruction(Translator::Operator::orr, wd,
+                                               wn, imm, false)};
+        case Operator::andi:
+            return {Translator::RRIInstruction(Translator::Operator::And, wd,
+                                               wn, imm, false)};
+        case Operator::slli:
+            return {Translator::RRIInstruction(Translator::Operator::lsl, wd,
+                                               wn, imm, false)};
+        case Operator::srli:
+            return {Translator::RRIInstruction(Translator::Operator::lsr, wd,
+                                               wn, imm, false)};
+        case Operator::srai:
+            return {Translator::RRIInstruction(Translator::Operator::asr, wd,
+                                               wn, imm, false)};
+        case Operator::slti:
+            return {
+                Translator::RIInstruction(Translator::Operator::cmp, wn, imm),
+                Translator::RRInstruction(Translator::Operator::cset, wd,
+                                          Translator::Register::lt)};
+        case Operator::sltiu:
+            return {
+                Translator::RIInstruction(Translator::Operator::cmp, wn, imm),
+                Translator::RRInstruction(Translator::Operator::cset, wd,
+                                          Translator::Register::lo)};
+        case Operator::lb:
+            return {Translator::RRIInstruction(Translator::Operator::ldrsb, wd,
+                                               wn, imm, false)};
+        case Operator::lh:
+            return {Translator::RRIInstruction(Translator::Operator::ldrsh, wd,
+                                               wn, imm, false)};
+        case Operator::lw:
+            return {Translator::RRIInstruction(Translator::Operator::ldrsw, wd,
+                                               wn, imm, false)};
+        case Operator::lbu:
+            return {Translator::RRIInstruction(Translator::Operator::ldrb, wd,
+                                               wn, imm, false)};
+        case Operator::lhu:
+            return {Translator::RRIInstruction(Translator::Operator::ldrh, wd,
+                                               wn, imm, false)};
+        case Operator::ecall:
+            return {Translator::EInstruction(Translator::Operator::svc)};
+        case Operator::ebreak:
+            return {Translator::EInstruction(Translator::Operator::brk)};
+    }
+
+    // jalr
+    if (rd == Register::ra) {
+        return {Translator::RRIInstruction(Translator::Operator::add,
+                                           Translator::Register::w15, wn, imm,
+                                           false),
+                Translator::BRInstruction(Translator::Operator::blr,
+                                          Translator::Register::w15)};
+    } else if (rd == Register::zero) {
+        return {Translator::RRIInstruction(Translator::Operator::add,
+                                           Translator::Register::w15, wn, imm,
+                                           false),
+                Translator::BRInstruction(Translator::Operator::br,
+                                          Translator::Register::w15)};
+    }
+
+    return {
+        Translator::RRIInstruction(Translator::Operator::add,
+                                   Translator::Register::w15, wn, imm, false),
+        Translator::RIInstruction(Translator::Operator::adr, wd, 8),
+        Translator::BRInstruction(Translator::Operator::br,
+                                  Translator::Register::w15)};
 }
 
 SInstruction::SInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
