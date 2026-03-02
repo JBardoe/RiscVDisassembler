@@ -8,6 +8,7 @@
 #include "disassembler/Disassembler.hpp"
 #include "parser/ELFFile.hpp"
 #include "parser/Parser.hpp"
+#include "translator/ArmFile.hpp"
 
 int main() {
     while (true) {
@@ -20,10 +21,21 @@ int main() {
 
         system("clear");
 
-        auto asmFile =
+        auto riscFile =
             Disassembler::disassemble("data/test/elf/" + fileName + ".elf");
 
-        std::cout << asmFile->toString();
+        std::cout << "<<<<<<<<<<<<<<<<RISC-V File>>>>>>>>>>>>>>>>\n";
+
+        std::cout << riscFile->toString();
+
+        std::cout << "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
+                     "ARM64 File>>>>>>>>>>>>>>>>\n";
+
+        auto armFile = Translator::ArmFile(riscFile);
+
+        std::cout << armFile.toString();
+
+        std::cout << "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\n";
     }
 
     return 0;
