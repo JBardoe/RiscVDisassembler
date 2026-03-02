@@ -92,9 +92,7 @@ const std::string& RInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-RInstruction::toArm() {  // TODO implement
-
+std::vector<Translator::ArmInstruction> RInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rd);
     Translator::Register wn = static_cast<Translator::Register>(rs1);
     Translator::Register wm = static_cast<Translator::Register>(rs2);
@@ -135,6 +133,8 @@ RInstruction::toArm() {  // TODO implement
                 Translator::RRInstruction(Translator::Operator::cset, wd,
                                           Translator::Register::lo)};
     }
+
+    return {};
 }
 
 IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -364,8 +364,23 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-SInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> SInstruction::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rs1);
+    Translator::Register wn = static_cast<Translator::Register>(rs2);
+
+    switch (instr) {
+        case Operator::sb:
+            return {Translator::RRIInstruction(Translator::Operator::strb, wd,
+                                               wn, imm, false)};
+        case Operator::sh:
+            return {Translator::RRIInstruction(Translator::Operator::strh, wd,
+                                               wn, imm, false)};
+        case Operator::sw:
+            return {Translator::RRIInstruction(Translator::Operator::str, wd,
+                                               wn, imm, false)};
+    }
+
+    return {};
 }
 
 BInstruction::BInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
