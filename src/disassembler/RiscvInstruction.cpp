@@ -455,8 +455,38 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-BInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> BInstruction::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rs1);
+    Translator::Register wn = static_cast<Translator::Register>(rs2);
+
+    switch (instr) {
+        case Operator::beq:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::beq, imm)};
+        case Operator::bne:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::bne, imm)};
+        case Operator::blt:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::blt, imm)};
+        case Operator::bge:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::bge, imm)};
+        case Operator::bltu:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::blo, imm)};
+        case Operator::bgeu:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BIInstruction(Translator::Operator::bhs, imm)};
+    }
+
+    return {};
 }
 
 UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
@@ -674,7 +704,43 @@ const std::string& BInstructionEntry::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-BInstructionEntry::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> BInstructionEntry::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rs1);
+    Translator::Register wn = static_cast<Translator::Register>(rs2);
+
+    switch (instr) {
+        case Operator::beq:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::beq,
+                                          entryPoint)};
+        case Operator::bne:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::bne,
+                                          entryPoint)};
+        case Operator::blt:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::blt,
+                                          entryPoint)};
+        case Operator::bge:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::bge,
+                                          entryPoint)};
+        case Operator::bltu:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::blo,
+                                          entryPoint)};
+        case Operator::bgeu:
+            return {
+                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
+                Translator::BLInstruction(Translator::Operator::bhs,
+                                          entryPoint)};
+    }
+
+    return {};
 }
 }  // namespace Disassembler
