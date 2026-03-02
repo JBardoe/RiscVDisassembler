@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "disassembler/RiscvTypes.hpp"
 #include "translator/ArmTypes.hpp"
 #include "utils/DisassemblyException.hpp"
 
@@ -98,40 +97,42 @@ std::vector<Translator::ArmInstruction> RInstruction::toArm() {
     Translator::Register wm = static_cast<Translator::Register>(rs2);
 
     switch (instr) {
-        case Disassembler::Operator::add:
+        case Operator::add:
             return {Translator::RRRInstruction(Translator::Operator::add, wd,
                                                wn, wm)};
-        case Disassembler::Operator::sub:
+        case Operator::sub:
             return {Translator::RRRInstruction(Translator::Operator::sub, wd,
                                                wn, wm)};
-        case Disassembler::Operator::Xor:
+        case Operator::Xor:
             return {Translator::RRRInstruction(Translator::Operator::eor, wd,
                                                wn, wm)};
-        case Disassembler::Operator::Or:
+        case Operator::Or:
             return {Translator::RRRInstruction(Translator::Operator::orr, wd,
                                                wn, wm)};
-        case Disassembler::Operator::And:
+        case Operator::And:
             return {Translator::RRRInstruction(Translator::Operator::And, wd,
                                                wn, wm)};
-        case Disassembler::Operator::sll:
+        case Operator::sll:
             return {Translator::RRRInstruction(Translator::Operator::lsl, wd,
                                                wn, wm)};
-        case Disassembler::Operator::srl:
+        case Operator::srl:
             return {Translator::RRRInstruction(Translator::Operator::lsr, wd,
                                                wn, wm)};
-        case Disassembler::Operator::sra:
+        case Operator::sra:
             return {Translator::RRRInstruction(Translator::Operator::asr, wd,
                                                wn, wm)};
-        case Disassembler::Operator::slt:
+        case Operator::slt:
             return {
                 Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
                 Translator::RRInstruction(Translator::Operator::cset, wd,
                                           Translator::Register::lt)};
-        case Disassembler::Operator::sltu:
+        case Operator::sltu:
             return {
                 Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
                 Translator::RRInstruction(Translator::Operator::cset, wd,
                                           Translator::Register::lo)};
+        default:
+            break;
     }
 
     return {};
@@ -364,6 +365,8 @@ std::vector<Translator::ArmInstruction> IInstruction::toArm() {
             return {Translator::EInstruction(Translator::Operator::svc)};
         case Operator::ebreak:
             return {Translator::EInstruction(Translator::Operator::brk)};
+        default:
+            break;
     }
 
     // jalr
@@ -454,6 +457,8 @@ std::vector<Translator::ArmInstruction> SInstruction::toArm() {
         case Operator::sw:
             return {Translator::RRIInstruction(Translator::Operator::str, wd,
                                                wn, imm, false)};
+        default:
+            break;
     }
 
     return {};
@@ -560,6 +565,8 @@ std::vector<Translator::ArmInstruction> BInstruction::toArm() {
             return {
                 Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
                 Translator::BIInstruction(Translator::Operator::bhs, imm)};
+        default:
+            break;
     }
 
     return {};
@@ -668,6 +675,8 @@ std::vector<Translator::ArmInstruction> PseudoLoadInstruction::toArm() {
         case Operator::lw:
             return {Translator::RSInstruction(Translator::Operator::ldrsw, wd,
                                               symbol)};
+        default:
+            break;
     }
 
     return {};
@@ -702,6 +711,8 @@ std::vector<Translator::ArmInstruction> PseudoStoreInstruction::toArm() {
         case Operator::sw:
             return {Translator::RSInstruction(Translator::Operator::str, wt,
                                               symbol)};
+        default:
+            break;
     }
 
     return {};
@@ -815,6 +826,8 @@ std::vector<Translator::ArmInstruction> BInstructionEntry::toArm() {
                 Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
                 Translator::BLInstruction(Translator::Operator::bhs,
                                           entryPoint)};
+        default:
+            break;
     }
 
     return {};

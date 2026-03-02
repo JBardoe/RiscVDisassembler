@@ -5,11 +5,8 @@ const std::string& RRRInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", " +
-               to_string(wn) + ", " + to_string(wm);
-
-    if (shift) printOut += ", lsl #12";
-
-    printOut += "\t// " + to_string(wd) + " = " + to_string(wn) + " ";
+               to_string(wn) + ", " + to_string(wm) + "\t// " + to_string(wd) +
+               " = " + to_string(wn) + " ";
 
     switch (instr) {
         case Operator::add:
@@ -37,11 +34,10 @@ const std::string& RRRInstruction::toString() {
             printOut += ">> ";
             break;
         default:
+            break;
     }
 
     printOut += to_string(wm);
-
-    if (shift) printOut += " << #12";
 
     return printOut;
 }
@@ -136,6 +132,8 @@ const std::string& RRIInstruction::toString() {
                         suffix + std::to_string(imm);
 
             break;
+        default:
+            break;
     }
 
     return printOut;
@@ -190,6 +188,7 @@ const std::string& BIInstruction::toString() {
             printOut += "and set lr to PC+4";
             break;
         default:
+            break;
     }
 
     return printOut;
@@ -225,6 +224,7 @@ const std::string& BLInstruction::toString() {
             printOut += "and set lr to PC+4";
             break;
         default:
+            break;
     }
 
     return printOut;

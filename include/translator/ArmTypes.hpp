@@ -1,5 +1,5 @@
-#ifndef AARCHTYPES_HPP
-#define ARRCHTYPES_HPP
+#ifndef ARMTYPES_HPP
+#define ARMTYPES_HPP
 
 #include <string>
 

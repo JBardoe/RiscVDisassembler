@@ -13,8 +13,8 @@ class ArmInstruction {
 
     virtual const std::string& toString() { return this->printOut; };
 
-    std::string printOut;
     Operator instr;
+    std::string printOut;
 };
 
 /*
@@ -30,14 +30,13 @@ asr
 class RRRInstruction : public virtual ArmInstruction {
    public:
     RRRInstruction(Operator op, Register wd, Register wn, Register wm)
-        : ArmInstruction(op), wd(wd), wn(wn), wm(wm), shift(shift) {}
+        : ArmInstruction(op), wd(wd), wn(wn), wm(wm) {}
 
     const std::string& toString() override;
 
     Register wd;
     Register wn;
     Register wm;
-    bool shift;
 };
 
 /*
