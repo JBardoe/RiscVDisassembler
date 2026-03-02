@@ -483,8 +483,20 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-UInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> UInstruction::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rd);
+
+    if (instr == Operator::lui) {
+        return {
+            Translator::RIInstruction(Translator::Operator::movz, wd, 0),
+            Translator::RRIInstruction(Translator::Operator::add, wd, wd, imm,
+                                       true),
+        };
+    }
+
+    return {Translator::RIInstruction(Translator::Operator::adr, wd, 0),
+            Translator::RRIInstruction(Translator::Operator::add, wd, wd, imm,
+                                       true)};
 }
 
 JInstruction::JInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -534,8 +546,25 @@ const std::string& PseudoLoadInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-PseudoLoadInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> PseudoLoadInstruction::toArm() {
+    Translator::Register wd = static_cast<Translator::Register>(rd);
+
+    switch (instr) {
+        case Operator::la:
+            return {Translator::RSInstruction(Translator::Operator::adr, wd,
+                                              symbol)};
+        case Operator::lb:
+            return {Translator::RSInstruction(Translator::Operator::ldrsb, wd,
+                                              symbol)};
+        case Operator::lh:
+            return {Translator::RSInstruction(Translator::Operator::ldrsh, wd,
+                                              symbol)};
+        case Operator::lw:
+            return {Translator::RSInstruction(Translator::Operator::ldrsw, wd,
+                                              symbol)};
+    }
+
+    return {};
 }
 
 const std::string& PseudoStoreInstruction::toString() {
@@ -554,8 +583,22 @@ const std::string& PseudoStoreInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction>
-PseudoStoreInstruction::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> PseudoStoreInstruction::toArm() {
+    Translator::Register wt = static_cast<Translator::Register>(rd);
+
+    switch (instr) {
+        case Operator::sb:
+            return {Translator::RSInstruction(Translator::Operator::strb, wt,
+                                              symbol)};
+        case Operator::sh:
+            return {Translator::RSInstruction(Translator::Operator::strh, wt,
+                                              symbol)};
+        case Operator::sw:
+            return {Translator::RSInstruction(Translator::Operator::str, wt,
+                                              symbol)};
+    }
+
+    return {};
 }
 
 const std::string& EntryPoint::toString() {
@@ -566,7 +609,8 @@ const std::string& EntryPoint::toString() {
     return printOut;
 }
 
-std::vector<Translator::ArmInstruction> EntryPoint::toArm() {  // TODO implement
+std::vector<Translator::ArmInstruction> EntryPoint::toArm() {
+    return {Translator::EntryPoint(name)};
 }
 
 const std::string& JInstructionEntry::toString() {
