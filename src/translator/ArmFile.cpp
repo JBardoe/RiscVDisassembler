@@ -6,6 +6,7 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     : printOut("") {  // TODO implement
     // TODO translate relqtive jumps and branches into offsets
     // TODO eliminate gp and tp
+    // TODO deal with jalr when instructions inflate
 }
 
 const std::string& ArmFile::toString() {  // TODO implement

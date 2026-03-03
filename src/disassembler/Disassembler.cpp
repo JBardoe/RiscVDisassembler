@@ -314,9 +314,9 @@ unique_ptr<TextSection> disassembleTextSection(
                               ? 0
                               : textSection->header->address);
 
-        if (entryAddr % 4 != 0 ||
-            entryAddr / 4 > textInstructions.size() - added)
-            continue;
+        if (entryAddr / 4 > textInstructions.size() - added)
+            continue;  // Must be divisible by 4 (enforced in instruction
+                       // constructor)
 
         textInstructions.insert(
             textInstructions.begin() + (entryAddr / 4) + added,
@@ -324,6 +324,11 @@ unique_ptr<TextSection> disassembleTextSection(
         entryPoints.push_back(make_pair(entry.name, entry.binding));
         added++;
     }
+
+    unordered_map<int, string>
+        tmps;  // New entry points created to remove relative jumps/branches
+
+    int tmpCount = 0;
 
     for (size_t i = 0; i < textInstructions.size(); i++) {
         if (textInstructions[i]->instr == Operator::jal) {
@@ -338,6 +343,21 @@ unique_ptr<TextSection> disassembleTextSection(
                     dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
                 textInstructions[i] = move(
                     make_unique<JInstructionEntry>(castedJ, castedE->name));
+            } else if (auto it = tmps.find(offset); it != tmps.end()) {
+                textInstructions[i] =
+                    move(make_unique<JInstructionEntry>(castedJ, it->second));
+            } else {
+                while (asmFile->getSymbolName(
+                           "L.diss." + std::to_string(tmpCount)) != nullopt)
+                    tmpCount++;  // Unlikely to trigger
+
+                tmps.insert({offset, "L.diss." + std::to_string(tmpCount)});
+                entryPoints.push_back(
+                    make_pair("L.diss." + std::to_string(tmpCount),
+                              Assembly::SymbolBinding::LOCAL));
+                textInstructions[i] = move(make_unique<JInstructionEntry>(
+                    castedJ, "L.diss." + std::to_string(tmpCount)));
+                tmpCount++;
             }
         } else if (textInstructions[i]->op == Opcode::B_TYPE) {
             auto* castedB =
@@ -351,8 +371,28 @@ unique_ptr<TextSection> disassembleTextSection(
                     dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
                 textInstructions[i] = move(
                     make_unique<BInstructionEntry>(castedB, castedE->name));
+            } else if (auto it = tmps.find(offset); it != tmps.end()) {
+                textInstructions[i] =
+                    move(make_unique<BInstructionEntry>(castedB, it->second));
+            } else {
+                while (asmFile->getSymbolName(
+                           "L.diss." + std::to_string(tmpCount)) != nullopt)
+                    tmpCount++;  // Unlikely to trigger
+
+                tmps.insert({offset, "L.diss." + std::to_string(tmpCount)});
+                entryPoints.push_back(
+                    make_pair("L.diss." + std::to_string(tmpCount),
+                              Assembly::SymbolBinding::LOCAL));
+                textInstructions[i] = move(make_unique<BInstructionEntry>(
+                    castedB, "L.diss." + std::to_string(tmpCount)));
+                tmpCount++;
             }
         }
+    }
+
+    for (auto tmp : tmps) {
+        textInstructions.insert(textInstructions.begin() + tmp.first,
+                                make_unique<EntryPoint>(tmp.second));
     }
 
     size_t i = 0;

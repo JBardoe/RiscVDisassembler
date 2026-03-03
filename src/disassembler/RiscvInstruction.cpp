@@ -147,6 +147,9 @@ IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
 
     if (this->op == Opcode::JALR) {
         this->instr = Operator::jalr;
+        if (this->imm % 4 != 0) {
+            throw DisassemblyException("Branch offset not divisible by 4");
+        }
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
         this->instr = Operator::ecall;
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {
@@ -497,6 +500,10 @@ BInstruction::BInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
 
     if (this->instr != Operator::bltu && this->instr != Operator::bgeu)
         this->imm = (this->imm << 19) >> 19;
+
+    if (this->imm % 4 != 0) {
+        throw DisassemblyException("Branch offset not divisible by 4");
+    }
 }
 
 const std::string& BInstruction::toString() {
@@ -619,6 +626,10 @@ JInstruction::JInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
                 (((raw >> 20) & 0x1) << 11) | (((raw >> 21) & 0x3FF) << 1);
 
     this->imm = (this->imm << 11) >> 11;
+
+    if (this->imm % 4 != 0) {
+        throw DisassemblyException("Jump offset not divisible by 4");
+    }
 }
 
 const std::string& JInstruction::toString() {
