@@ -9,9 +9,14 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 }
 
 const std::string& ArmFile::toString() {  // TODO implement
-    if (printOut != "") return printOut;
+    if (this->printOut != "") return this->printOut;
 
-    return "";
+    for (auto& sec : this->sections) {
+        printOut += sec.second->toString();
+        printOut += "\n";
+    }
+
+    return this->printOut;
 }
 }  // namespace Translator
 

@@ -2,8 +2,11 @@
 #define ARMFILE_HPP
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "disassembler/RiscvFile.hpp"
+#include "translator/ArmSection.hpp"
+
 namespace Translator {
 
 class ArmFile {  // TODO implement
@@ -14,6 +17,7 @@ class ArmFile {  // TODO implement
 
    private:
     std::string printOut;
+    std::unordered_map<std::string, std::unique_ptr<ArmSection>> sections;
 };
 
 }  // namespace Translator

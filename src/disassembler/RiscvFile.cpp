@@ -4,7 +4,7 @@ namespace Disassembler {
 const std::string& RiscvFile::toString() {
     if (this->printOut != "") return this->printOut;
 
-    printOut += symbolTable.toString();
+    printOut += symbolTable.toString();  // TODO remove?
 
     for (auto& sec : this->sections) {
         printOut += sec.second->toString();
