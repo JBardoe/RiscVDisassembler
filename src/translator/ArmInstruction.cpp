@@ -63,8 +63,6 @@ const std::string& RRIInstruction::toString() {
 
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
 
-    printOut += "\t// ";
-
     std::string suffix = "";
 
     switch (instr) {
@@ -198,7 +196,7 @@ const std::string& BLInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut =
-        "\t" + to_string(instr) + " " + label + "\t// branch to " + label + " ";
+        "\t" + to_string(instr) + " " + label + "\t// Branch to " + label + " ";
 
     switch (instr) {
         case Operator::beq:

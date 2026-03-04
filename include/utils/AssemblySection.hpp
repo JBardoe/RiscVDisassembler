@@ -41,6 +41,8 @@ class DataSection : public virtual AssemblySection {
         std::string name);
     std::optional<std::reference_wrapper<const Variable>> getVar(uint32_t addr);
 
+    bool empty() { return addrLookup.empty(); }
+
     const std::string& toString() override;
 
    protected:

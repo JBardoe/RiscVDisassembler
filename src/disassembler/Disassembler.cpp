@@ -467,15 +467,16 @@ unique_ptr<RiscvFile> disassemble(const string& filepath) {
 
     disassembleSymbolTable(asmFile, elffile, sections);
 
-    if (auto dataIt = sections.find(".data"); dataIt != sections.end()) {
+    if (auto dataIt = sections.find(".data");
+        dataIt != sections.end() && dataIt->second->header->size != 0) {
         auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
                                                   elffile->isLittleEndian);
-        asmFile->addSection(".data", dataSection);
+        if (!dataSection->empty()) asmFile->addSection(".data", dataSection);
     }
 
     if (auto bssIt = sections.find(".bss"); bssIt != sections.end()) {
         auto bssSection = disassembleBSSSection(asmFile, (*bssIt).second);
-        asmFile->addSection(".bss", bssSection);
+        if (!bssSection->empty()) asmFile->addSection(".bss", bssSection);
     }
 
     auto textIt = sections.find(".text");
