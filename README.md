@@ -1,4 +1,14 @@
+Tool for disassembling RISC-V and porting it to ARM64.
+
+This project aims to provide a tool to assist with porting software from RISC-V to ARM64 when the source code is not available. It acts as a potential performance enhancing alternative to emulators and dynamic binary translation tools, by removing the overhead they require and allowing optimisation of the disassembled code. Furthermore, the disassembled code can also be ported to other ISAs easily.
+
+# Disassembler
+
+TODO
+
 # Translator
+
+TODO
 
 ## Register Mapping for Translation (RV32I -> AArch64)
 
