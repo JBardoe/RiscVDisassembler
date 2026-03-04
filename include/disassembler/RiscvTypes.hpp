@@ -177,8 +177,17 @@ typedef struct Symbol {
     std::string sectionName;  // Name of the section to which the symbol is tied
 } Symbol;
 
+/**
+ * toString for the symbol enum
+ *
+ * @param s symbol enum
+ * @return string equivalent
+ */
 std::string to_string(Symbol s);
 
+/**
+ * Represents possible type of the file (e.g. executable)
+ */
 enum class FileType : int {
     REL = 1,
     EXEC = 2,

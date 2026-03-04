@@ -21,7 +21,7 @@ class RiscvSection : public virtual Assembly::AssemblySection {
 };
 
 /**
- * Represents a text section in an assembly file
+ * Represents a text section in a RISC-V file
  */
 class TextSection : public virtual RiscvSection {
    public:
@@ -51,7 +51,8 @@ class TextSection : public virtual RiscvSection {
    private:
     std::vector<std::unique_ptr<RiscvInstruction>>
         instructions;  // Vector of the instructions in the section
-    std::vector<std::pair<std::string, Assembly::SymbolBinding>> entryPoints;
+    std::vector<std::pair<std::string, Assembly::SymbolBinding>>
+        entryPoints;  // Vector of entry points in the .text section
 };
 
 }  // namespace Disassembler
