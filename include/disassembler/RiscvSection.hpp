@@ -39,7 +39,7 @@ class TextSection : public virtual RiscvSection {
      */
     const std::string& toString() override;
 
-    const std::vector<std::unique_ptr<RiscvInstruction>> getInstructions() {
+    const std::vector<std::unique_ptr<RiscvInstruction>>& getInstructions() {
         return instructions;
     }
 

@@ -91,51 +91,64 @@ const std::string& RInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> RInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> RInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rd);
     Translator::Register wn = static_cast<Translator::Register>(rs1);
     Translator::Register wm = static_cast<Translator::Register>(rs2);
 
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     switch (instr) {
         case Operator::add:
-            return {Translator::RRRInstruction(Translator::Operator::add, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::add, wd, wn, wm));
+            break;
         case Operator::sub:
-            return {Translator::RRRInstruction(Translator::Operator::sub, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::sub, wd, wn, wm));
+            break;
         case Operator::Xor:
-            return {Translator::RRRInstruction(Translator::Operator::eor, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::eor, wd, wn, wm));
+            break;
         case Operator::Or:
-            return {Translator::RRRInstruction(Translator::Operator::orr, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::orr, wd, wn, wm));
+            break;
         case Operator::And:
-            return {Translator::RRRInstruction(Translator::Operator::And, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::And, wd, wn, wm));
+            break;
         case Operator::sll:
-            return {Translator::RRRInstruction(Translator::Operator::lsl, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::lsl, wd, wn, wm));
+            break;
         case Operator::srl:
-            return {Translator::RRRInstruction(Translator::Operator::lsr, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::lsr, wd, wn, wm));
+            break;
         case Operator::sra:
-            return {Translator::RRRInstruction(Translator::Operator::asr, wd,
-                                               wn, wm)};
+            ret.push_back(std::make_unique<Translator::RRRInstruction>(
+                Translator::Operator::asr, wd, wn, wm));
+            break;
         case Operator::slt:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
-                Translator::RRInstruction(Translator::Operator::cset, wd,
-                                          Translator::Register::lt)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wn, wm));
+
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cset, wd, Translator::Register::lt));
+            break;
         case Operator::sltu:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wn, wm),
-                Translator::RRInstruction(Translator::Operator::cset, wd,
-                                          Translator::Register::lo)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wn, wm));
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cset, wd, Translator::Register::lo));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 
 IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -313,86 +326,112 @@ const std::string& IInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> IInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> IInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rd);
     Translator::Register wn = static_cast<Translator::Register>(rs1);
 
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     switch (instr) {
         case Operator::addi:
-            return {Translator::RRIInstruction(Translator::Operator::add, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::add, wd, wn, imm, false));
+            break;
         case Operator::xori:
-            return {Translator::RRIInstruction(Translator::Operator::eor, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::eor, wd, wn, imm, false));
+            break;
         case Operator::ori:
-            return {Translator::RRIInstruction(Translator::Operator::orr, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::orr, wd, wn, imm, false));
+            break;
         case Operator::andi:
-            return {Translator::RRIInstruction(Translator::Operator::And, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::And, wd, wn, imm, false));
+            break;
         case Operator::slli:
-            return {Translator::RRIInstruction(Translator::Operator::lsl, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::lsl, wd, wn, imm, false));
+            break;
         case Operator::srli:
-            return {Translator::RRIInstruction(Translator::Operator::lsr, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::lsr, wd, wn, imm, false));
+            break;
         case Operator::srai:
-            return {Translator::RRIInstruction(Translator::Operator::asr, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::asr, wd, wn, imm, false));
+            break;
         case Operator::slti:
-            return {
-                Translator::RIInstruction(Translator::Operator::cmp, wn, imm),
-                Translator::RRInstruction(Translator::Operator::cset, wd,
-                                          Translator::Register::lt)};
+            ret.push_back(std::make_unique<Translator::RIInstruction>(
+                Translator::Operator::cmp, wn, imm));
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cset, wd, Translator::Register::lt));
+            break;
         case Operator::sltiu:
-            return {
-                Translator::RIInstruction(Translator::Operator::cmp, wn, imm),
-                Translator::RRInstruction(Translator::Operator::cset, wd,
-                                          Translator::Register::lo)};
+            ret.push_back(std::make_unique<Translator::RIInstruction>(
+                Translator::Operator::cmp, wn, imm));
+
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cset, wd, Translator::Register::lo));
+            break;
         case Operator::lb:
-            return {Translator::RRIInstruction(Translator::Operator::ldrsb, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::ldrsb, wd, wn, imm, false));
+            break;
         case Operator::lh:
-            return {Translator::RRIInstruction(Translator::Operator::ldrsh, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::ldrsh, wd, wn, imm, false));
+            break;
         case Operator::lw:
-            return {Translator::RRIInstruction(Translator::Operator::ldrsw, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::ldrsw, wd, wn, imm, false));
+            break;
         case Operator::lbu:
-            return {Translator::RRIInstruction(Translator::Operator::ldrb, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::ldrb, wd, wn, imm, false));
+            break;
         case Operator::lhu:
-            return {Translator::RRIInstruction(Translator::Operator::ldrh, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::ldrh, wd, wn, imm, false));
+            break;
         case Operator::ecall:
-            return {Translator::EInstruction(Translator::Operator::svc)};
+            ret.push_back(std::make_unique<Translator::EInstruction>(
+                Translator::Operator::svc));
+            break;
         case Operator::ebreak:
-            return {Translator::EInstruction(Translator::Operator::brk)};
+            ret.push_back(std::make_unique<Translator::EInstruction>(
+                Translator::Operator::brk));
+            break;
         default:
             break;
     }
 
+    if (!ret.empty()) return ret;
+
     // jalr
     if (rd == Register::ra) {
-        return {Translator::RRIInstruction(Translator::Operator::add,
-                                           Translator::Register::w15, wn, imm,
-                                           false),
-                Translator::BRInstruction(Translator::Operator::blr,
-                                          Translator::Register::w15)};
+        ret.push_back(std::make_unique<Translator::RRIInstruction>(
+            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            false));
+        ret.push_back(std::make_unique<Translator::BRInstruction>(
+            Translator::Operator::blr, Translator::Register::w15));
     } else if (rd == Register::zero) {
-        return {Translator::RRIInstruction(Translator::Operator::add,
-                                           Translator::Register::w15, wn, imm,
-                                           false),
-                Translator::BRInstruction(Translator::Operator::br,
-                                          Translator::Register::w15)};
+        ret.push_back(std::make_unique<Translator::RRIInstruction>(
+            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            false));
+        ret.push_back(std::make_unique<Translator::BRInstruction>(
+            Translator::Operator::br, Translator::Register::w15));
+    } else {
+        ret.push_back(std::make_unique<Translator::RRIInstruction>(
+            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            false));
+        ret.push_back(std::make_unique<Translator::RIInstruction>(
+            Translator::Operator::adr, wd, 8));
+        ret.push_back(std::make_unique<Translator::BRInstruction>(
+            Translator::Operator::br, Translator::Register::w15));
     }
 
-    return {
-        Translator::RRIInstruction(Translator::Operator::add,
-                                   Translator::Register::w15, wn, imm, false),
-        Translator::RIInstruction(Translator::Operator::adr, wd, 8),
-        Translator::BRInstruction(Translator::Operator::br,
-                                  Translator::Register::w15)};
+    return ret;
 }
 
 SInstruction::SInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -446,25 +485,30 @@ const std::string& SInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> SInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> SInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rs1);
     Translator::Register wn = static_cast<Translator::Register>(rs2);
 
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     switch (instr) {
         case Operator::sb:
-            return {Translator::RRIInstruction(Translator::Operator::strb, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::strb, wd, wn, imm, false));
+            break;
         case Operator::sh:
-            return {Translator::RRIInstruction(Translator::Operator::strh, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::strh, wd, wn, imm, false));
+            break;
         case Operator::sw:
-            return {Translator::RRIInstruction(Translator::Operator::str, wd,
-                                               wn, imm, false)};
+            ret.push_back(std::make_unique<Translator::RRIInstruction>(
+                Translator::Operator::str, wd, wn, imm, false));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 
 BInstruction::BInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -543,40 +587,54 @@ const std::string& BInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> BInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> BInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rs1);
     Translator::Register wn = static_cast<Translator::Register>(rs2);
 
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     switch (instr) {
         case Operator::beq:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::beq, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::beq, imm));
+            break;
         case Operator::bne:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::bne, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::bne, imm));
+            break;
         case Operator::blt:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::blt, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::blt, imm));
+            break;
         case Operator::bge:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::bge, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::bge, imm));
+            break;
         case Operator::bltu:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::blo, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::blo, imm));
+            break;
         case Operator::bgeu:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BIInstruction(Translator::Operator::bhs, imm)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BIInstruction>(
+                Translator::Operator::bhs, imm));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 
 UInstruction::UInstruction(Opcode op, uint32_t raw, uint32_t addr)
@@ -603,20 +661,26 @@ const std::string& UInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> UInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> UInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rd);
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
 
     if (instr == Operator::lui) {
-        return {
-            Translator::RIInstruction(Translator::Operator::movz, wd, 0),
-            Translator::RRIInstruction(Translator::Operator::add, wd, wd, imm,
-                                       true),
-        };
+        ret.push_back(std::make_unique<Translator::RIInstruction>(
+            Translator::Operator::movz, wd, 0));
+
+        ret.push_back(std::make_unique<Translator::RRIInstruction>(
+            Translator::Operator::add, wd, wd, imm, true));
+
+    } else {
+        ret.push_back(std::make_unique<Translator::RIInstruction>(
+            Translator::Operator::adr, wd, 0));
+
+        ret.push_back(std::make_unique<Translator::RRIInstruction>(
+            Translator::Operator::add, wd, wd, imm, true));
     }
 
-    return {Translator::RIInstruction(Translator::Operator::adr, wd, 0),
-            Translator::RRIInstruction(Translator::Operator::add, wd, wd, imm,
-                                       true)};
+    return ret;
 }
 
 JInstruction::JInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
@@ -643,16 +707,24 @@ const std::string& JInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> JInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>> JInstruction::toArm() {
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     if (rd == Register::ra) {
-        return {Translator::BIInstruction(Translator::Operator::bl, imm)};
+        ret.push_back(std::make_unique<Translator::BIInstruction>(
+            Translator::Operator::bl, imm));
     } else if (rd == Register::zero) {
-        return {Translator::BIInstruction(Translator::Operator::b, imm)};
+        ret.push_back(std::make_unique<Translator::BIInstruction>(
+            Translator::Operator::b, imm));
+    } else {
+        ret.push_back(std::make_unique<Translator::RIInstruction>(
+            Translator::Operator::adr, static_cast<Translator::Register>(rd),
+            8));
+        ret.push_back(std::make_unique<Translator::BIInstruction>(
+            Translator::Operator::b, imm));
     }
 
-    return {Translator::RIInstruction(Translator::Operator::adr,
-                                      static_cast<Translator::Register>(rd), 8),
-            Translator::BIInstruction(Translator::Operator::b, imm)};
+    return ret;
 }
 
 const std::string& PseudoLoadInstruction::toString() {
@@ -670,27 +742,34 @@ const std::string& PseudoLoadInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> PseudoLoadInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>>
+PseudoLoadInstruction::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rd);
+
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
 
     switch (instr) {
         case Operator::la:
-            return {Translator::RSInstruction(Translator::Operator::adr, wd,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::adr, wd, symbol));
+            break;
         case Operator::lb:
-            return {Translator::RSInstruction(Translator::Operator::ldrsb, wd,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::ldrsb, wd, symbol));
+            break;
         case Operator::lh:
-            return {Translator::RSInstruction(Translator::Operator::ldrsh, wd,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::ldrsh, wd, symbol));
+            break;
         case Operator::lw:
-            return {Translator::RSInstruction(Translator::Operator::ldrsw, wd,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::ldrsw, wd, symbol));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 
 const std::string& PseudoStoreInstruction::toString() {
@@ -709,24 +788,29 @@ const std::string& PseudoStoreInstruction::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> PseudoStoreInstruction::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>>
+PseudoStoreInstruction::toArm() {
     Translator::Register wt = static_cast<Translator::Register>(rd);
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
 
     switch (instr) {
         case Operator::sb:
-            return {Translator::RSInstruction(Translator::Operator::strb, wt,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::strb, wt, symbol));
+            break;
         case Operator::sh:
-            return {Translator::RSInstruction(Translator::Operator::strh, wt,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::strh, wt, symbol));
+            break;
         case Operator::sw:
-            return {Translator::RSInstruction(Translator::Operator::str, wt,
-                                              symbol)};
+            ret.push_back(std::make_unique<Translator::RSInstruction>(
+                Translator::Operator::str, wt, symbol));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 
 const std::string& EntryPoint::toString() {
@@ -737,8 +821,10 @@ const std::string& EntryPoint::toString() {
     return printOut;
 }
 
-std::vector<Translator::ArmInstruction> EntryPoint::toArm() {
-    return {Translator::EntryPoint(name)};
+std::vector<std::unique_ptr<Translator::ArmInstruction>> EntryPoint::toArm() {
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+    ret.push_back(std::make_unique<Translator::EntryPoint>(name));
+    return ret;
 }
 
 const std::string& JInstructionEntry::toString() {
@@ -752,17 +838,25 @@ const std::string& JInstructionEntry::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> JInstructionEntry::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>>
+JInstructionEntry::toArm() {
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     if (rd == Register::ra) {
-        return {
-            Translator::BLInstruction(Translator::Operator::bl, entryPoint)};
+        ret.push_back(std::make_unique<Translator::BLInstruction>(
+            Translator::Operator::bl, entryPoint));
     } else if (rd == Register::zero) {
-        return {Translator::BLInstruction(Translator::Operator::b, entryPoint)};
+        ret.push_back(std::make_unique<Translator::BLInstruction>(
+            Translator::Operator::b, entryPoint));
+    } else {
+        ret.push_back(std::make_unique<Translator::RIInstruction>(
+            Translator::Operator::adr, static_cast<Translator::Register>(rd),
+            8));
+        ret.push_back(std::make_unique<Translator::BLInstruction>(
+            Translator::Operator::b, entryPoint));
     }
 
-    return {Translator::RIInstruction(Translator::Operator::adr,
-                                      static_cast<Translator::Register>(rd), 8),
-            Translator::BLInstruction(Translator::Operator::b, entryPoint)};
+    return ret;
 }
 
 const std::string& BInstructionEntry::toString() {
@@ -802,45 +896,54 @@ const std::string& BInstructionEntry::toString() {
     return this->printOut;
 }
 
-std::vector<Translator::ArmInstruction> BInstructionEntry::toArm() {
+std::vector<std::unique_ptr<Translator::ArmInstruction>>
+BInstructionEntry::toArm() {
     Translator::Register wd = static_cast<Translator::Register>(rs1);
     Translator::Register wn = static_cast<Translator::Register>(rs2);
 
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> ret;
+
     switch (instr) {
         case Operator::beq:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::beq,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::beq, entryPoint));
+            break;
         case Operator::bne:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::bne,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::bne, entryPoint));
+            break;
         case Operator::blt:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::blt,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::blt, entryPoint));
+            break;
         case Operator::bge:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::bge,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::bge, entryPoint));
+            break;
         case Operator::bltu:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::blo,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::blo, entryPoint));
+            break;
         case Operator::bgeu:
-            return {
-                Translator::RRInstruction(Translator::Operator::cmp, wd, wn),
-                Translator::BLInstruction(Translator::Operator::bhs,
-                                          entryPoint)};
+            ret.push_back(std::make_unique<Translator::RRInstruction>(
+                Translator::Operator::cmp, wd, wn));
+            ret.push_back(std::make_unique<Translator::BLInstruction>(
+                Translator::Operator::bhs, entryPoint));
+            break;
         default:
             break;
     }
 
-    return {};
+    return ret;
 }
 }  // namespace Disassembler

@@ -2,6 +2,7 @@
 #define RISCVINSTRUCTION_H
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,7 +29,9 @@ class RiscvInstruction {
      */
     virtual const std::string& toString() { return this->printOut; };
 
-    virtual std::vector<Translator::ArmInstruction> toArm() { return {}; }
+    virtual std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() {
+        return {};
+    }
 
     Operator instr;
     Opcode op;
@@ -50,7 +53,7 @@ class RInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * R-Type instructions have the form:
@@ -76,7 +79,7 @@ class IInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * I-Type instructions have the form:
@@ -104,7 +107,7 @@ class SInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * S-Type instructions have the form:
@@ -130,7 +133,7 @@ class BInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * B-Type instructions have the form:
@@ -156,7 +159,7 @@ class UInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * U-Type instructions have the form:
@@ -182,7 +185,7 @@ class JInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
      * J-Type instructions have the form:
@@ -200,7 +203,7 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
 
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     Register rd;
     std::string symbol;
@@ -214,7 +217,7 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
 
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     Register rd;
     std::string symbol;
@@ -228,7 +231,7 @@ class EntryPoint : public virtual RiscvInstruction {
 
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::string name;
 };
@@ -243,7 +246,7 @@ class BInstructionEntry : public virtual RiscvInstruction {
 
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     Register rs1;
     Register rs2;
@@ -257,7 +260,7 @@ class JInstructionEntry : public virtual RiscvInstruction {
 
     const std::string& toString() override;
 
-    std::vector<Translator::ArmInstruction> toArm() override;
+    std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     Register rd;
     std::string entryPoint;

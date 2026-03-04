@@ -13,20 +13,27 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     auto riscTextSection = dynamic_cast<Disassembler::TextSection*>(
         riscSections.find(".text")->second.get());
 
-    auto riscTextInstructions = riscTextSection->getInstructions();
+    const std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>&
+        riscTextInstructions = riscTextSection->getInstructions();
 
-    // TODO deal with jalr when instructions inflate
-    // TODO eliminate gp and tp
+    // // TODO deal with jalr when instructions inflate
+    // // TODO eliminate gp and tp
 
-    std::vector<std::vector<ArmInstruction>> instructions;
+    std::vector<std::vector<std::unique_ptr<ArmInstruction>>> instructions;
 
     for (auto& instr : riscTextInstructions) {
-        instructions.push_back(instr->toArm());
+        instructions.push_back(std::move(instr->toArm()));
     }
 
-    sections.insert({".text", std::make_shared<TextSection>(
-                                  instructions | std::views::join,
-                                  riscTextSection->getEntryPoints())});
+    auto joined = std::ranges::join_view(instructions);
+
+    std::vector<std::unique_ptr<ArmInstruction>> all(
+        std::make_move_iterator(joined.begin()),
+        std::make_move_iterator(joined.end()));
+
+    sections.insert(
+        {".text", std::make_shared<TextSection>(
+                      std::move(all), riscTextSection->getEntryPoints())});
 
     if (auto it = riscSections.find(".data"); it != riscSections.end()) {
         sections.insert({".data", it->second});

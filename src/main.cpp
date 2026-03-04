@@ -28,14 +28,15 @@ int main() {
 
         std::cout << riscFile->toString();
 
-        std::cout << "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
-                     "ARM64 File>>>>>>>>>>>>>>>>\n";
+        std::cout
+            << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
+               "ARM64 File>>>>>>>>>>>>>>>>\n";
 
         auto armFile = Translator::ArmFile(riscFile);
 
         std::cout << armFile.toString();
 
-        std::cout << "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\n";
+        std::cout << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n";
     }
 
     return 0;
