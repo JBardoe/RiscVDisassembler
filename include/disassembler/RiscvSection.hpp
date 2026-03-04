@@ -4,6 +4,7 @@
 #include <string>
 
 #include "disassembler/RiscvInstruction.hpp"
+#include "translator/ArmInstruction.hpp"
 #include "utils/AssemblySection.hpp"
 
 namespace Disassembler {
@@ -37,6 +38,15 @@ class TextSection : public virtual RiscvSection {
      * @return string readout version of the section
      */
     const std::string& toString() override;
+
+    const std::vector<std::unique_ptr<RiscvInstruction>> getInstructions() {
+        return instructions;
+    }
+
+    std::vector<std::pair<std::string, Assembly::SymbolBinding>>
+    getEntryPoints() {
+        return entryPoints;
+    }
 
    private:
     std::vector<std::unique_ptr<RiscvInstruction>>
