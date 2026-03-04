@@ -37,6 +37,9 @@ int main() {
         std::cout << armFile.toString();
 
         std::cout << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n";
+
+        riscFile->writeToFile(fileName);
+        armFile.writeToFile(fileName);
     }
 
     return 0;

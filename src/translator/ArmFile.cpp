@@ -1,5 +1,6 @@
 #include "translator/ArmFile.hpp"
 
+#include <fstream>
 #include <ranges>
 #include <vector>
 
@@ -54,6 +55,15 @@ const std::string& ArmFile::toString() {
 
     return this->printOut;
 }
+
+void ArmFile::writeToFile(std::string fileName) {
+    std::ofstream outFile("data/output/ARM/" + fileName + ".s");
+
+    outFile << toString();
+
+    outFile.close();
+}
+
 }  // namespace Translator
 
 // TODO implement

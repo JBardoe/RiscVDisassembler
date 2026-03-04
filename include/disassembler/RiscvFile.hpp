@@ -66,6 +66,8 @@ class RiscvFile {
      */
     const std::string& toString();
 
+    void writeToFile(std::string fileName);
+
     FileType getFileType() { return type; }
 
    private:

@@ -16,6 +16,8 @@ class ArmFile {  // TODO implement
 
     const std::string& toString();
 
+    void writeToFile(std::string fileName);
+
    private:
     std::string printOut;
     std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>

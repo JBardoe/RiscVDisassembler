@@ -4,14 +4,20 @@ namespace Disassembler {
 const std::string& RiscvFile::toString() {
     if (this->printOut != "") return this->printOut;
 
-    printOut += symbolTable.toString();  // TODO remove?
-
     for (auto& sec : this->sections) {
         printOut += sec.second->toString();
         printOut += "\n";
     }
 
     return this->printOut;
+}
+
+void RiscvFile::writeToFile(std::string fileName) {
+    std::ofstream outFile("data/output/RISCV/" + fileName + ".s");
+
+    outFile << toString();
+
+    outFile.close();
 }
 
 void RiscvFile::addSymbol(std::string name, uint32_t addr, uint32_t size,
