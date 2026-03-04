@@ -19,6 +19,8 @@ std::string to_string(Variable v);
 static constexpr std::array<std::string_view, 4> variableTypes{
     ".byte", ".half", "<unknown_type>", ".word"};
 
+static constexpr std::size_t COMMENT_COL = 25;
+
 /**
  * All possible bindings for entries in the symbol table
  * Underlying value is the equivalent constant value that represents the binding

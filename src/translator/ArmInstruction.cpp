@@ -1,12 +1,20 @@
 #include "translator/ArmInstruction.hpp"
+
+#include "utils/AssemblyTypes.hpp"
+
 namespace Translator {
 
 const std::string& RRRInstruction::toString() {
     if (printOut != "") return printOut;
 
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", " +
-               to_string(wn) + ", " + to_string(wm) + "\t// " + to_string(wd) +
-               " = " + to_string(wn) + " ";
+               to_string(wn) + ", " + to_string(wm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// " + to_string(wd) + " = " + to_string(wn) + " ";
 
     switch (instr) {
         case Operator::add:
@@ -45,8 +53,14 @@ const std::string& RRRInstruction::toString() {
 const std::string& RRInstruction::toString() {
     if (printOut != "") return printOut;
 
-    printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", " +
-               to_string(wn) + "\t// ";
+    printOut =
+        "\t" + to_string(instr) + " " + to_string(wd) + ", " + to_string(wn);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// ";
 
     if (instr == Operator::cmp) {
         printOut += "set flags for " + to_string(wd) + " - " + to_string(wn);
@@ -81,10 +95,15 @@ const std::string& RRIInstruction::toString() {
         case Operator::ldrh:
             suffix = "[0:15] (zero-extends)";
         loads:
-            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) +
-                        "]\t// " + to_string(wd) + " = Memory[" +
-                        to_string(wn) + "+" + std::to_string(imm) + "]" +
-                        suffix;
+            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) + "]";
+
+            if (this->printOut.size() < Assembly::COMMENT_COL)
+                this->printOut.append(
+                    Assembly::COMMENT_COL - this->printOut.size(), ' ');
+
+            this->printOut += "// " + to_string(wd) + " = Memory[" +
+                              to_string(wn) + "+" + std::to_string(imm) + "]" +
+                              suffix;
             break;
 
         case Operator::strb:
@@ -96,10 +115,15 @@ const std::string& RRIInstruction::toString() {
         case Operator::str:
             suffix = "[0:31]";
         stores:
-            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) +
-                        "]\t// Memory[" + to_string(wd) + "+" +
-                        std::to_string(imm) + "]" + suffix + " = " +
-                        to_string(wn) + suffix;
+            printOut += "[" + to_string(wn) + ", #" + std::to_string(imm) + "]";
+
+            if (this->printOut.size() < Assembly::COMMENT_COL)
+                this->printOut.append(
+                    Assembly::COMMENT_COL - this->printOut.size(), ' ');
+
+            this->printOut += "// Memory[" + to_string(wd) + "+" +
+                              std::to_string(imm) + "]" + suffix + " = " +
+                              to_string(wn) + suffix;
             break;
 
         case Operator::add:
@@ -126,8 +150,12 @@ const std::string& RRIInstruction::toString() {
             printOut += to_string(wn) + ", #" + std::to_string(imm);
             if (shift) printOut += ", lsl #12";
 
-            printOut += "\t// " + to_string(wd) + " = " + to_string(wn) +
-                        suffix + std::to_string(imm);
+            if (this->printOut.size() < Assembly::COMMENT_COL)
+                this->printOut.append(
+                    Assembly::COMMENT_COL - this->printOut.size(), ' ');
+
+            this->printOut += "// " + to_string(wd) + " = " + to_string(wn) +
+                              suffix + std::to_string(imm);
 
             break;
         default:
@@ -143,14 +171,26 @@ const std::string& RIInstruction::toString() {
     printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
 
     if (instr == Operator::adr) {
-        printOut += ".+" + std::to_string(imm) + "\t// " + to_string(wd) +
-                    " = PC + " + std::to_string(imm);
+        printOut += ".+" + std::to_string(imm);
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut +=
+            "// " + to_string(wd) + " = PC + " + std::to_string(imm);
     } else if (instr == Operator::cmp) {
         printOut += "#" + std::to_string(imm) + "set flags for " +
                     to_string(wd) + " - " + std::to_string(imm);
     } else {
-        printOut += "#" + std::to_string(imm) + "\t// " + to_string(wd) +
-                    " = " + std::to_string(imm) + " (zero-extended)";
+        printOut += "#" + std::to_string(imm);
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut += "// " + to_string(wd) + " = " + std::to_string(imm) +
+                          " (zero-extended)";
     }
 
     return printOut;
@@ -159,8 +199,13 @@ const std::string& RIInstruction::toString() {
 const std::string& BIInstruction::toString() {
     if (printOut != "") return printOut;
 
-    printOut = "\t" + to_string(instr) + " " + std::to_string(imm) +
-               "\t// PC+=" + std::to_string(imm) + " ";
+    printOut = "\t" + to_string(instr) + " " + std::to_string(imm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// PC+=" + std::to_string(imm) + " ";
 
     switch (instr) {
         case Operator::beq:
@@ -195,8 +240,13 @@ const std::string& BIInstruction::toString() {
 const std::string& BLInstruction::toString() {
     if (printOut != "") return printOut;
 
-    printOut =
-        "\t" + to_string(instr) + " " + label + "\t// Branch to " + label + " ";
+    printOut = "\t" + to_string(instr) + " " + label;
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// Branch to " + label + " ";
 
     switch (instr) {
         case Operator::beq:
@@ -231,8 +281,13 @@ const std::string& BLInstruction::toString() {
 const std::string& BRInstruction::toString() {
     if (printOut != "") return printOut;
 
-    printOut = "\t" + to_string(instr) + " " + to_string(wd) +
-               "\t// PC+=" + to_string(wd) + " ";
+    printOut = "\t" + to_string(instr) + " " + to_string(wd);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// PC+=" + to_string(wd) + " ";
 
     if (instr == Operator::blr) {
         printOut += "and set lr to PC+4";
@@ -243,7 +298,13 @@ const std::string& BRInstruction::toString() {
 
 const std::string& EInstruction::toString() {
     if (printOut != "") return printOut;
-    printOut = "\t" + to_string(instr) + " #0\t//";
+    printOut = "\t" + to_string(instr) + " #0";
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "//";
 
     if (instr == Operator::svc) {
         printOut += " Transfer control to OS";
@@ -261,10 +322,15 @@ const std::string& RSInstruction::toString() {
 
     if (instr == Operator::ldrsb || instr == Operator::ldrsh ||
         instr == Operator::ldrsw) {
-        printOut += "[" + symbol + "]\t// ";
+        printOut += "[" + symbol + "]";
     } else {
-        printOut += symbol + "\t// ";
+        printOut += symbol;
     }
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "// ";
 
     std::string suffix = "";
 

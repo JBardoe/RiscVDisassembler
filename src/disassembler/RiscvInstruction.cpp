@@ -1,8 +1,10 @@
 #include "disassembler/RiscvInstruction.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 #include "translator/ArmTypes.hpp"
+#include "utils/AssemblyTypes.hpp"
 #include "utils/DisassemblyException.hpp"
 
 namespace Disassembler {
@@ -50,8 +52,13 @@ const std::string& RInstruction::toString() {
     std::string symbol;
 
     this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
-                     ", " + to_string(this->rs1) + ", " + to_string(this->rs2) +
-                     "\t\t# " + to_string(this->rd) + " = ";
+                     ", " + to_string(this->rs1) + ", " + to_string(this->rs2);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# " + to_string(this->rd) + " = ";
 
     switch (this->instr) {
         case Operator::add:
@@ -237,29 +244,53 @@ const std::string& IInstruction::toString() {
     if (this->instr == Operator::jalr) {
         this->printOut = "\t" + to_string(this->instr) + to_string(this->rd) +
                          ", " + std::to_string(this->imm) + "(" +
-                         to_string(rs1) + ")\t\t# " + to_string(this->rd) +
-                         " = PC+4; PC = " + to_string(this->rs1) + " + " +
-                         std::to_string(this->imm);
+                         to_string(rs1) + ")";
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut += "# " + to_string(this->rd) +
+                          " = PC+4; PC = " + to_string(this->rs1) + " + " +
+                          std::to_string(this->imm);
 
         return this->printOut;
     }
 
     if (this->instr == Operator::ecall) {
-        this->printOut = "\tecall\t\t# Transfer control to OS";
+        this->printOut = "\tecall";
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut += "# Transfer control to OS";
         return this->printOut;
     }
 
     if (this->instr == Operator::ebreak) {
-        this->printOut = "\tebreak\t\t# Transfer control to debugger";
+        this->printOut = "\tebreak";
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut += "# Transfer control to debugger";
         return this->printOut;
     }
 
     if (this->op == Opcode::LOAD) {
         this->printOut =
             "\t" + to_string(this->instr) + " " + to_string(this->rd) + ", " +
-            std::to_string(this->imm) + "(" + to_string(this->rs1) + ")\t\t# " +
-            to_string(this->rd) + " = M[" + to_string(this->rs1) + "+" +
-            std::to_string(this->imm) + "][0:";
+            std::to_string(this->imm) + "(" + to_string(this->rs1) + ")";
+
+        if (this->printOut.size() < Assembly::COMMENT_COL)
+            this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                                  ' ');
+
+        this->printOut += "# " + to_string(this->rd) + " = M[" +
+                          to_string(this->rs1) + "+" +
+                          std::to_string(this->imm) + "][0:";
 
         switch (this->instr) {
             case Operator::lb:
@@ -282,8 +313,13 @@ const std::string& IInstruction::toString() {
 
     this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
                      ", " + to_string(this->rs1) + ", " +
-                     std::to_string(this->imm) + "\t\t# " +
-                     to_string(this->rd) + " = ";
+                     std::to_string(this->imm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# " + to_string(this->rd) + " = ";
 
     std::string symbol;
     switch (this->instr) {
@@ -475,10 +511,16 @@ const std::string& SInstruction::toString() {
             break;
     }
 
-    this->printOut =
-        "\t" + to_string(this->instr) + " " + to_string(this->rs2) + ", " +
-        std::to_string(this->imm) + "(" + to_string(this->rs1) + ")" +
-        "\t\t# M[" + to_string(this->rs1) + "+" + std::to_string(this->imm) +
+    this->printOut = "\t" + to_string(this->instr) + " " +
+                     to_string(this->rs2) + ", " + std::to_string(this->imm) +
+                     "(" + to_string(this->rs1) + ")";
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut +=
+        "# M[" + to_string(this->rs1) + "+" + std::to_string(this->imm) +
         "][0:" + std::to_string(upper) + "] = " + to_string(this->rs2) +
         "[0:" + std::to_string(upper) + "]";
 
@@ -578,11 +620,17 @@ const std::string& BInstruction::toString() {
             break;
     }
 
-    this->printOut =
-        "\t" + to_string(this->instr) + " " + to_string(this->rs1) + ", " +
-        to_string(this->rs2) + ", " + std::to_string(this->imm) + "\t\t# if(" +
-        to_string(this->rs1) + " " + symbol + " " + to_string(this->rs2) +
-        ") PC += " + std::to_string(this->imm);
+    this->printOut = "\t" + to_string(this->instr) + " " +
+                     to_string(this->rs1) + ", " + to_string(this->rs2) + ", " +
+                     std::to_string(this->imm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# if(" + to_string(this->rs1) + " " + symbol + " " +
+                      to_string(this->rs2) +
+                      ") PC += " + std::to_string(this->imm);
 
     return this->printOut;
 }
@@ -648,8 +696,13 @@ const std::string& UInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
-                     ", " + std::to_string(this->imm) + "\t\t# " +
-                     to_string(this->rd) + " = ";
+                     ", " + std::to_string(this->imm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# " + to_string(this->rd) + " = ";
 
     // Cannot be an unknown opcode as it will have been caught earlier
     if (this->op == Opcode::LUI) {
@@ -700,9 +753,14 @@ const std::string& JInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     this->printOut = "\t" + to_string(this->instr) + " " + to_string(this->rd) +
-                     ", " + std::to_string(this->imm) + "\t\t# " +
-                     to_string(this->rd) +
-                     " = PC+4; PC += " + std::to_string(this->imm);
+                     ", " + std::to_string(this->imm);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# " + to_string(this->rd) +
+                      " = PC+4; PC += " + std::to_string(this->imm);
 
     return this->printOut;
 }
@@ -730,8 +788,14 @@ std::vector<std::unique_ptr<Translator::ArmInstruction>> JInstruction::toArm() {
 const std::string& PseudoLoadInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
-    this->printOut = "\t" + to_string(instr) + " " + to_string(rd) + ", " +
-                     symbol + "\t\t# ";
+    this->printOut =
+        "\t" + to_string(instr) + " " + to_string(rd) + ", " + symbol;
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# ";
 
     if (instr == Operator::la) {
         this->printOut += to_string(rd) + " = " + "&" + symbol;
@@ -776,8 +840,13 @@ const std::string& PseudoStoreInstruction::toString() {
     if (this->printOut != "") return this->printOut;
 
     this->printOut = "\t" + to_string(instr) + " " + to_string(rd) + ", " +
-                     symbol + ", " + to_string(rt) + "\t\t# M[&" + symbol +
-                     "] = " + to_string(rt);
+                     symbol + ", " + to_string(rt);
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# M[&" + symbol + "] = " + to_string(rt);
 
     if (instr == Operator::sb) {
         this->printOut += "[7:0]";
@@ -831,9 +900,14 @@ const std::string& JInstructionEntry::toString() {
     if (this->printOut != "") return this->printOut;
 
     printOut = this->printOut = "\t" + to_string(this->instr) + " " +
-                                to_string(this->rd) + ", " + entryPoint +
-                                "\t\t# " + to_string(this->rd) +
-                                " = PC+4; PC = &" + entryPoint;
+                                to_string(this->rd) + ", " + entryPoint;
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut +=
+        "# " + to_string(this->rd) + " = PC+4; PC = &" + entryPoint;
 
     return this->printOut;
 }
@@ -889,9 +963,14 @@ const std::string& BInstructionEntry::toString() {
 
     this->printOut = "\t" + to_string(this->instr) + " " +
                      to_string(this->rs1) + ", " + to_string(this->rs2) + ", " +
-                     entryPoint + "\t\t# if(" + to_string(this->rs1) + " " +
-                     symbol + " " + to_string(this->rs2) + ") PC = &" +
                      entryPoint;
+
+    if (this->printOut.size() < Assembly::COMMENT_COL)
+        this->printOut.append(Assembly::COMMENT_COL - this->printOut.size(),
+                              ' ');
+
+    this->printOut += "# if(" + to_string(this->rs1) + " " + symbol + " " +
+                      to_string(this->rs2) + ") PC = &" + entryPoint;
 
     return this->printOut;
 }
