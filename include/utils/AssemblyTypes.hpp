@@ -7,6 +7,9 @@
 
 namespace Assembly {
 
+/**
+ * Struct representing a variable in the data sections
+ */
 typedef struct Variable {
     std::string name;
     uint32_t addr;
@@ -14,11 +17,24 @@ typedef struct Variable {
     uint32_t size;
 } Variable;
 
+/**
+ * toString for the variable struct
+ *
+ * @param v variable struct
+ * @return string equivalent
+ */
 std::string to_string(Variable v);
 
+/**
+ * Lookup array to match variable size to the string name of type
+ */
 static constexpr std::array<std::string_view, 4> variableTypes{
     ".byte", ".half", "<unknown_type>", ".word"};
 
+/**
+ * Formatting constant to position comments away from instructions in assembly
+ * output
+ */
 static constexpr std::size_t COMMENT_COL = 25;
 
 /**
