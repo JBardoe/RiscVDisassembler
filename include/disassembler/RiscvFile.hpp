@@ -28,8 +28,14 @@ class RiscvFile {
      * @param section pointer to the section object
      */
     void addSection(std::string name,
-                    std::unique_ptr<Assembly::AssemblySection> section) {
-        sections.insert({name, std::move(section)});
+                    std::shared_ptr<Assembly::AssemblySection> section) {
+        sections.insert({name, section});
+    }
+
+    const std::unordered_map<std::string,
+                             std::shared_ptr<Assembly::AssemblySection>>&
+    getSections() {
+        return sections;
     }
 
     /**
@@ -63,7 +69,7 @@ class RiscvFile {
     FileType getFileType() { return type; }
 
    private:
-    std::unordered_map<std::string, std::unique_ptr<Assembly::AssemblySection>>
+    std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>
         sections;             // Map of section names to sections
     std::string printOut;     // String readout of the file
     SymbolTable symbolTable;  // Map of symbol names to symbols

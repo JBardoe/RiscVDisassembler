@@ -120,10 +120,10 @@ void disassembleSymbolTable(
     }
 }
 
-unique_ptr<Assembly::DataSection> disassembleDataSection(
+shared_ptr<Assembly::DataSection> disassembleDataSection(
     const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
-    auto data = make_unique<Assembly::DataSection>();
+    auto data = make_shared<Assembly::DataSection>();
 
     uint32_t dataBase = (asmFile->getFileType() == FileType::REL)
                             ? 0
@@ -208,10 +208,10 @@ unique_ptr<Assembly::DataSection> disassembleDataSection(
     return data;
 }
 
-unique_ptr<Assembly::BSSSection> disassembleBSSSection(
+shared_ptr<Assembly::BSSSection> disassembleBSSSection(
     const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& bssSection) {
-    auto bss = make_unique<Assembly::BSSSection>();
+    auto bss = make_shared<Assembly::BSSSection>();
 
     uint32_t bssBase = (asmFile->getFileType() == FileType::REL)
                            ? 0
@@ -274,7 +274,7 @@ unique_ptr<Assembly::BSSSection> disassembleBSSSection(
     return bss;
 }
 
-unique_ptr<TextSection> disassembleTextSection(
+shared_ptr<TextSection> disassembleTextSection(
     const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& textSection, uint32_t gpAddress,
     bool isLittleEndian) {
@@ -452,7 +452,7 @@ unique_ptr<TextSection> disassembleTextSection(
         i++;
     }
 
-    return make_unique<TextSection>(move(textInstructions), entryPoints);
+    return make_shared<TextSection>(move(textInstructions), entryPoints);
 }
 
 unique_ptr<RiscvFile> disassemble(const string& filepath) {
@@ -470,12 +470,12 @@ unique_ptr<RiscvFile> disassemble(const string& filepath) {
     if (auto dataIt = sections.find(".data"); dataIt != sections.end()) {
         auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
                                                   elffile->isLittleEndian);
-        asmFile->addSection(".data", move(dataSection));
+        asmFile->addSection(".data", dataSection);
     }
 
     if (auto bssIt = sections.find(".bss"); bssIt != sections.end()) {
         auto bssSection = disassembleBSSSection(asmFile, (*bssIt).second);
-        asmFile->addSection(".bss", move(bssSection));
+        asmFile->addSection(".bss", bssSection);
     }
 
     auto textIt = sections.find(".text");

@@ -6,6 +6,7 @@
 
 #include "disassembler/RiscvFile.hpp"
 #include "translator/ArmSection.hpp"
+#include "utils/AssemblySection.hpp"
 
 namespace Translator {
 
@@ -17,7 +18,8 @@ class ArmFile {  // TODO implement
 
    private:
     std::string printOut;
-    std::unordered_map<std::string, std::unique_ptr<ArmSection>> sections;
+    std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>
+        sections;
 };
 
 }  // namespace Translator

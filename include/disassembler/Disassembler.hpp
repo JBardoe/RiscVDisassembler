@@ -15,12 +15,16 @@ void disassembleSymbolTable(
     const std::unique_ptr<ELFParser::ELFFile>& elffile,
     const std::unordered_map<std::string,
                              std::unique_ptr<ELFParser::ELFSection>>& sections);
-std::unique_ptr<Assembly::DataSection> disassembleDataSection(
+std::shared_ptr<Assembly::DataSection> disassembleDataSection(
     const std::unique_ptr<RiscvFile>& asmFile,
     const std::unique_ptr<ELFParser::ELFSection>& dataSection,
     bool isLittleEndian);
 
-std::unique_ptr<TextSection> disassembleTextSection(
+std::shared_ptr<Assembly::BSSSection> disassembleBSSSection(
+    const std::unique_ptr<RiscvFile>& asmFile,
+    const std::unique_ptr<ELFParser::ELFSection>& bssSection);
+
+std::shared_ptr<TextSection> disassembleTextSection(
     const std::unique_ptr<RiscvFile>& asmFile,
     const std::unique_ptr<ELFParser::ELFSection>& textSection,
     uint32_t gpAddress, bool isLittleEndian);
