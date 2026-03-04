@@ -29,12 +29,16 @@ class RiscvInstruction {
      */
     virtual const std::string& toString() { return this->printOut; };
 
+    /**
+     * Default toArm method to translate to ARM
+     * Overridden for specific instructions
+     */
     virtual std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() {
         return {};
     }
 
-    Operator instr;
-    Opcode op;
+    Operator instr;        // Instruction
+    Opcode op;             // Opcode
     std::string printOut;  // String version of the instruction if it has
                            // already been generated
 };
@@ -53,6 +57,12 @@ class RInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     *
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -79,6 +89,12 @@ class IInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     *
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -107,6 +123,11 @@ class SInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -133,6 +154,11 @@ class BInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -159,6 +185,11 @@ class UInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -185,6 +216,11 @@ class JInstruction : public virtual RiscvInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     /**
@@ -196,46 +232,98 @@ class JInstruction : public virtual RiscvInstruction {
     int imm;
 };
 
+/**
+ * RISC-V Pseudo Instructions to load data
+ */
 class PseudoLoadInstruction : public virtual RiscvInstruction {
    public:
     PseudoLoadInstruction(Operator instr, Register rd, std::string symbol)
         : RiscvInstruction(instr), rd(rd), symbol(symbol) {};
 
+    /**
+     * toString method to print the instruction in assembly form
+     *
+     * @return string readout version of the instruction
+     */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Pseudo-loads have the form:
+     *
+     * instr rd, symbol
+     */
     Register rd;
     std::string symbol;
 };
 
+/**
+ * RISC-V Pseudo Instructions to store data
+ */
 class PseudoStoreInstruction : public virtual RiscvInstruction {
    public:
     PseudoStoreInstruction(Operator instr, Register rd, std::string symbol,
                            Register rt)
         : RiscvInstruction(instr), rd(rd), symbol(symbol), rt(rt) {}
 
+    /**
+     * toString method to print the instruction in assembly form
+     *
+     * @return string readout version of the instruction
+     */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Pseudo-stores have the form:
+     *
+     * instr rd, symbol, rt
+     */
     Register rd;
     std::string symbol;
     Register rt;
 };
 
+/**
+ * RISC-V Entry Point
+ */
 class EntryPoint : public virtual RiscvInstruction {
    public:
     EntryPoint(std::string name)
         : RiscvInstruction(Operator::entry), name(name) {};
 
+    /**
+     * toString method to print the instruction in assembly form
+     *
+     * @return string readout version of the instruction
+     */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
-    std::string name;
+    std::string name;  // Name of the entry point
 };
 
+/**
+ * RISC-V B-Type (Branch) instruction that uses an entry point
+ */
 class BInstructionEntry : public virtual RiscvInstruction {
    public:
     BInstructionEntry(BInstruction* old, std::string entryPoint)
@@ -244,24 +332,57 @@ class BInstructionEntry : public virtual RiscvInstruction {
           rs2(old->rs2),
           entryPoint(entryPoint) {}
 
+    /**
+     * toString method to print the instruction in assembly form
+     *
+     * @return string readout version of the instruction
+     */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * B-Type instruction with entry points have the form:
+     *
+     * instr rs1, rs2, entryPoint
+     */
     Register rs1;
     Register rs2;
     std::string entryPoint;
 };
 
+/**
+ * RISC-V J-Type (Jump) instruction that uses an entry point
+ */
 class JInstructionEntry : public virtual RiscvInstruction {
    public:
     JInstructionEntry(JInstruction* old, std::string entryPoint)
         : RiscvInstruction(old->instr), rd(old->rd), entryPoint(entryPoint) {}
 
+    /**
+     * toString method to print the instruction in assembly form
+     *
+     * @return string readout version of the instruction
+     */
     const std::string& toString() override;
 
+    /**
+     * toArm method to translate the instruction into ARM
+     *
+     * @return Vector of equivalent ARM instructions
+     */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * J-Type instruction with entry points have the form:
+     *
+     * instr rd, entryPoint
+     */
     Register rd;
     std::string entryPoint;
 };

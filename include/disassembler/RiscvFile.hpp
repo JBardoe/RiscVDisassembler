@@ -32,12 +32,6 @@ class RiscvFile {
         sections.insert({name, section});
     }
 
-    const std::unordered_map<std::string,
-                             std::shared_ptr<Assembly::AssemblySection>>&
-    getSections() {
-        return sections;
-    }
-
     /**
      * Adds a decoded symbol to the symbol table
      *
@@ -52,12 +46,18 @@ class RiscvFile {
                    SymbolType type, Assembly::SymbolBinding binding,
                    std::string sectionName);
 
+    /**
+     * Getters for the symbols from the symbol table from the:
+     * getSymbolName - Name of the symbol
+     * getSymbolAddr - Address of the symbol
+     * getSymbolSections - Section name
+     */
     std::optional<std::reference_wrapper<const Symbol>> getSymbolName(
         std::string name);
     std::vector<Symbol> getSymbolAddr(uint32_t addr);
     std::vector<Symbol> getSymbolSection(std::string sectionName);
 
-    std::string printSymbolTable();
+    std::string printSymbolTable();  // TODO remove
 
     /**
      * Gives a string readout of the assembly file
@@ -66,16 +66,27 @@ class RiscvFile {
      */
     const std::string& toString();
 
+    /**
+     * Write the string readout to a file
+     *
+     * @param fileName Name of the file to write to
+     */
     void writeToFile(std::string fileName);
 
     FileType getFileType() { return type; }
+
+    const std::unordered_map<std::string,
+                             std::shared_ptr<Assembly::AssemblySection>>&
+    getSections() {
+        return sections;
+    }
 
    private:
     std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>
         sections;             // Map of section names to sections
     std::string printOut;     // String readout of the file
     SymbolTable symbolTable;  // Map of symbol names to symbols
-    FileType type;
+    FileType type;            // File type (e.g. executable)
 };
 }  // namespace Disassembler
 #endif

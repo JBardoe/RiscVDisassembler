@@ -44,3 +44,5 @@ int main() {
 
     return 0;
 }
+
+// TODO catch errors for nice printing

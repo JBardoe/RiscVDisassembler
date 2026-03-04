@@ -65,5 +65,3 @@ void ArmFile::writeToFile(std::string fileName) {
 }
 
 }  // namespace Translator
-
-// TODO implement
