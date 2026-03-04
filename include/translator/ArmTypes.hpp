@@ -4,6 +4,11 @@
 #include <string>
 
 namespace Translator {
+
+/**
+ * Enum representing an AArch64 register (matching order to the RISC-V register
+ * enum)
+ */
 enum class Register : int {
     wzr,
     lr,
@@ -41,8 +46,17 @@ enum class Register : int {
     lo,
 };
 
+/**
+ * toString for the register enum
+ *
+ * @param r register enum
+ * @return string equivalent
+ */
 std::string to_string(Register r);
 
+/**
+ * All relevant ARM instructions
+ */
 enum class Operator : int {
     add,
     sub,
@@ -76,9 +90,15 @@ enum class Operator : int {
     movz,
     svc,
     brk,
-    entry,
+    entry,  // Fake instruction denoting an entry point
 };
 
+/**
+ * toString for the instruction enum
+ *
+ * @param i instruction enum
+ * @return string equivalent
+ */
 std::string to_string(Operator i);
 
 }  // namespace Translator

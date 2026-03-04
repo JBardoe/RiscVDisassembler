@@ -60,7 +60,7 @@ class RiscvFile {
     std::string printSymbolTable();  // TODO remove
 
     /**
-     * Gives a string readout of the assembly file
+     * Gives a string readout of the RISC-V file
      *
      * @return string equivalent of the file
      */

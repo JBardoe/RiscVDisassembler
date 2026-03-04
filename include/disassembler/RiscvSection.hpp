@@ -10,7 +10,7 @@
 namespace Disassembler {
 
 /**
- * Represents a section of an assembly file
+ * Represents a section of a RISC-V file
  */
 class RiscvSection : public virtual Assembly::AssemblySection {
    public:

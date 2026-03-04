@@ -12,7 +12,7 @@
 namespace Disassembler {
 
 /**
- * Virtual class for an assembly instruction
+ * Virtual class for a RISC-V assembly instruction
  */
 class RiscvInstruction {
    public:

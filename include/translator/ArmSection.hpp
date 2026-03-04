@@ -12,6 +12,9 @@
 
 namespace Translator {
 
+/**
+ * Represents a section in an ARM file
+ */
 class ArmSection : public virtual Assembly::AssemblySection {
    public:
     ArmSection() = default;
@@ -42,7 +45,8 @@ class TextSection : public virtual ArmSection {
    private:
     std::vector<std::unique_ptr<ArmInstruction>>
         instructions;  // Vector of the instructions in the section
-    std::vector<std::pair<std::string, Assembly::SymbolBinding>> entryPoints;
+    std::vector<std::pair<std::string, Assembly::SymbolBinding>>
+        entryPoints;  // Entry points into the .text section
 };
 }  // namespace Translator
 
