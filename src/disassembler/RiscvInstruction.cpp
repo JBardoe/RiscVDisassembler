@@ -40,7 +40,8 @@ RInstruction::RInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
                 "Invalid funct3 parameter on R-Type instruction.");
     }
 
-    // Registers to be in the range 0-31 as it is parsed from a 5 bit number
+    // Raw register addresses have to be in the range 0-31 as it is parsed from
+    // a 5 bit number
     this->rd = static_cast<Register>((raw >> 7) & 0x1F);
     this->rs1 = static_cast<Register>((raw >> 15) & 0x1F);
     this->rs2 = static_cast<Register>((raw >> 20) & 0x1F);
@@ -167,9 +168,6 @@ IInstruction::IInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
 
     if (this->op == Opcode::JALR) {
         this->instr = Operator::jalr;
-        if (this->imm % 4 != 0) {
-            throw DisassemblyException("Branch offset not divisible by 4");
-        }
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 0) {
         this->instr = Operator::ecall;
     } else if (this->op == Opcode::ENV_TYPE && this->imm == 1) {

@@ -66,11 +66,17 @@ void disassembleSymbolTable(
 
     // Parse symbol tables if they exists
     for (auto& sec : sections) {
-        if (sec.second->header->type == 11 || sec.second->header->type == 2) {
+        if (sec.second->header->type == 11 ||
+            sec.second->header->type ==
+                2) {  // Find symbol tables based on section type as names can
+                      // be unreliable
+
+            // If the string table does not exist, no symbols can be decoded
             if (sections.find(".strtab") == sections.end()) {
                 throw ELFParser::BadFileException("Missing string table.");
             }
 
+            // Get and check the string table
             const unsigned char* stringTable =
                 reinterpret_cast<const unsigned char*>(
                     sections.at(".strtab")->getData());
@@ -87,9 +93,11 @@ void disassembleSymbolTable(
 
             offset = 0;
 
+            // For every entry in the symbol table, if it is useful, add it
             while (offset * sec.second->header->entrySize <
                    sec.second->header->size) {
-                if (symbolData[offset].name < 1) {
+                if (symbolData[offset].name <
+                    1) {  // Unnamed symbols can exist and are not relevant
                     offset++;
                     continue;
                 }
@@ -100,6 +108,7 @@ void disassembleSymbolTable(
                         "Invalid symbol table entry.");
                 }
 
+                // Get the symbol data and add to the disassembled symbol table
                 string symbolName(reinterpret_cast<const char*>(
                     stringTable + symbolData[offset].name));
 
@@ -125,15 +134,23 @@ shared_ptr<Assembly::DataSection> disassembleDataSection(
     const unique_ptr<ELFParser::ELFSection>& dataSection, bool isLittleEndian) {
     auto data = make_shared<Assembly::DataSection>();
 
+    // Base address of variables in .data section (can be an index or a virtual
+    // address)
     uint32_t dataBase = (asmFile->getFileType() == FileType::REL)
                             ? 0
                             : dataSection->header->address;
+
+    // Upper bound on the .data section
     uint32_t dataUpper = dataBase + dataSection->header->size;
 
+    // Get all symbols from the symbol table that are in the .data section and
+    // return an empty data section if there are none
     auto vars = asmFile->getSymbolSection(".data");
 
     if (vars.empty()) return data;
 
+    // Sort the symbols by their address in the .data section so their size can
+    // be determined as the gap between the current and next symbol
     sort(vars.begin(), vars.end(),
          [](auto& a, auto& b) { return a.addr < b.addr; });
 
@@ -146,7 +163,10 @@ shared_ptr<Assembly::DataSection> disassembleDataSection(
     uint32_t currentVal;
     uint32_t offset;
 
+    // For each symbol in the .data section
     for (size_t i = 1; i < vars.size(); i++) {
+        // If the next address has been reached (indicates the size of the
+        // previous symbol can now be determined)
         if (vars[i].addr != currentAddress) {
             currentVal = 0;
 
@@ -158,7 +178,8 @@ shared_ptr<Assembly::DataSection> disassembleDataSection(
                                            std::to_string(currentSize));
             }
 
-            // Get all the required bytes out of the file
+            // Get all the required bytes out of the raw data according to the
+            // endianness
             for (uint32_t j = 0; j < currentSize; j++) {
                 if (isLittleEndian) {
                     currentVal |= (dataData[offset + j] << (j * 8));
@@ -178,6 +199,7 @@ shared_ptr<Assembly::DataSection> disassembleDataSection(
         }
     }
 
+    // Add the last variable to the section if it is valid
     if (currentAddress < dataUpper) {
         currentVal = 0;
 
@@ -213,18 +235,27 @@ shared_ptr<Assembly::BSSSection> disassembleBSSSection(
     const unique_ptr<ELFParser::ELFSection>& bssSection) {
     auto bss = make_shared<Assembly::BSSSection>();
 
+    // Base address of variables in .bss section (can be an index or a virtual
+    // address)
     uint32_t bssBase = (asmFile->getFileType() == FileType::REL)
                            ? 0
                            : bssSection->header->address;
+
+    // Upper bound on the .bss section
     uint32_t bssUpper = bssBase + bssSection->header->size;
 
+    // Get all symbols from the symbol table that are in the .bss section and
+    // return an empty .bss section if there are none
     auto vars = asmFile->getSymbolSection(".bss");
 
     if (vars.empty()) return bss;
 
+    // Sort the symbols by their address in the .bss section so their size can
+    // be determined as the gap between the current and next symbol
     sort(vars.begin(), vars.end(),
          [](auto& a, auto& b) { return a.addr < b.addr; });
 
+    // Eliminate common .bss symbols that are not variables
     while (vars[0].name == "__bss_start" || vars[0].name == "__BSS_END__" ||
            vars[0].name == "_end" || vars[0].name == "_edata") {
         vars.erase(vars.begin(), vars.begin() + 1);
@@ -234,11 +265,16 @@ shared_ptr<Assembly::BSSSection> disassembleBSSSection(
     uint32_t currentAddress = vars[0].addr;
     uint32_t currentSize;
 
+    // For each symbol in the .bss section
     for (size_t i = 1; i < vars.size(); i++) {
+        // Eliminate common .bss symbols that are not variables
         if (vars[i].name == "__bss_start" || vars[i].name == "__BSS_END__" ||
             vars[i].name == "_end" || vars[i].name == "_edata") {
             continue;
         }
+
+        // If the next address has been reached (indicates the size of the
+        // previous symbol can now be determined)
         if (vars[i].addr != currentAddress) {
             currentSize = vars[i].addr - currentAddress;
 
@@ -257,6 +293,7 @@ shared_ptr<Assembly::BSSSection> disassembleBSSSection(
         }
     }
 
+    // Add the last variable to the section if it is valid
     if (currentAddress < bssUpper) {
         currentSize = bssUpper - currentAddress;
 
@@ -278,6 +315,8 @@ shared_ptr<TextSection> disassembleTextSection(
     const unique_ptr<RiscvFile>& asmFile,
     const unique_ptr<ELFParser::ELFSection>& textSection, uint32_t gpAddress,
     bool isLittleEndian) {
+    // Instructions are all 4 bytes so if the .text section is not a multiple of
+    // 4, there is an issue
     if (textSection->header->size % 4 != 0) {
         throw ELFParser::BadFileException(
             "Text section is of an invalid size.");
@@ -288,6 +327,8 @@ shared_ptr<TextSection> disassembleTextSection(
     vector<unique_ptr<RiscvInstruction>> textInstructions;
     uint32_t offset = 0;
 
+    // For each instruction in the section, extract it, construct a uint32_t
+    // value based on endianness, and dispatch to the decoding method
     while (offset < textSection->header->size) {
         uint32_t instr;
         if (isLittleEndian) {
@@ -307,6 +348,7 @@ shared_ptr<TextSection> disassembleTextSection(
 
     int added = 0;
 
+    // Extract all entry points using the symbol table
     for (size_t i = 0; i < entries.size(); i++) {
         auto entry = entries[i];
         uint32_t entryAddr =
@@ -330,27 +372,40 @@ shared_ptr<TextSection> disassembleTextSection(
 
     int tmpCount = 0;
 
+    // Turn each jump/branch that uses an address to the equivalent entry point
+    // If it does not go to an entry points, add one for it to use (helps with
+    // translation)
     for (size_t i = 0; i < textInstructions.size(); i++) {
-        if (textInstructions[i]->instr == Operator::jal) {
+        if (textInstructions[i]->instr ==
+            Operator::jal) {  // Translate explicit jumps
             auto* castedJ =
                 dynamic_cast<JInstruction*>(textInstructions[i].get());
             if (!castedJ) continue;
+
             size_t offset =
                 max(i + (castedJ->imm / 4), static_cast<unsigned long>(1));
             if (offset >= textInstructions.size()) continue;
             if (castedJ->imm < 0) offset--;
+
+            // If there's already an entry point at the end of the jump
             if (auto* castedE =
                     dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
                 textInstructions[i] = move(
                     make_unique<JInstructionEntry>(castedJ, castedE->name));
-            } else if (auto it = tmps.find(offset); it != tmps.end()) {
+            } else if (auto it = tmps.find(offset);
+                       it != tmps.end()) {  // If a temp entry point has
+                                            // already been added
                 textInstructions[i] =
                     move(make_unique<JInstructionEntry>(castedJ, it->second));
-            } else {
+            } else {  // Otherwise add a new entry points
+
+                // Check if there's already a symbol with the same name as the
+                // new temp entry point (Unlikely to trigger)
                 while (asmFile->getSymbolName(
                            "L.diss." + std::to_string(tmpCount)) != nullopt)
-                    tmpCount++;  // Unlikely to trigger
+                    tmpCount++;
 
+                // Add a new entry point
                 tmps.insert({offset, "L.diss." + std::to_string(tmpCount)});
                 entryPoints.push_back(
                     make_pair("L.diss." + std::to_string(tmpCount),
@@ -359,26 +414,36 @@ shared_ptr<TextSection> disassembleTextSection(
                     castedJ, "L.diss." + std::to_string(tmpCount)));
                 tmpCount++;
             }
-        } else if (textInstructions[i]->op == Opcode::B_TYPE) {
+        } else if (textInstructions[i]->op ==
+                   Opcode::B_TYPE) {  // Translate explicit branches
             auto* castedB =
                 dynamic_cast<BInstruction*>(textInstructions[i].get());
             if (!castedB) continue;
+
             size_t offset =
                 max(i + (castedB->imm / 4), static_cast<unsigned long>(1));
             if (offset >= textInstructions.size()) continue;
             if (castedB->imm < 0) offset--;
+
+            // If there's already an entry point at the end of the jump
             if (auto* castedE =
                     dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
                 textInstructions[i] = move(
                     make_unique<BInstructionEntry>(castedB, castedE->name));
-            } else if (auto it = tmps.find(offset); it != tmps.end()) {
+            } else if (auto it = tmps.find(offset);
+                       it != tmps.end()) {  // If a temp entry point has
+                                            // already been added
                 textInstructions[i] =
                     move(make_unique<BInstructionEntry>(castedB, it->second));
-            } else {
+            } else {  // Otherwise add a new entry points
+
+                // Check if there's already a symbol with the same name as the
+                // new temp entry point (Unlikely to trigger)
                 while (asmFile->getSymbolName(
                            "L.diss." + std::to_string(tmpCount)) != nullopt)
                     tmpCount++;  // Unlikely to trigger
 
+                // Add a new entry point
                 tmps.insert({offset, "L.diss." + std::to_string(tmpCount)});
                 entryPoints.push_back(
                     make_pair("L.diss." + std::to_string(tmpCount),
@@ -390,19 +455,23 @@ shared_ptr<TextSection> disassembleTextSection(
         }
     }
 
+    // New entry points are not inserted into the instructions until the end so
+    // explicit jumps can still accurately calculate difference to existing
+    // entry points
     for (auto tmp : tmps) {
         textInstructions.insert(textInstructions.begin() + tmp.first,
                                 make_unique<EntryPoint>(tmp.second));
     }
 
     size_t i = 0;
-    // Translate unravelled pseudo-intructions that use symbols
+    // Translate unravelled pseudo-intructions
     while (i < textInstructions.size()) {
         auto& instr = textInstructions[i];
         uint32_t symbolAddress;
         vector<Disassembler::Symbol> vars;
 
-        // If it uses a gp relative address, convert from that
+        // If it uses a gp relative address, convert from that to the symbol
+        // name
         if (gpAddress != 0) {
             auto* castedI = dynamic_cast<IInstruction*>(instr.get());
             if (castedI && castedI->instr == Operator::addi &&
@@ -422,7 +491,7 @@ shared_ptr<TextSection> disassembleTextSection(
             }
         }
 
-        // If it uses pc-relative address, convert from that
+        // If it uses pc-relative address, convert from that to the symbol
         if (instr->instr == Operator::auipc &&
             i < textInstructions.size() - 1 &&
             textInstructions[i + 1]->instr == Operator::addi) {
@@ -456,6 +525,7 @@ shared_ptr<TextSection> disassembleTextSection(
 }
 
 unique_ptr<RiscvFile> disassemble(const string& filepath) {
+    // Parse the binary file
     unique_ptr<ELFParser::ELFFile> elffile = ELFParser::parseFile(filepath);
     if (!elffile) return nullptr;
 
@@ -465,8 +535,10 @@ unique_ptr<RiscvFile> disassemble(const string& filepath) {
     const unordered_map<string, unique_ptr<ELFParser::ELFSection>>& sections =
         elffile->getSections();
 
+    // Decode symbol table
     disassembleSymbolTable(asmFile, elffile, sections);
 
+    // Decode the .data section if present and non-empty
     if (auto dataIt = sections.find(".data");
         dataIt != sections.end() && dataIt->second->header->size != 0) {
         auto dataSection = disassembleDataSection(asmFile, (*dataIt).second,
@@ -474,6 +546,7 @@ unique_ptr<RiscvFile> disassemble(const string& filepath) {
         if (!dataSection->empty()) asmFile->addSection(".data", dataSection);
     }
 
+    // Decode the .bss section if present and non-empty
     if (auto bssIt = sections.find(".bss"); bssIt != sections.end()) {
         auto bssSection = disassembleBSSSection(asmFile, (*bssIt).second);
         if (!bssSection->empty()) asmFile->addSection(".bss", bssSection);
