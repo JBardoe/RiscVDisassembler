@@ -45,4 +45,4 @@ int main() {
     return 0;
 }
 
-// TODO catch errors for nice printing
+// NEXT catch errors for nice printing

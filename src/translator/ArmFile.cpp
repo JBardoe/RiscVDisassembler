@@ -24,12 +24,14 @@ bool replaceRegister(
     return writesToOld;
 }
 
-void eliminateRegisterFromBlock(int reg, int start,
-                                int end) {  // TODO implement
-}
-
-std::map<int, std::vector<ArmInstruction>> eliminateRegister(
+std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
     int reg, Disassembler::TextSection* riscTextSection) {
+    std::string regVarName =
+        Disassembler::to_string(static_cast<Disassembler::Register>(reg));
+    std::string regSpillName = regVarName + "Spill";
+
+    std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> ret;
+
     std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>&
         riscTextInstructions = riscTextSection->getInstructions();
     auto registersUsed = riscTextSection->getRegistersUsed();
@@ -42,7 +44,9 @@ std::map<int, std::vector<ArmInstruction>> eliminateRegister(
                             riscTextInstructions, 0,
                             riscTextInstructions.size() - 1);
             registersUsed->erase(reg);
-            return {};  // TODO load into memory
+            ret[1].push_back(std::make_unique<RSInstruction>(
+                Operator::ldr, static_cast<Register>(tempReg), regVarName));
+            return ret;
         }
     }
 
@@ -50,21 +54,29 @@ std::map<int, std::vector<ArmInstruction>> eliminateRegister(
     for (auto block = basicBlocks->begin(); block != basicBlocks->end();
          block++) {
         if (block->first == -1) continue;
+        if (!block->second->count(reg)) continue;
 
         for (auto& tempReg : Disassembler::tempRegisters) {
             if (!block->second->count(static_cast<int>(tempReg))) {
-                replaceRegister(reg, static_cast<int>(tempReg),
-                                riscTextInstructions,
-                                std::prev(block)->first + 1, block->first);
+                bool written = replaceRegister(
+                    reg, static_cast<int>(tempReg), riscTextInstructions,
+                    std::prev(block)->first + 1, block->first);
                 block->second->erase(reg);
 
-                // TODO read into reg
-                // TODO write from reg
-                return {};  // TODO loads and writes
+                ret[std::prev(block)->first + 1].push_back(
+                    std::make_unique<RSInstruction>(
+                        Operator::ldr, static_cast<Register>(tempReg),
+                        regVarName));
+
+                if (written) {
+                    ret[block->first].push_back(std::make_unique<RSInstruction>(
+                        Operator::str, static_cast<Register>(tempReg),
+                        regVarName));
+                }
+                return std::move(ret);
             }
         }
-        eliminateRegisterFromBlock(reg, std::prev(block)->first + 1,
-                                   block->first);
+        // TODO Eliminate Register From Block
     }
 }
 
@@ -91,13 +103,12 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     bool gpSpill = false;
     bool tpSpill = false;
 
-    std::map<int, std::vector<ArmInstruction>> toAdd;
+    std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> toAdd;
 
     // Eliminate tp + gp
     if (registersUsed->count(3)) {
         gpSpill = true;
-        auto temp = eliminateRegister(3, riscTextSection);
-        toAdd.insert(temp.begin(), temp.end());
+        toAdd = std::move(eliminateRegister(3, riscTextSection));
     }
 
     if (registersUsed->count(4)) {
@@ -106,13 +117,17 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 
         for (auto& addition : temp) {
             if (auto it = toAdd.find(addition.first); it != toAdd.end()) {
-                it->second.insert(it->second.end(), addition.second.begin(),
-                                  addition.second.end());
+                it->second.insert(
+                    it->second.end(),
+                    std::make_move_iterator(addition.second.begin()),
+                    std::make_move_iterator(addition.second.end()));
             } else {
-                toAdd.insert(addition);
+                toAdd.insert(std::move(addition));
             }
         }
     }
+
+    // TODO add toAdd to text instruction - if at entrypoint, add after
 
     if (gpSpill || tpSpill) {
         auto dataIt = sections.find(".data");
