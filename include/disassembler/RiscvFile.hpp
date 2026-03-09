@@ -57,8 +57,6 @@ class RiscvFile {
     std::vector<Symbol> getSymbolAddr(uint32_t addr);
     std::vector<Symbol> getSymbolSection(std::string sectionName);
 
-    std::string printSymbolTable();  // TODO remove
-
     /**
      * Gives a string readout of the RISC-V file
      *

@@ -13,6 +13,6 @@ entry_a:
     jal  x0, entry_b
 
 entry_b:
-    addi x3, x0, 3
+    addi x7, x0, 3
     jal  x0, entry_b
 

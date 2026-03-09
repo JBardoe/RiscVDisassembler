@@ -37,6 +37,4 @@ std::vector<Symbol> RiscvFile::getSymbolSection(std::string sectionName) {
     return symbolTable.getSymbolSection(sectionName);
 }
 
-std::string RiscvFile::printSymbolTable() { return symbolTable.toString(); }
-
 }  // namespace Disassembler
