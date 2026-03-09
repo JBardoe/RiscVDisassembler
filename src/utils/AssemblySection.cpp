@@ -87,4 +87,13 @@ const std::string& BSSSection::toString() {
 
     return printOut;
 }
+
+void DataSection::addVariable(std::string name, uint32_t val, uint32_t size) {
+    uint32_t i = 0;
+    while (getVar(i) != std::nullopt) {
+        i++;
+    }
+    addVariable(name, i, val, size);
+}
+
 }  // namespace Assembly

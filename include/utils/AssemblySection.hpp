@@ -55,6 +55,8 @@ class DataSection : public virtual AssemblySection {
     void addVariable(std::string name, uint32_t addr, uint32_t val,
                      uint32_t size);
 
+    void addVariable(std::string name, uint32_t val, uint32_t size);
+
     // TODO check if can be removed
     std::optional<std::reference_wrapper<const Variable>> getVar(
         std::string name);
