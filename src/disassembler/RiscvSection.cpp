@@ -11,11 +11,14 @@ TextSection::TextSection(
     basicBlocks = std::make_shared<
         std::map<int, std::unique_ptr<std::unordered_set<int>>>>();
 
+    basicBlocks->insert({-1, std::make_unique<std::unordered_set<int>>()});
+
     auto liveRegisters = std::make_unique<std::unordered_set<int>>();
 
     for (std::size_t i = 0; i < this->instructions.size(); i++) {
         for (auto& reg : this->instructions[i]->getRegistersUsed()) {
             liveRegisters->insert(static_cast<int>(reg));
+            registersUsed->insert(static_cast<int>(reg));
         }
 
         if (this->instructions[i]->op == Opcode::B_TYPE ||

@@ -74,6 +74,10 @@ enum class Register : int {
     t6,
 };
 
+constexpr std::array<Register, 7> tempRegisters{
+    Register::t0, Register::t1, Register::t2, Register::t3,
+    Register::t4, Register::t5, Register::t6};
+
 /**
  * toString for the register enum
  *
