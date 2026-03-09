@@ -39,6 +39,15 @@ class RiscvInstruction {
 
     virtual std::vector<Register> getRegistersUsed() { return {}; }
 
+    virtual void replaceRegister(Register old, Register replacement) {};
+
+    /**
+     * 0 - does not use register
+     * 1 - reads to register
+     * 2 - write to register
+     */
+    virtual int usesRegister(Register query) {};
+
     Operator instr;        // Instruction
     Opcode op;             // Opcode
     std::string printOut;  // String version of the instruction if it has
@@ -69,6 +78,16 @@ class RInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override {
         return {rd, rs1, rs2};
+    };
+
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+        rs1 = (rs1 == old) ? replacement : rs1;
+        rs2 = (rs2 == old) ? replacement : rs2;
+    }
+
+    int usesRegister(Register query) override {
+        return (rd == query) ? 2 : ((rs1 == query || rs2 == query) ? 1 : 0);
     };
 
     /**
@@ -105,6 +124,15 @@ class IInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {rd, rs1}; };
 
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+        rs1 = (rs1 == old) ? replacement : rs1;
+    }
+
+    int usesRegister(Register query) override {
+        return (rd == query) ? 2 : ((rs1 == query) ? 1 : 0);
+    };
+
     /**
      * I-Type instructions have the form:
      *
@@ -140,6 +168,15 @@ class SInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
 
+    void replaceRegister(Register old, Register replacement) {
+        rs1 = (rs1 == old) ? replacement : rs1;
+        rs2 = (rs2 == old) ? replacement : rs2;
+    }
+
+    int usesRegister(Register query) override {
+        return (rs1 == query || rs2 == query) ? 1 : 0;
+    };
+
     /**
      * S-Type instructions have the form:
      *
@@ -172,6 +209,15 @@ class BInstruction : public virtual RiscvInstruction {
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+
+    void replaceRegister(Register old, Register replacement) {
+        rs1 = (rs1 == old) ? replacement : rs1;
+        rs2 = (rs2 == old) ? replacement : rs2;
+    }
+
+    int usesRegister(Register query) override {
+        return (rs1 == query || rs2 == query) ? 1 : 0;
+    };
 
     /**
      * B-Type instructions have the form:
@@ -206,6 +252,12 @@ class UInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+    }
+
+    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+
     /**
      * U-Type instructions have the form:
      *
@@ -239,6 +291,12 @@ class JInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+    }
+
+    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+
     /**
      * J-Type instructions have the form:
      *
@@ -271,6 +329,12 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::vector<Register> getRegistersUsed() override { return {rd}; };
+
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+    }
+
+    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
      * Pseudo-loads have the form:
@@ -306,6 +370,15 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {rd, rt}; };
 
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+        rt = (rt == old) ? replacement : rt;
+    }
+
+    int usesRegister(Register query) override {
+        return (rd == query || rt == query) ? 1 : 0;
+    };
+
     /**
      * Pseudo-stores have the form:
      *
@@ -340,6 +413,10 @@ class EntryPoint : public virtual RiscvInstruction {
 
     std::vector<Register> getRegistersUsed() override { return {}; };
 
+    void replaceRegister(Register old, Register replacement) {}
+
+    int usesRegister(Register query) override { return 0; };
+
     std::string name;  // Name of the entry point
 };
 
@@ -369,6 +446,15 @@ class BInstructionEntry : public virtual RiscvInstruction {
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+
+    void replaceRegister(Register old, Register replacement) {
+        rs1 = (rs1 == old) ? replacement : rs1;
+        rs2 = (rs2 == old) ? replacement : rs2;
+    }
+
+    int usesRegister(Register query) override {
+        return (rs1 == query || rs2 == query) ? 1 : 0;
+    };
 
     /**
      * B-Type instruction with entry points have the form:
@@ -403,6 +489,12 @@ class JInstructionEntry : public virtual RiscvInstruction {
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::vector<Register> getRegistersUsed() override { return {rd}; };
+
+    void replaceRegister(Register old, Register replacement) {
+        rd = (rd == old) ? replacement : rd;
+    }
+
+    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
      * J-Type instruction with entry points have the form:
