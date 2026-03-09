@@ -34,11 +34,12 @@ class TextSection : public virtual ArmSection {
         std::vector<std::vector<std::unique_ptr<ArmInstruction>>> instructions,
         std::vector<std::pair<std::string, Assembly::SymbolBinding>>
             entryPoints,
-        std::shared_ptr<std::map<int, std::unordered_set<int>>> basicBlocks)
+        std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+            basicBlocks)
         : ArmSection(".text"),
           instructions(std::move(instructions)),
           entryPoints(entryPoints),
-          basicBlocks(basicBlocks) {}
+          basicBlocks(std::move(basicBlocks)) {}
 
     /**
      * toString method to print the text section in assembly form
@@ -53,7 +54,7 @@ class TextSection : public virtual ArmSection {
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
         entryPoints;  // Entry points into the .text section
 
-    std::shared_ptr<std::map<int, std::unordered_set<int>>>
+    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
 };

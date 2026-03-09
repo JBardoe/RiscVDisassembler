@@ -2,6 +2,36 @@
 
 namespace Disassembler {
 
+TextSection::TextSection(
+    std::vector<std::unique_ptr<RiscvInstruction>> instructions,
+    std::vector<std::pair<std::string, Assembly::SymbolBinding>> entryPoints)
+    : RiscvSection(".text"),
+      instructions(std::move(instructions)),
+      entryPoints(entryPoints) {
+    basicBlocks = std::make_shared<
+        std::map<int, std::unique_ptr<std::unordered_set<int>>>>();
+
+    auto liveRegisters = std::make_unique<std::unordered_set<int>>();
+
+    for (std::size_t i = 0; i < instructions.size(); i++) {
+        for (auto& reg : instructions[i]->getRegistersUsed()) {
+            liveRegisters->insert(static_cast<int>(reg));
+        }
+
+        if (instructions[i]->op == Opcode::B_TYPE ||
+            instructions[i]->instr == Operator::jal ||
+            instructions[i]->instr == Operator::jalr) {
+            basicBlocks->insert({i, std::move(liveRegisters)});
+            liveRegisters = std::make_unique<std::unordered_set<int>>();
+        }
+    }
+
+    if (basicBlocks->count(instructions.size() - 1)) {
+        basicBlocks->insert(
+            {instructions.size() - 1, std::move(liveRegisters)});
+    }
+}
+
 const std::string& TextSection::toString() {
     if (this->printOut != "") return this->printOut;
 

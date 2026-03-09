@@ -26,7 +26,8 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 
     sections.insert({".text", std::make_shared<TextSection>(
                                   std::move(instructions),
-                                  riscTextSection->getEntryPoints())});
+                                  riscTextSection->getEntryPoints(),
+                                  riscTextSection->getBasicBlocks())});
 
     // Transfer .data and .bss over directly if present (no changes are
     // required)
