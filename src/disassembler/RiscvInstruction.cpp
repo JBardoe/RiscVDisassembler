@@ -418,7 +418,7 @@ std::vector<std::unique_ptr<Translator::ArmInstruction>> IInstruction::toArm() {
             break;
         case Operator::lw:
             ret.push_back(std::make_unique<Translator::RRIInstruction>(
-                Translator::Operator::ldrsw, wd, wn, imm, false));
+                Translator::Operator::ldr, wd, wn, imm, false));
             break;
         case Operator::lbu:
             ret.push_back(std::make_unique<Translator::RRIInstruction>(
@@ -825,7 +825,7 @@ PseudoLoadInstruction::toArm() {
             break;
         case Operator::lw:
             ret.push_back(std::make_unique<Translator::RSInstruction>(
-                Translator::Operator::ldrsw, wd, symbol));
+                Translator::Operator::ldr, wd, symbol));
             break;
         default:
             break;
