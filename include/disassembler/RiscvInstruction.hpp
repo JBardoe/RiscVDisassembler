@@ -338,6 +338,8 @@ class EntryPoint : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    std::vector<Register> getRegistersUsed() override { return {}; };
+
     std::string name;  // Name of the entry point
 };
 

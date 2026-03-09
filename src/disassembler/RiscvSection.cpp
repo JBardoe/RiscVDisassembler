@@ -13,22 +13,22 @@ TextSection::TextSection(
 
     auto liveRegisters = std::make_unique<std::unordered_set<int>>();
 
-    for (std::size_t i = 0; i < instructions.size(); i++) {
-        for (auto& reg : instructions[i]->getRegistersUsed()) {
+    for (std::size_t i = 0; i < this->instructions.size(); i++) {
+        for (auto& reg : this->instructions[i]->getRegistersUsed()) {
             liveRegisters->insert(static_cast<int>(reg));
         }
 
-        if (instructions[i]->op == Opcode::B_TYPE ||
-            instructions[i]->instr == Operator::jal ||
-            instructions[i]->instr == Operator::jalr) {
+        if (this->instructions[i]->op == Opcode::B_TYPE ||
+            this->instructions[i]->instr == Operator::jal ||
+            this->instructions[i]->instr == Operator::jalr) {
             basicBlocks->insert({i, std::move(liveRegisters)});
             liveRegisters = std::make_unique<std::unordered_set<int>>();
         }
     }
 
-    if (basicBlocks->count(instructions.size() - 1)) {
+    if (!basicBlocks->count(this->instructions.size() - 1)) {
         basicBlocks->insert(
-            {instructions.size() - 1, std::move(liveRegisters)});
+            {this->instructions.size() - 1, std::move(liveRegisters)});
     }
 }
 
