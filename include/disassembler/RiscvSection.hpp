@@ -38,7 +38,7 @@ class TextSection : public virtual RiscvSection {
      */
     const std::string& toString() override;
 
-    const std::vector<std::unique_ptr<RiscvInstruction>>& getInstructions() {
+    std::vector<std::unique_ptr<RiscvInstruction>>& getInstructions() {
         return instructions;
     }
 
@@ -52,6 +52,10 @@ class TextSection : public virtual RiscvSection {
         return basicBlocks;
     }
 
+    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() {
+        return registersUsed;
+    }
+
    private:
     std::vector<std::unique_ptr<RiscvInstruction>>
         instructions;  // Vector of the instructions in the section
@@ -61,6 +65,8 @@ class TextSection : public virtual RiscvSection {
     std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
+
+    std::shared_ptr<std::unordered_set<int>> registersUsed;
 };
 
 }  // namespace Disassembler

@@ -35,11 +35,13 @@ class TextSection : public virtual ArmSection {
         std::vector<std::pair<std::string, Assembly::SymbolBinding>>
             entryPoints,
         std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
-            basicBlocks)
+            basicBlocks,
+        std::shared_ptr<std::unordered_set<int>> registersUsed)
         : ArmSection(".text"),
           instructions(std::move(instructions)),
           entryPoints(entryPoints),
-          basicBlocks(std::move(basicBlocks)) {}
+          basicBlocks(std::move(basicBlocks)),
+          registersUsed(registersUsed) {}
 
     /**
      * toString method to print the text section in assembly form
@@ -47,6 +49,15 @@ class TextSection : public virtual ArmSection {
      * @return string readout version of the section
      */
     const std::string& toString() override;
+
+    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+    getBasicBlocks() {
+        return basicBlocks;
+    }
+
+    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() {
+        return registersUsed;
+    }
 
    private:
     std::vector<std::vector<std::unique_ptr<ArmInstruction>>>
@@ -57,6 +68,8 @@ class TextSection : public virtual ArmSection {
     std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
+
+    std::shared_ptr<std::unordered_set<int>> registersUsed;
 };
 }  // namespace Translator
 
