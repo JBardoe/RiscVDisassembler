@@ -1,7 +1,6 @@
 #include "translator/ArmFile.hpp"
 
 #include <fstream>
-#include <ranges>
 #include <vector>
 
 #include "disassembler/RiscvSection.hpp"
@@ -9,7 +8,8 @@
 namespace Translator {
 
 ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
-    : printOut("") {  // TODO implement
+    : printOut("") {
+    // Translate text instructions into ARM
     auto riscSections = riscFile->getSections();
     auto riscTextSection = dynamic_cast<Disassembler::TextSection*>(
         riscSections.find(".text")->second.get());
@@ -17,25 +17,19 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     const std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>&
         riscTextInstructions = riscTextSection->getInstructions();
 
-    // // TODO deal with jalr when instructions inflate
-    // // TODO eliminate gp and tp
-
-    std::vector<std::vector<std::unique_ptr<ArmInstruction>>> instructions;
+    std::vector<std::vector<std::unique_ptr<ArmInstruction>>>
+        instructions;  // Initially 2D as some instructions expand into two
 
     for (auto& instr : riscTextInstructions) {
         instructions.push_back(std::move(instr->toArm()));
     }
 
-    auto joined = std::ranges::join_view(instructions);
+    sections.insert({".text", std::make_shared<TextSection>(
+                                  std::move(instructions),
+                                  riscTextSection->getEntryPoints())});
 
-    std::vector<std::unique_ptr<ArmInstruction>> all(
-        std::make_move_iterator(joined.begin()),
-        std::make_move_iterator(joined.end()));
-
-    sections.insert(
-        {".text", std::make_shared<TextSection>(
-                      std::move(all), riscTextSection->getEntryPoints())});
-
+    // Transfer .data and .bss over directly if present (no changes are
+    // required)
     if (auto it = riscSections.find(".data"); it != riscSections.end()) {
         sections.insert({".data", it->second});
     }

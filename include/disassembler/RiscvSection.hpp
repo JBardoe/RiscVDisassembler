@@ -1,7 +1,9 @@
 #ifndef RISCVSECTION_H
 #define RISCVSECTION_H
 
+#include <map>
 #include <string>
+#include <unordered_set>
 
 #include "disassembler/RiscvInstruction.hpp"
 #include "translator/ArmInstruction.hpp"
@@ -25,12 +27,15 @@ class RiscvSection : public virtual Assembly::AssemblySection {
  */
 class TextSection : public virtual RiscvSection {
    public:
-    TextSection(std::vector<std::unique_ptr<RiscvInstruction>> instructions,
-                std::vector<std::pair<std::string, Assembly::SymbolBinding>>
-                    entryPoints)
+    TextSection(
+        std::vector<std::unique_ptr<RiscvInstruction>> instructions,
+        std::vector<std::pair<std::string, Assembly::SymbolBinding>>
+            entryPoints,
+        std::shared_ptr<std::map<int, std::unordered_set<int>>> basicBlocks)
         : RiscvSection(".text"),
           instructions(std::move(instructions)),
-          entryPoints(entryPoints) {}
+          entryPoints(entryPoints),
+          basicBlocks(basicBlocks) {}
 
     /**
      * toString method to print the text section in assembly form
@@ -53,6 +58,10 @@ class TextSection : public virtual RiscvSection {
         instructions;  // Vector of the instructions in the section
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
         entryPoints;  // Vector of entry points in the .text section
+
+    std::shared_ptr<std::map<int, std::unordered_set<int>>>
+        basicBlocks;  // Map of ends of basic blocks to a set of live registers
+                      // in that block
 };
 
 }  // namespace Disassembler

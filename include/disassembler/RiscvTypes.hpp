@@ -153,7 +153,7 @@ enum class SymbolType : int {
     LOOS = 10,
     HIOS = 12,
     LOPROC = 13,
-    HIPROC = 15  // TODO bounds checking
+    HIPROC = 15
 };
 
 /**

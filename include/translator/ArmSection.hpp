@@ -1,8 +1,10 @@
 #ifndef ARMSECTION_HPP
 #define ARMSECTION_HPP
 
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -28,12 +30,15 @@ class ArmSection : public virtual Assembly::AssemblySection {
  */
 class TextSection : public virtual ArmSection {
    public:
-    TextSection(std::vector<std::unique_ptr<ArmInstruction>> instructions,
-                std::vector<std::pair<std::string, Assembly::SymbolBinding>>
-                    entryPoints)
+    TextSection(
+        std::vector<std::vector<std::unique_ptr<ArmInstruction>>> instructions,
+        std::vector<std::pair<std::string, Assembly::SymbolBinding>>
+            entryPoints,
+        std::shared_ptr<std::map<int, std::unordered_set<int>>> basicBlocks)
         : ArmSection(".text"),
           instructions(std::move(instructions)),
-          entryPoints(entryPoints) {}
+          entryPoints(entryPoints),
+          basicBlocks(basicBlocks) {}
 
     /**
      * toString method to print the text section in assembly form
@@ -43,10 +48,14 @@ class TextSection : public virtual ArmSection {
     const std::string& toString() override;
 
    private:
-    std::vector<std::unique_ptr<ArmInstruction>>
+    std::vector<std::vector<std::unique_ptr<ArmInstruction>>>
         instructions;  // Vector of the instructions in the section
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
         entryPoints;  // Entry points into the .text section
+
+    std::shared_ptr<std::map<int, std::unordered_set<int>>>
+        basicBlocks;  // Map of ends of basic blocks to a set of live registers
+                      // in that block
 };
 }  // namespace Translator
 

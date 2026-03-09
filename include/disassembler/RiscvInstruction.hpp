@@ -37,6 +37,8 @@ class RiscvInstruction {
         return {};
     }
 
+    virtual std::vector<Register> getRegistersUsed() { return {}; }
+
     Operator instr;        // Instruction
     Opcode op;             // Opcode
     std::string printOut;  // String version of the instruction if it has
@@ -64,6 +66,10 @@ class RInstruction : public virtual RiscvInstruction {
      *
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override {
+        return {rd, rs1, rs2};
+    };
 
     /**
      * R-Type instructions have the form:
@@ -96,6 +102,8 @@ class IInstruction : public virtual RiscvInstruction {
      *
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override { return {rd, rs1}; };
 
     /**
      * I-Type instructions have the form:
@@ -130,6 +138,8 @@ class SInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+
     /**
      * S-Type instructions have the form:
      *
@@ -160,6 +170,8 @@ class BInstruction : public virtual RiscvInstruction {
      * @return Vector of equivalent ARM instructions
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
 
     /**
      * B-Type instructions have the form:
@@ -192,6 +204,8 @@ class UInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    std::vector<Register> getRegistersUsed() override { return {rd}; };
+
     /**
      * U-Type instructions have the form:
      *
@@ -222,6 +236,8 @@ class JInstruction : public virtual RiscvInstruction {
      * @return Vector of equivalent ARM instructions
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override { return {rd}; };
 
     /**
      * J-Type instructions have the form:
@@ -254,6 +270,8 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    std::vector<Register> getRegistersUsed() override { return {rd}; };
+
     /**
      * Pseudo-loads have the form:
      *
@@ -285,6 +303,8 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
      * @return Vector of equivalent ARM instructions
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override { return {rd, rt}; };
 
     /**
      * Pseudo-stores have the form:
@@ -346,6 +366,8 @@ class BInstructionEntry : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+
     /**
      * B-Type instruction with entry points have the form:
      *
@@ -377,6 +399,8 @@ class JInstructionEntry : public virtual RiscvInstruction {
      * @return Vector of equivalent ARM instructions
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
+
+    std::vector<Register> getRegistersUsed() override { return {rd}; };
 
     /**
      * J-Type instruction with entry points have the form:
