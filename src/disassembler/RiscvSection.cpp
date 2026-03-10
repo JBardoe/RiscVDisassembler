@@ -9,15 +9,15 @@ TextSection::TextSection(
       instructions(std::move(instructions)),
       entryPoints(entryPoints) {
     basicBlocks = std::make_shared<
-        std::map<int, std::unique_ptr<std::unordered_set<int>>>>();
+        std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>();
 
-    basicBlocks->insert({-1, std::make_unique<std::unordered_set<int>>()});
+    basicBlocks->insert({-1, std::make_unique<std::unordered_map<int, int>>()});
 
-    auto liveRegisters = std::make_unique<std::unordered_set<int>>();
+    auto liveRegisters = std::make_unique<std::unordered_map<int, int>>();
 
     for (std::size_t i = 0; i < this->instructions.size(); i++) {
         for (auto& reg : this->instructions[i]->getRegistersUsed()) {
-            liveRegisters->insert(static_cast<int>(reg));
+            (*liveRegisters)[static_cast<int>(reg)]++;
             registersUsed->insert(static_cast<int>(reg));
         }
 
@@ -25,7 +25,7 @@ TextSection::TextSection(
             this->instructions[i]->instr == Operator::jal ||
             this->instructions[i]->instr == Operator::jalr) {
             basicBlocks->insert({i, std::move(liveRegisters)});
-            liveRegisters = std::make_unique<std::unordered_set<int>>();
+            liveRegisters = std::make_unique<std::unordered_map<int, int>>();
         }
     }
 

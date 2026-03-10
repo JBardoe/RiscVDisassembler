@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -34,7 +35,8 @@ class TextSection : public virtual ArmSection {
         std::vector<std::vector<std::unique_ptr<ArmInstruction>>> instructions,
         std::vector<std::pair<std::string, Assembly::SymbolBinding>>
             entryPoints,
-        std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+        std::shared_ptr<
+            std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
             basicBlocks,
         std::shared_ptr<std::unordered_set<int>> registersUsed)
         : ArmSection(".text"),
@@ -50,7 +52,8 @@ class TextSection : public virtual ArmSection {
      */
     const std::string& toString() override;
 
-    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+    std::shared_ptr<
+        std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
     getBasicBlocks() {
         return basicBlocks;
     }
@@ -65,7 +68,8 @@ class TextSection : public virtual ArmSection {
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
         entryPoints;  // Entry points into the .text section
 
-    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+    std::shared_ptr<
+        std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
 

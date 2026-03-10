@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "disassembler/RiscvInstruction.hpp"
@@ -47,7 +48,8 @@ class TextSection : public virtual RiscvSection {
         return entryPoints;
     }
 
-    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+    std::shared_ptr<
+        std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
     getBasicBlocks() {
         return basicBlocks;
     }
@@ -62,7 +64,8 @@ class TextSection : public virtual RiscvSection {
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
         entryPoints;  // Vector of entry points in the .text section
 
-    std::shared_ptr<std::map<int, std::unique_ptr<std::unordered_set<int>>>>
+    std::shared_ptr<
+        std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
 
