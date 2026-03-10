@@ -8,6 +8,8 @@ TextSection::TextSection(
     : RiscvSection(".text"),
       instructions(std::move(instructions)),
       entryPoints(entryPoints) {
+    registersUsed = std::make_shared<std::unordered_set<int>>();
+
     basicBlocks = std::make_shared<
         std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>();
 
