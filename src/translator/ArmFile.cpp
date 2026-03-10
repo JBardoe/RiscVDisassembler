@@ -184,7 +184,6 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 
     // Eliminate tp + gp
     if (registersUsed->count(3)) {
-        // TODO Check if can replace w/ imm
         gpSpill = true;
         toAdd = std::move(eliminateRegister(3, riscTextSection));
     }
@@ -204,8 +203,6 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
             }
         }
     }
-
-    // TODO add toAdd to text instruction - if at entrypoint, add after
 
     if (gpSpill || tpSpill) {
         auto dataIt = sections.find(".data");
@@ -236,6 +233,18 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 
     for (auto& instr : riscTextInstructions) {
         instructions.push_back(std::move(instr->toArm()));
+    }
+
+    for (auto& addition : toAdd) {
+        int i = addition.first;
+
+        while (instructions[i][0]->instr == Operator::entry) {
+            i++;
+        }
+
+        instructions[i].insert(instructions[i].begin(),
+                               std::make_move_iterator(addition.second.begin()),
+                               std::make_move_iterator(addition.second.end()));
     }
 
     sections.insert(
