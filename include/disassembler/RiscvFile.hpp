@@ -46,6 +46,19 @@ class RiscvFile {
                    SymbolType type, Assembly::SymbolBinding binding,
                    std::string sectionName);
 
+    void addVariable(std::string name, uint32_t val, uint32_t size) {
+        if (auto it = sections.find(".data"); it != sections.end()) {
+            if (auto* data =
+                    dynamic_cast<Assembly::DataSection*>(it->second.get())) {
+                data->addVariable(name, val, size);
+            }
+        } else {
+            auto dataSection = std::make_unique<Assembly::DataSection>();
+            dataSection->addVariable(name, val, size);
+            addSection(".data", std::move(dataSection));
+        }
+    }
+
     /**
      * Getters for the symbols from the symbol table from the:
      * getSymbolName - Name of the symbol

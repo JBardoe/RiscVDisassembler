@@ -486,6 +486,11 @@ shared_ptr<TextSection> disassembleTextSection(
 
                 textInstructions[i] = move(make_unique<PseudoLoadInstruction>(
                     Operator::la, castedI->rd, vars[0].name));
+
+                if (vars[0].name == "__global_pointer$") {
+                    asmFile->addVariable("__global_pointer$", gpAddress, 4);
+                }
+
                 i++;
                 continue;
             }
@@ -514,6 +519,11 @@ shared_ptr<TextSection> disassembleTextSection(
 
                 textInstructions[i] = move(make_unique<PseudoLoadInstruction>(
                     Operator::la, castedADDI->rd, vars[0].name));
+
+                if (vars[0].name == " __global_pointer$") {
+                    asmFile->addVariable("__global_pointer$", gpAddress, 4);
+                }
+
                 textInstructions.erase(textInstructions.begin() + i + 1,
                                        textInstructions.begin() + i + 2);
             }

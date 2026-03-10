@@ -19,7 +19,8 @@ unique_ptr<ELFFile> parseFile(const string& filepath) {
 
     filestream->open(filepath, ifstream::in | ifstream::binary);
 
-    if (filestream->fail()) throw BadFileException("Failed to open file");
+    if (filestream->fail())
+        throw BadFileException("Failed to open file: " + filepath);
 
     auto hdr = parseHeader(*filestream);
     auto file = make_unique<ELFFile>(move(filestream), move(hdr));
