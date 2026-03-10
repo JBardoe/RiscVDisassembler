@@ -17,8 +17,8 @@ namespace Disassembler {
 class RiscvInstruction {
    public:
     RiscvInstruction() : printOut("") {}
-    RiscvInstruction(Operator instr) : instr(instr) {}
     RiscvInstruction(Opcode op) : op(op) {}
+    RiscvInstruction(Opcode op, Operator instr) : instr(instr), op(op) {}
     virtual ~RiscvInstruction() = default;
 
     /**
@@ -39,7 +39,7 @@ class RiscvInstruction {
 
     virtual std::vector<Register> getRegistersUsed() { return {}; }
 
-    virtual void replaceRegister(Register old, Register replacement) {};
+    virtual void replaceRegister(Register old, Register replacement) {}
 
     /**
      * 0 - does not use register
@@ -312,7 +312,7 @@ class JInstruction : public virtual RiscvInstruction {
 class PseudoLoadInstruction : public virtual RiscvInstruction {
    public:
     PseudoLoadInstruction(Operator instr, Register rd, std::string symbol)
-        : RiscvInstruction(instr), rd(rd), symbol(symbol) {};
+        : RiscvInstruction(Opcode::LOAD, instr), rd(rd), symbol(symbol) {};
 
     /**
      * toString method to print the instruction in assembly form
@@ -352,7 +352,10 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
    public:
     PseudoStoreInstruction(Operator instr, Register rd, std::string symbol,
                            Register rt)
-        : RiscvInstruction(instr), rd(rd), symbol(symbol), rt(rt) {}
+        : RiscvInstruction(Opcode::S_TYPE, instr),
+          rd(rd),
+          symbol(symbol),
+          rt(rt) {}
 
     /**
      * toString method to print the instruction in assembly form
@@ -395,7 +398,7 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
 class EntryPoint : public virtual RiscvInstruction {
    public:
     EntryPoint(std::string name)
-        : RiscvInstruction(Operator::entry), name(name) {};
+        : RiscvInstruction(Opcode::ENTRY, Operator::entry), name(name) {};
 
     /**
      * toString method to print the instruction in assembly form
@@ -426,7 +429,7 @@ class EntryPoint : public virtual RiscvInstruction {
 class BInstructionEntry : public virtual RiscvInstruction {
    public:
     BInstructionEntry(BInstruction* old, std::string entryPoint)
-        : RiscvInstruction(old->instr),
+        : RiscvInstruction(Opcode::B_TYPE, old->instr),
           rs1(old->rs1),
           rs2(old->rs2),
           entryPoint(entryPoint) {}
@@ -472,7 +475,9 @@ class BInstructionEntry : public virtual RiscvInstruction {
 class JInstructionEntry : public virtual RiscvInstruction {
    public:
     JInstructionEntry(JInstruction* old, std::string entryPoint)
-        : RiscvInstruction(old->instr), rd(old->rd), entryPoint(entryPoint) {}
+        : RiscvInstruction(Opcode::JAL, old->instr),
+          rd(old->rd),
+          entryPoint(entryPoint) {}
 
     /**
      * toString method to print the instruction in assembly form
