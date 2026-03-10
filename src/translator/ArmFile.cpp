@@ -76,7 +76,7 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
                         Operator::str, static_cast<Register>(tempReg),
                         regVarName));
                 }
-                return std::move(ret);
+                return ret;
             }
         }
         int i = std::prev(block)->first + 1;

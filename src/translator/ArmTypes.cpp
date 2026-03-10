@@ -103,8 +103,8 @@ std::string to_string(Operator i) {
             return "ldrsb";
         case Operator::ldrsh:
             return "ldrsh";
-        case Operator::ldrsw:
-            return "ldrsw";
+        case Operator::ldr:
+            return "ldr";
         case Operator::ldrb:
             return "ldrb";
         case Operator::ldrh:

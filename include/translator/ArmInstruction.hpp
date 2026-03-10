@@ -203,7 +203,7 @@ class EInstruction : public virtual ArmInstruction {
 /**
  * Represents an instruction that uses a register and symbol
  *
- * Includes: adr, ldrsb, ldrsh, ldrsw, strb, strh, str
+ * Includes: adr, ldrsb, ldrsh, ldr, strb, strh, str
  */
 class RSInstruction : public virtual ArmInstruction {
    public:

@@ -86,8 +86,8 @@ const std::string& RRIInstruction::toString() {
         case Operator::ldrsh:
             suffix = "[0:15] (sign-extends)";
             goto loads;
-        case Operator::ldrsw:
-            suffix = "[0:31] (sign-extends)";
+        case Operator::ldr:
+            suffix = "[0:31]";
             goto loads;
         case Operator::ldrb:
             suffix = "[0:7] (zero-entends)";
@@ -321,7 +321,7 @@ const std::string& RSInstruction::toString() {
     printOut = "\t" + to_string(instr) + ", " + to_string(wd) + ", ";
 
     if (instr == Operator::ldrsb || instr == Operator::ldrsh ||
-        instr == Operator::ldrsw) {
+        instr == Operator::ldr) {
         printOut += "[" + symbol + "]";
     } else {
         printOut += symbol;
@@ -341,7 +341,7 @@ const std::string& RSInstruction::toString() {
         case Operator::ldrsh:
             suffix = "[0:15]";
             goto loads;
-        case Operator::ldrsw:
+        case Operator::ldr:
             suffix = "[0:31]";
         loads:
             printOut += to_string(wd) + " = " + symbol + suffix;

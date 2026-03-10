@@ -39,7 +39,7 @@ class RiscvInstruction {
 
     virtual std::vector<Register> getRegistersUsed() { return {}; }
 
-    virtual void replaceRegister(Register old, Register replacement) {}
+    virtual void replaceRegister(Register, Register) {}
 
     /**
      * 0 - does not use register
