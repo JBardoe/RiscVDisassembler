@@ -46,7 +46,7 @@ class RiscvInstruction {
      * 1 - reads to register
      * 2 - write to register
      */
-    virtual int usesRegister(Register query) {};
+    virtual int usesRegister(Register) { return 0; };
 
     Operator instr;        // Instruction
     Opcode op;             // Opcode
@@ -415,10 +415,6 @@ class EntryPoint : public virtual RiscvInstruction {
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
     std::vector<Register> getRegistersUsed() override { return {}; };
-
-    void replaceRegister(Register old, Register replacement) {}
-
-    int usesRegister(Register query) override { return 0; };
 
     std::string name;  // Name of the entry point
 };
