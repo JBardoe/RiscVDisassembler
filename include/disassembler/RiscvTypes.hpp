@@ -15,6 +15,7 @@ namespace Disassembler {
  * All possible RISC-V opcodes
  */
 enum class Opcode : int {
+    ENTRY = 0,
     LOAD = 3,
     IMM_INSTR = 19,
     AUIPC = 23,
@@ -31,10 +32,10 @@ enum class Opcode : int {
  * Constant lookup table to match opcodes to the enum
  */
 static const std::unordered_map<unsigned char, Opcode> opcodeMap = {
-    {0x03, Opcode::LOAD},    {0x13, Opcode::IMM_INSTR}, {0x17, Opcode::AUIPC},
-    {0x23, Opcode::S_TYPE},  {0x33, Opcode::R_TYPE},    {0x37, Opcode::LUI},
-    {0x63, Opcode::B_TYPE},  {0x67, Opcode::JALR},      {0x6F, Opcode::JAL},
-    {0x73, Opcode::ENV_TYPE}};
+    {0x03, Opcode::LOAD},     {0x13, Opcode::IMM_INSTR}, {0x17, Opcode::AUIPC},
+    {0x23, Opcode::S_TYPE},   {0x33, Opcode::R_TYPE},    {0x37, Opcode::LUI},
+    {0x63, Opcode::B_TYPE},   {0x67, Opcode::JALR},      {0x6F, Opcode::JAL},
+    {0x73, Opcode::ENV_TYPE}, {0x00, Opcode::ENTRY}};
 
 /**
  * All RISC-V registers (underlying int value equals the address)
