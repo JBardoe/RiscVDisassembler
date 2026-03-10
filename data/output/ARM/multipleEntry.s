@@ -14,6 +14,6 @@ entry_a:
 	b entry_b               // Branch to entry_b 
 
 entry_b:
-	add xxgp, wzr, #3       // xxgp = wzr + 3
+	add w11, wzr, #3        // w11 = wzr + 3
 	b entry_b               // Branch to entry_b 
 

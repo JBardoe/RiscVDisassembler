@@ -13,6 +13,6 @@ entry_a:
 	jal zero, entry_b       # zero = PC+4; PC = &entry_b
 
 entry_b:
-	addi gp, zero, 3        # gp = zero + 3
+	addi t2, zero, 3        # t2 = zero + 3
 	jal zero, entry_b       # zero = PC+4; PC = &entry_b
 
