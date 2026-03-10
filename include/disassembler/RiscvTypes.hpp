@@ -1,10 +1,10 @@
 #ifndef RISCVTYPES_H
 #define RISCVTYPES_H
 
-#include <array>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "parser/ELFFile.hpp"
 #include "utils/AssemblyTypes.hpp"
@@ -74,7 +74,7 @@ enum class Register : int {
     t6,
 };
 
-constexpr std::array<Register, 7> tempRegisters{
+static const std::unordered_set<Register> tempRegisters{
     Register::t0, Register::t1, Register::t2, Register::t3,
     Register::t4, Register::t5, Register::t6};
 

@@ -1,6 +1,9 @@
 #include "translator/ArmFile.hpp"
 
+#include <algorithm>
+#include <array>
 #include <fstream>
+#include <ranges>
 #include <vector>
 
 #include "disassembler/RiscvSection.hpp"
@@ -76,8 +79,82 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
                 return std::move(ret);
             }
         }
-        // TODO Eliminate Register From Block
+        int i = std::prev(block)->first + 1;
+
+        // NOTE performance inefficient but much better resulting code
+        while (i <= block->first) {
+            // Find the next instruction using the register to be eliminated
+            while (i <= block->first &&
+                   riscTextInstructions[i]->usesRegister(
+                       static_cast<Disassembler::Register>(reg)) == 0) {
+                i++;
+            }
+
+            if (i > block->first) break;  // Should not trigger
+
+            std::array<int, 7> nextTmpUse{-1, -1, -1, -1, -1, -1, -1};
+            int count = 0;
+            int j = i;
+
+            while (j <= block->first && count < 7) {
+                for (auto& usedReg :
+                     riscTextInstructions[j]->getRegistersUsed()) {
+                    if (Disassembler::tempRegisters.count(usedReg)) {
+                        int index =
+                            static_cast<int>(usedReg) -
+                            ((usedReg < Disassembler::Register::t3) ? 5 : 25);
+
+                        if (nextTmpUse[index] == -1) {
+                            nextTmpUse[index] = j;
+                            count++;
+                        }
+                    }
+                }
+                j++;
+            }
+
+            std::array<int, 7> indexes = {0, 1, 2, 3, 4, 5, 6};
+
+            std::sort(indexes.begin(), indexes.end(), [&](int a, int b) {
+                return nextTmpUse[a] < nextTmpUse[b];
+            });
+
+            bool written = false;
+            int tempReg = -1;
+
+            if (nextTmpUse[indexes.front()] == -1) {
+                tempReg = indexes.front() + ((indexes.front() < 3) ? 5 : 25);
+                written = replaceRegister(reg, tempReg, riscTextInstructions, i,
+                                          block->first);
+                j = block->first;
+            } else {
+                tempReg = indexes.back() + ((indexes.back() < 3) ? 5 : 25);
+                written = replaceRegister(reg, tempReg, riscTextInstructions, i,
+                                          nextTmpUse[indexes.back()] - 1);
+                j = nextTmpUse[indexes.back()];
+            }
+
+            ret[i].push_back(std::make_unique<RSInstruction>(
+                Operator::str, static_cast<Register>(tempReg), regSpillName));
+
+            ret[i].push_back(std::make_unique<RSInstruction>(
+                Operator::ldr, static_cast<Register>(tempReg), regVarName));
+
+            if (written) {
+                ret[j].push_back(std::make_unique<RSInstruction>(
+                    Operator::str, static_cast<Register>(tempReg), regVarName));
+            }
+
+            if (j == nextTmpUse[indexes.back()]) {
+                ret[j].push_back(std::make_unique<RSInstruction>(
+                    Operator::ldr, static_cast<Register>(tempReg),
+                    regSpillName));
+            }
+
+            i = j;
+        }
     }
+    return ret;
 }
 
 ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
@@ -107,6 +184,7 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
 
     // Eliminate tp + gp
     if (registersUsed->count(3)) {
+        // TODO Check if can replace w/ imm
         gpSpill = true;
         toAdd = std::move(eliminateRegister(3, riscTextSection));
     }
