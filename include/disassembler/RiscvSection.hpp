@@ -69,7 +69,8 @@ class TextSection : public virtual RiscvSection {
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
 
-    std::shared_ptr<std::unordered_set<int>> registersUsed;
+    std::shared_ptr<std::unordered_set<int>>
+        registersUsed;  // The registers used in the file
 };
 
 }  // namespace Disassembler

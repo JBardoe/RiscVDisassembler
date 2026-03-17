@@ -75,6 +75,9 @@ enum class Register : int {
     t6,
 };
 
+/**
+ * Lookup for the temporary register values
+ */
 static const std::unordered_set<Register> tempRegisters{
     Register::t0, Register::t1, Register::t2, Register::t3,
     Register::t4, Register::t5, Register::t6};

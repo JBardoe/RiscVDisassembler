@@ -37,14 +37,27 @@ class RiscvInstruction {
         return {};
     }
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     virtual std::vector<Register> getRegistersUsed() { return {}; }
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     virtual void replaceRegister(Register, Register) {}
 
     /**
-     * 0 - does not use register
-     * 1 - reads to register
-     * 2 - write to register
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
      */
     virtual int usesRegister(Register) { return 0; };
 
@@ -76,16 +89,34 @@ class RInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override {
         return {rd, rs1, rs2};
     };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
         rs1 = (rs1 == old) ? replacement : rs1;
         rs2 = (rs2 == old) ? replacement : rs2;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rd == query) ? 2 : ((rs1 == query || rs2 == query) ? 1 : 0);
     };
@@ -122,13 +153,31 @@ class IInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd, rs1}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
         rs1 = (rs1 == old) ? replacement : rs1;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rd == query) ? 2 : ((rs1 == query) ? 1 : 0);
     };
@@ -166,13 +215,31 @@ class SInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rs1 = (rs1 == old) ? replacement : rs1;
         rs2 = (rs2 == old) ? replacement : rs2;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
@@ -208,13 +275,31 @@ class BInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rs1 = (rs1 == old) ? replacement : rs1;
         rs2 = (rs2 == old) ? replacement : rs2;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
@@ -250,12 +335,30 @@ class UInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
@@ -289,12 +392,30 @@ class JInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
@@ -328,12 +449,30 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
@@ -371,13 +510,31 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd, rt}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
         rt = (rt == old) ? replacement : rt;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rd == query || rt == query) ? 1 : 0;
     };
@@ -414,8 +571,6 @@ class EntryPoint : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
-    std::vector<Register> getRegistersUsed() override { return {}; };
-
     std::string name;  // Name of the entry point
 };
 
@@ -444,13 +599,31 @@ class BInstructionEntry : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rs1 = (rs1 == old) ? replacement : rs1;
         rs2 = (rs2 == old) ? replacement : rs2;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
@@ -489,12 +662,30 @@ class JInstructionEntry : public virtual RiscvInstruction {
      */
     std::vector<std::unique_ptr<Translator::ArmInstruction>> toArm() override;
 
+    /**
+     * Get the registers used in the instruction
+     * @return a vector of the instructions used
+     */
     std::vector<Register> getRegistersUsed() override { return {rd}; };
 
+    /**
+     * Swaps out any uses of the the first argument in the instruction, with the
+     * second register
+     * @param old the register to replace
+     * @param replacement the new register
+     */
     void replaceRegister(Register old, Register replacement) {
         rd = (rd == old) ? replacement : rd;
     }
 
+    /**
+     * Queries whether an instruction uses a given register
+     * @param query the register to check
+     * @returns:
+     *      0 - does not use register
+     *      1 - reads to register
+     *      2 - writes to register
+     */
     int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
 
     /**
