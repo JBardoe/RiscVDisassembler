@@ -73,7 +73,8 @@ class TextSection : public virtual ArmSection {
         basicBlocks;  // Map of ends of basic blocks to a set of live registers
                       // in that block
 
-    std::shared_ptr<std::unordered_set<int>> registersUsed;
+    std::shared_ptr<std::unordered_set<int>>
+        registersUsed;  // Registers used in a file
 };
 }  // namespace Translator
 

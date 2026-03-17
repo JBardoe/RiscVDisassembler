@@ -6,7 +6,7 @@
 namespace Translator {
 
 /**
- * Enum representing an AArch64 register (matching order to the RISC-V register
+ * Enum representing an ARM64 register (matching order to the RISC-V register
  * enum)
  */
 enum class Register : int {
