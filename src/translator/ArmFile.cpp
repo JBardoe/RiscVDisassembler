@@ -10,6 +10,16 @@
 
 namespace Translator {
 
+/**
+ * Replaces all references to a register with another in a given section
+ * @param older the register to replace
+ * @param newer the replacement register
+ * @param instructions the instructions to replace over
+ * @param start start index of the section in which to replace
+ * @param end end index of the section in which to replace
+ *
+ * @return whether the replaced register was ever written to
+ */
 bool replaceRegister(
     int older, int newer,
     std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>& instructions,
@@ -27,20 +37,32 @@ bool replaceRegister(
     return writesToOld;
 }
 
-std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
-    int reg, Disassembler::TextSection* riscTextSection) {
+/**
+ * Eliminates a register from a .text section
+ * @param reg the register to eliminate
+ * @param riscTextSection the .text section to eliminate from (in RISC-V)
+ *
+ * @return a map of the instructions to insert to allow for the elimination in
+ * the form (index to insert before, instructions to insert)
+ */
+std::unordered_map<int, std::vector<std::unique_ptr<ArmInstruction>>>
+eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
+    // Names of the variables inserted to allow for spilling
     std::string regVarName =
-        Disassembler::to_string(static_cast<Disassembler::Register>(reg));
-    std::string regSpillName = regVarName + "Spill";
+        Disassembler::to_string(static_cast<Disassembler::Register>(
+            reg));  // Spilled value of the register
+    std::string regSpillName =
+        regVarName + "Spill";  // Spilled value of the register the previous
+                               // variable is loaded into
 
-    std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> ret;
+    std::unordered_map<int, std::vector<std::unique_ptr<ArmInstruction>>> ret;
 
     std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>&
         riscTextInstructions = riscTextSection->getInstructions();
     auto registersUsed = riscTextSection->getRegistersUsed();
     auto basicBlocks = riscTextSection->getBasicBlocks();
 
-    // If can be replaced globally
+    // Check if the register can be replaced globally with another free register
     for (auto& tempReg : Disassembler::tempRegisters) {
         if (!registersUsed->count(static_cast<int>(tempReg))) {
             replaceRegister(reg, static_cast<int>(tempReg),
@@ -53,12 +75,15 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
         }
     }
 
-    // Replace locally
+    // Otherwise, replace locally
     for (auto block = basicBlocks->begin(); block != basicBlocks->end();
          block++) {
-        if (block->first == -1) continue;
-        if (!block->second->count(reg)) continue;
+        if (block->first == -1) continue;  // Skip the empty first block
+        if (!block->second->count(reg))
+            continue;  // Skip blocks that don't use the register
 
+        // Check if any temp register is not used in this block and use it for
+        // the eliminated register if so
         for (auto& tempReg : Disassembler::tempRegisters) {
             if (!block->second->count(static_cast<int>(tempReg))) {
                 bool written = replaceRegister(
@@ -79,8 +104,11 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
                 return ret;
             }
         }
-        int i = std::prev(block)->first + 1;
 
+        int i =
+            std::prev(block)->first + 1;  // Base instruction of the register
+
+        // Replace locally within the block
         // NOTE performance inefficient but much better resulting code
         while (i <= block->first) {
             // Find the next instruction using the register to be eliminated
@@ -92,10 +120,15 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
 
             if (i > block->first) break;  // Should not trigger
 
-            std::array<int, 7> nextTmpUse{-1, -1, -1, -1, -1, -1, -1};
+            std::array<int, 7> nextTmpUse{
+                -1, -1, -1, -1,
+                -1, -1, -1};  // Index of the next time each temp instruction is
+                              // used
             int count = 0;
             int j = i;
 
+            // Iterate over all the remaining instructions or until all temps
+            // have been used and mark the index of their next use
             while (j <= block->first && count < 7) {
                 for (auto& usedReg :
                      riscTextInstructions[j]->getRegistersUsed()) {
@@ -113,6 +146,7 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
                 j++;
             }
 
+            // Sort the indexes to find the last used temp
             std::array<int, 7> indexes = {0, 1, 2, 3, 4, 5, 6};
 
             std::sort(indexes.begin(), indexes.end(), [&](int a, int b) {
@@ -122,18 +156,21 @@ std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> eliminateRegister(
             bool written = false;
             int tempReg = -1;
 
+            // If there is a temp that is never used again, it can be used for
+            // the eliminated register
             if (nextTmpUse[indexes.front()] == -1) {
                 tempReg = indexes.front() + ((indexes.front() < 3) ? 5 : 25);
                 written = replaceRegister(reg, tempReg, riscTextInstructions, i,
                                           block->first);
                 j = block->first;
-            } else {
+            } else {  // Otherwise use the last used temp
                 tempReg = indexes.back() + ((indexes.back() < 3) ? 5 : 25);
                 written = replaceRegister(reg, tempReg, riscTextInstructions, i,
                                           nextTmpUse[indexes.back()] - 1);
                 j = nextTmpUse[indexes.back()];
             }
 
+            // Add the code required to load and store the register
             ret[i].push_back(std::make_unique<RSInstruction>(
                 Operator::str, static_cast<Register>(tempReg), regSpillName));
 
@@ -177,10 +214,11 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
         sections.insert({".bss", it->second});
     }
 
+    // Whether gp and tp need to be spilled
     bool gpSpill = false;
     bool tpSpill = false;
 
-    std::map<int, std::vector<std::unique_ptr<ArmInstruction>>> toAdd;
+    std::unordered_map<int, std::vector<std::unique_ptr<ArmInstruction>>> toAdd;
 
     // Eliminate tp + gp
     if (registersUsed->count(3)) {
@@ -204,6 +242,7 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
         }
     }
 
+    // If gp or tp need to be spilled, add variables to do that
     if (gpSpill || tpSpill) {
         auto dataIt = sections.find(".data");
         if (dataIt == sections.end()) {
@@ -216,7 +255,8 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
             dynamic_cast<Assembly::DataSection*>(dataIt->second.get());
 
         if (gpSpill) {
-            auto gpSym = riscFile->getSymbolName("__global_pointer$");
+            auto gpSym = riscFile->getSymbolName(
+                "__global_pointer$");  // Get gp initial value
             dataSection->addVariable(
                 "gp", (gpSym.has_value()) ? gpSym.value().get().addr : 0, 4);
             dataSection->addVariable("gpSpill", 0, 4);
@@ -235,6 +275,7 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
         instructions.push_back(std::move(instr->toArm()));
     }
 
+    // Add in the the instructions needed to spill the registers
     for (auto& addition : toAdd) {
         int i = addition.first;
 
