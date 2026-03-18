@@ -5,9 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include "analyser/Analyser.hpp"
 #include "disassembler/Disassembler.hpp"
-#include "parser/ELFFile.hpp"
-#include "parser/Parser.hpp"
 #include "translator/ArmFile.hpp"
 
 int main() {
@@ -40,6 +39,8 @@ int main() {
 
         riscFile->writeToFile(fileName);
         armFile.writeToFile(fileName);
+
+        Analyser::analyse(armFile);
     }
 
     return 0;

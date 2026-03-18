@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "analyser/AnalysisTypes.hpp"
 #include "disassembler/RiscvFile.hpp"
 #include "translator/ArmSection.hpp"
 #include "utils/AssemblySection.hpp"
@@ -31,10 +32,20 @@ class ArmFile {
      */
     void writeToFile(std::string fileName);
 
+    void setAnalysis(std::unique_ptr<Analyser::Analysis> analysisReport) {
+        this->analysisReport = std::move(analysisReport);
+    }
+
+    const std::unique_ptr<Analyser::Analysis>& getAnalysis() {
+        return analysisReport;
+    }
+
    private:
     std::string printOut;  // String readout of the file
     std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>
         sections;  // Map of the sections in the file
+
+    std::unique_ptr<Analyser::Analysis> analysisReport;
 };
 
 }  // namespace Translator
