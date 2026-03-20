@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "analyser/AnalysisTypes.hpp"
 #include "translator/ArmTypes.hpp"
 
 namespace Translator {
@@ -25,6 +26,8 @@ class ArmInstruction {
 
     Operator instr;        // Instruction
     std::string printOut;  // String version of the instruction
+    Analyser::InstructionAnalysis
+        analysis;  // Grouped useful data for the analyser
 };
 
 /**

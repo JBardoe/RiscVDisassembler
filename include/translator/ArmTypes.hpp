@@ -44,6 +44,7 @@ enum class Register : int {
     w15,
     lt,
     lo,
+    empty,  // Stand-in register
 };
 
 /**
