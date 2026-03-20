@@ -13,7 +13,11 @@ namespace Translator {
  */
 class ArmInstruction {
    public:
-    ArmInstruction(Operator instr) : instr(instr), printOut("") {}
+    ArmInstruction(Operator instr)
+        : instr(instr),
+          printOut(""),
+          analysis(Analyser::InstructionAnalysis(
+              {}, Register::empty, Analyser::InstructionClass::OTHER, -1)) {}
     virtual ~ArmInstruction() = default;
 
     /**
@@ -24,8 +28,20 @@ class ArmInstruction {
      */
     virtual const std::string& toString() { return this->printOut; };
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    virtual const Analyser::InstructionAnalysis& getAnalysis() {
+        return analysis;
+    }
+
     Operator instr;        // Instruction
     std::string printOut;  // String version of the instruction
+
+   protected:
     Analyser::InstructionAnalysis
         analysis;  // Grouped useful data for the analyser
 };
@@ -46,6 +62,14 @@ class RRRInstruction : public virtual ArmInstruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
+
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
 
     // The three registers in the order they are listed in the instruction
     Register wd;
@@ -70,6 +94,14 @@ class RRInstruction : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // The two registers in the order they are listed in the instruction
     Register wd;
     Register wn;
@@ -92,6 +124,14 @@ class RRIInstruction : public virtual ArmInstruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
+
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
 
     // The two registers and immediate in the order of the instruction
     Register wd;
@@ -119,6 +159,14 @@ class RIInstruction : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // The register and immediate in the order they are listed in the
     // instruction
     Register wd;
@@ -141,6 +189,14 @@ class BIInstruction : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // Branch immediate
     int imm;
 };
@@ -162,6 +218,14 @@ class BLInstruction : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // Label to jump to
     std::string label;
 };
@@ -182,6 +246,14 @@ class BRInstruction : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // The register whose value to jump to
     Register wd;
 };
@@ -201,6 +273,14 @@ class EInstruction : public virtual ArmInstruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
+
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
 };
 
 /**
@@ -219,6 +299,14 @@ class RSInstruction : public virtual ArmInstruction {
      * @return string readout version of the instruction
      */
     const std::string& toString() override;
+
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
 
     // The register and symbol
     Register wd;

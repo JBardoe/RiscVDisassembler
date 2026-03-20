@@ -50,6 +50,10 @@ const std::string& RRRInstruction::toString() {
     return printOut;
 }
 
+const Analyser::InstructionAnalysis&
+RRRInstruction::getAnalysis() {  // TODO implement
+}
+
 const std::string& RRInstruction::toString() {
     if (printOut != "") return printOut;
 
@@ -70,6 +74,10 @@ const std::string& RRInstruction::toString() {
     }
 
     return printOut;
+}
+
+const Analyser::InstructionAnalysis&
+RRInstruction::getAnalysis() {  // TODO implement
 }
 
 const std::string& RRIInstruction::toString() {
@@ -165,6 +173,10 @@ const std::string& RRIInstruction::toString() {
     return printOut;
 }
 
+const Analyser::InstructionAnalysis&
+RRIInstruction::getAnalysis() {  // TODO implement
+}
+
 const std::string& RIInstruction::toString() {
     if (printOut != "") return printOut;
 
@@ -194,6 +206,10 @@ const std::string& RIInstruction::toString() {
     }
 
     return printOut;
+}
+
+const Analyser::InstructionAnalysis&
+RIInstruction::getAnalysis() {  // TODO implement
 }
 
 const std::string& BIInstruction::toString() {
@@ -237,6 +253,10 @@ const std::string& BIInstruction::toString() {
     return printOut;
 }
 
+const Analyser::InstructionAnalysis&
+BIInstruction::getAnalysis() {  // TODO implement
+}
+
 const std::string& BLInstruction::toString() {
     if (printOut != "") return printOut;
 
@@ -278,6 +298,10 @@ const std::string& BLInstruction::toString() {
     return printOut;
 }
 
+const Analyser::InstructionAnalysis&
+BLInstruction::getAnalysis() {  // TODO implement
+}
+
 const std::string& BRInstruction::toString() {
     if (printOut != "") return printOut;
 
@@ -294,6 +318,10 @@ const std::string& BRInstruction::toString() {
     }
 
     return printOut;
+}
+
+const Analyser::InstructionAnalysis&
+BRInstruction::getAnalysis() {  // TODO implement
 }
 
 const std::string& EInstruction::toString() {
@@ -313,6 +341,10 @@ const std::string& EInstruction::toString() {
     }
 
     return printOut;
+}
+
+const Analyser::InstructionAnalysis&
+EInstruction::getAnalysis() {  // TODO implement
 }
 
 const std::string& RSInstruction::toString() {
@@ -362,6 +394,10 @@ const std::string& RSInstruction::toString() {
     }
 
     return printOut;
+}
+
+const Analyser::InstructionAnalysis&
+RSInstruction::getAnalysis() {  // TODO implement
 }
 
 const std::string& EntryPoint::toString() {
