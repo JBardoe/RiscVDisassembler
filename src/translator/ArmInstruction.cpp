@@ -179,8 +179,29 @@ const std::string& RRIInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-RRIInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& RRIInstruction::getAnalysis() {
+    switch (instr) {
+        case Operator::ldrsb:
+        case Operator::ldrsh:
+        case Operator::ldr:
+        case Operator::ldrb:
+        case Operator::ldrh:
+            return Analyser::InstructionAnalysis(
+                {wn}, wd, Analyser::InstructionClass::LOAD, imm);
+
+        case Operator::strb:
+        case Operator::strh:
+        case Operator::str:
+            return Analyser::InstructionAnalysis(
+                {wn, wd}, Register::empty, Analyser::InstructionClass::STORE,
+                imm);
+
+        default:
+            break;
+    }
+
+    return Analyser::InstructionAnalysis({wn}, wd,
+                                         Analyser::InstructionClass::ALU, imm);
 }
 
 const std::string& RIInstruction::toString() {
@@ -214,8 +235,13 @@ const std::string& RIInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-RIInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& RIInstruction::getAnalysis() {
+    if (instr == Operator::cmp) {
+        return Analyser::InstructionAnalysis(
+            {wd}, Register::empty, Analyser::InstructionClass::ALU, imm);
+    }
+    return Analyser::InstructionAnalysis({}, wd,
+                                         Analyser::InstructionClass::ALU, imm);
 }
 
 const std::string& BIInstruction::toString() {
@@ -362,8 +388,9 @@ const std::string& EInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-EInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& EInstruction::getAnalysis() {
+    return Analyser::InstructionAnalysis({}, Register::empty,
+                                         Analyser::InstructionClass::OTHER, -1);
 }
 
 const std::string& RSInstruction::toString() {
@@ -415,8 +442,25 @@ const std::string& RSInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-RSInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& RSInstruction::getAnalysis() {
+    switch (instr) {
+        case Operator::ldrsb:
+        case Operator::ldrsh:
+        case Operator::ldr:
+            return Analyser::InstructionAnalysis(
+                {}, wd, Analyser::InstructionClass::LOAD, -1);
+        case Operator::strb:
+        case Operator::strh:
+        case Operator::str:
+            return Analyser::InstructionAnalysis(
+                {wd}, Register::empty, Analyser::InstructionClass::STORE, -1);
+
+        default:
+            break;
+    }
+
+    return Analyser::InstructionAnalysis({}, wd,
+                                         Analyser::InstructionClass::ALU, -1);
 }
 
 const std::string& EntryPoint::toString() {
