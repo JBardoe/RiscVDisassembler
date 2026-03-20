@@ -50,8 +50,9 @@ const std::string& RRRInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-RRRInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& RRRInstruction::getAnalysis() {
+    return Analyser::InstructionAnalysis({wn, wm}, wd,
+                                         Analyser::InstructionClass::ALU, -1);
 }
 
 const std::string& RRInstruction::toString() {
@@ -76,8 +77,13 @@ const std::string& RRInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-RRInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& RRInstruction::getAnalysis() {
+    if (instr == Operator::cmp) {
+        return Analyser::InstructionAnalysis(
+            {wd, wn}, Register::empty, Analyser::InstructionClass::ALU, -1);
+    }
+    return Analyser::InstructionAnalysis({wn}, wd,
+                                         Analyser::InstructionClass::ALU, -1);
 }
 
 const std::string& RRIInstruction::toString() {
@@ -253,8 +259,14 @@ const std::string& BIInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-BIInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& BIInstruction::getAnalysis() {
+    if (instr == Operator::b || instr == Operator::bl) {
+        return Analyser::InstructionAnalysis(
+            {}, Register::empty, Analyser::InstructionClass::JUMP, imm);
+    }
+
+    return Analyser::InstructionAnalysis(
+        {}, Register::empty, Analyser::InstructionClass::BRANCH, imm);
 }
 
 const std::string& BLInstruction::toString() {
@@ -298,8 +310,14 @@ const std::string& BLInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-BLInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& BLInstruction::getAnalysis() {
+    if (instr == Operator::b || instr == Operator::bl) {
+        return Analyser::InstructionAnalysis(
+            {}, Register::empty, Analyser::InstructionClass::JUMP, -1);
+    }
+
+    return Analyser::InstructionAnalysis(
+        {}, Register::empty, Analyser::InstructionClass::BRANCH, -1);
 }
 
 const std::string& BRInstruction::toString() {
@@ -320,8 +338,9 @@ const std::string& BRInstruction::toString() {
     return printOut;
 }
 
-const Analyser::InstructionAnalysis&
-BRInstruction::getAnalysis() {  // TODO implement
+const Analyser::InstructionAnalysis& BRInstruction::getAnalysis() {
+    return Analyser::InstructionAnalysis({wd}, Register::empty,
+                                         Analyser::InstructionClass::JUMP, -1);
 }
 
 const std::string& EInstruction::toString() {
