@@ -1,6 +1,7 @@
 #ifndef ANALYSISTYPES_HPP
 #define ANALYSISTYPES_HPP
 
+#include <string>
 #include <vector>
 
 #include "translator/ArmTypes.hpp"
@@ -18,6 +19,8 @@ enum class InstructionClass {
     JUMP,
     OTHER,
 };
+
+std::string to_string(InstructionClass i);
 
 typedef struct InstructionAnalysis {
     std::vector<Translator::Register> reads;
