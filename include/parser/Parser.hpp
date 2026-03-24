@@ -1,3 +1,6 @@
+#ifndef PARSER_HPP
+#define PARSER_HPP
+
 #include <fstream>
 #include <memory>
 #include <string>
@@ -22,3 +25,5 @@ std::unique_ptr<ELFFile> parseFile(const std::string& filepath);
  */
 std::unique_ptr<ELFHeader> parseHeader(std::ifstream& filestream);
 }  // namespace ELFParser
+
+#endif

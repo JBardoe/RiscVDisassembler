@@ -1,3 +1,6 @@
+#ifndef DISASSEMBLER_HPP
+#define DISASSEMBLER_HPP
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -80,3 +83,5 @@ std::shared_ptr<TextSection> disassembleTextSection(
  */
 std::unique_ptr<RiscvFile> disassemble(const std::string& filepath);
 }  // namespace Disassembler
+
+#endif
