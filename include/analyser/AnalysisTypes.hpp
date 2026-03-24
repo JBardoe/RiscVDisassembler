@@ -1,3 +1,6 @@
+#ifndef ANALYSISTYPES_HPP
+#define ANALYSISTYPES_HPP
+
 #include <vector>
 
 #include "translator/ArmTypes.hpp"
@@ -26,3 +29,5 @@ typedef struct InstructionAnalysis {
 } InstructionAnalysis;
 
 }  // namespace Analyser
+
+#endif

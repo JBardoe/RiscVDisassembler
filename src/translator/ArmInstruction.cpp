@@ -51,8 +51,9 @@ const std::string& RRRInstruction::toString() {
 }
 
 const Analyser::InstructionAnalysis& RRRInstruction::getAnalysis() {
-    return Analyser::InstructionAnalysis({wn, wm}, wd,
-                                         Analyser::InstructionClass::ALU, -1);
+    analysis = Analyser::InstructionAnalysis(
+        {wn, wm}, wd, Analyser::InstructionClass::ALU, -1);
+    return analysis;
 }
 
 const std::string& RRInstruction::toString() {
@@ -79,11 +80,13 @@ const std::string& RRInstruction::toString() {
 
 const Analyser::InstructionAnalysis& RRInstruction::getAnalysis() {
     if (instr == Operator::cmp) {
-        return Analyser::InstructionAnalysis(
+        analysis = Analyser::InstructionAnalysis(
             {wd, wn}, Register::empty, Analyser::InstructionClass::ALU, -1);
+    } else {
+        analysis = Analyser::InstructionAnalysis(
+            {wn}, wd, Analyser::InstructionClass::ALU, -1);
     }
-    return Analyser::InstructionAnalysis({wn}, wd,
-                                         Analyser::InstructionClass::ALU, -1);
+    return analysis;
 }
 
 const std::string& RRIInstruction::toString() {
@@ -186,22 +189,24 @@ const Analyser::InstructionAnalysis& RRIInstruction::getAnalysis() {
         case Operator::ldr:
         case Operator::ldrb:
         case Operator::ldrh:
-            return Analyser::InstructionAnalysis(
+            analysis = Analyser::InstructionAnalysis(
                 {wn}, wd, Analyser::InstructionClass::LOAD, imm);
+            break;
 
         case Operator::strb:
         case Operator::strh:
         case Operator::str:
-            return Analyser::InstructionAnalysis(
+            analysis = Analyser::InstructionAnalysis(
                 {wn, wd}, Register::empty, Analyser::InstructionClass::STORE,
                 imm);
+            break;
 
         default:
-            break;
+            analysis = Analyser::InstructionAnalysis(
+                {wn}, wd, Analyser::InstructionClass::ALU, imm);
     }
 
-    return Analyser::InstructionAnalysis({wn}, wd,
-                                         Analyser::InstructionClass::ALU, imm);
+    return analysis;
 }
 
 const std::string& RIInstruction::toString() {
@@ -237,11 +242,14 @@ const std::string& RIInstruction::toString() {
 
 const Analyser::InstructionAnalysis& RIInstruction::getAnalysis() {
     if (instr == Operator::cmp) {
-        return Analyser::InstructionAnalysis(
+        analysis = Analyser::InstructionAnalysis(
             {wd}, Register::empty, Analyser::InstructionClass::ALU, imm);
+    } else {
+        analysis = Analyser::InstructionAnalysis(
+            {}, wd, Analyser::InstructionClass::ALU, imm);
     }
-    return Analyser::InstructionAnalysis({}, wd,
-                                         Analyser::InstructionClass::ALU, imm);
+
+    return analysis;
 }
 
 const std::string& BIInstruction::toString() {
@@ -287,12 +295,14 @@ const std::string& BIInstruction::toString() {
 
 const Analyser::InstructionAnalysis& BIInstruction::getAnalysis() {
     if (instr == Operator::b || instr == Operator::bl) {
-        return Analyser::InstructionAnalysis(
+        analysis = Analyser::InstructionAnalysis(
             {}, Register::empty, Analyser::InstructionClass::JUMP, imm);
+    } else {
+        analysis = Analyser::InstructionAnalysis(
+            {}, Register::empty, Analyser::InstructionClass::BRANCH, imm);
     }
 
-    return Analyser::InstructionAnalysis(
-        {}, Register::empty, Analyser::InstructionClass::BRANCH, imm);
+    return analysis;
 }
 
 const std::string& BLInstruction::toString() {
@@ -338,12 +348,14 @@ const std::string& BLInstruction::toString() {
 
 const Analyser::InstructionAnalysis& BLInstruction::getAnalysis() {
     if (instr == Operator::b || instr == Operator::bl) {
-        return Analyser::InstructionAnalysis(
+        analysis = Analyser::InstructionAnalysis(
             {}, Register::empty, Analyser::InstructionClass::JUMP, -1);
+    } else {
+        analysis = Analyser::InstructionAnalysis(
+            {}, Register::empty, Analyser::InstructionClass::BRANCH, -1);
     }
 
-    return Analyser::InstructionAnalysis(
-        {}, Register::empty, Analyser::InstructionClass::BRANCH, -1);
+    return analysis;
 }
 
 const std::string& BRInstruction::toString() {
@@ -365,8 +377,9 @@ const std::string& BRInstruction::toString() {
 }
 
 const Analyser::InstructionAnalysis& BRInstruction::getAnalysis() {
-    return Analyser::InstructionAnalysis({wd}, Register::empty,
-                                         Analyser::InstructionClass::JUMP, -1);
+    analysis = Analyser::InstructionAnalysis(
+        {wd}, Register::empty, Analyser::InstructionClass::JUMP, -1);
+    return analysis;
 }
 
 const std::string& EInstruction::toString() {
@@ -389,8 +402,9 @@ const std::string& EInstruction::toString() {
 }
 
 const Analyser::InstructionAnalysis& EInstruction::getAnalysis() {
-    return Analyser::InstructionAnalysis({}, Register::empty,
-                                         Analyser::InstructionClass::OTHER, -1);
+    analysis = Analyser::InstructionAnalysis(
+        {}, Register::empty, Analyser::InstructionClass::OTHER, -1);
+    return analysis;
 }
 
 const std::string& RSInstruction::toString() {
@@ -447,20 +461,20 @@ const Analyser::InstructionAnalysis& RSInstruction::getAnalysis() {
         case Operator::ldrsb:
         case Operator::ldrsh:
         case Operator::ldr:
-            return Analyser::InstructionAnalysis(
+            analysis = Analyser::InstructionAnalysis(
                 {}, wd, Analyser::InstructionClass::LOAD, -1);
+            break;
         case Operator::strb:
         case Operator::strh:
         case Operator::str:
-            return Analyser::InstructionAnalysis(
+            analysis = Analyser::InstructionAnalysis(
                 {wd}, Register::empty, Analyser::InstructionClass::STORE, -1);
-
-        default:
             break;
+        default:
+            analysis = Analyser::InstructionAnalysis(
+                {}, wd, Analyser::InstructionClass::ALU, -1);
     }
-
-    return Analyser::InstructionAnalysis({}, wd,
-                                         Analyser::InstructionClass::ALU, -1);
+    return analysis;
 }
 
 const std::string& EntryPoint::toString() {
