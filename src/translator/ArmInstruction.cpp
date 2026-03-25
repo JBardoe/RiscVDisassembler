@@ -498,4 +498,12 @@ const std::string& EntryPoint::toString() {
 
     return printOut;
 }
+
+const Analyser::InstructionAnalysis& EntryPoint::getAnalysis() {
+    analysis = Analyser::InstructionAnalysis({}, Register::empty,
+                                             Analyser::InstructionClass::ENTRY,
+                                             Assembly::BranchDirection::NA, -1);
+    return analysis;
+}
+
 }  // namespace Translator

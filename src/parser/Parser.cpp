@@ -2,7 +2,6 @@
 
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <memory>
 
 #include "parser/ELFTypes.hpp"

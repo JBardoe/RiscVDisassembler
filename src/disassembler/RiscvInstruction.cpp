@@ -1,7 +1,6 @@
 #include "disassembler/RiscvInstruction.hpp"
 
 #include <iomanip>
-#include <iostream>
 
 #include "translator/ArmTypes.hpp"
 #include "utils/AssemblyTypes.hpp"

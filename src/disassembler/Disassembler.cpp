@@ -1,7 +1,6 @@
 #include "disassembler/Disassembler.hpp"
 
 #include <format>
-#include <iostream>
 #include <utility>
 #include <vector>
 

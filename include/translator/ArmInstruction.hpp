@@ -337,6 +337,14 @@ class EntryPoint : public virtual ArmInstruction {
      */
     const std::string& toString() override;
 
+    /**
+     * Constructs and returns the analysis data.
+     * The data is only generated on request as the analyser may not be run
+     *
+     * @return the grouped analysis data
+     */
+    const Analyser::InstructionAnalysis& getAnalysis() override;
+
     // Name of the entry point
     std::string name;
 };

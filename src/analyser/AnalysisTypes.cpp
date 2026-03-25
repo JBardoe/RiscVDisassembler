@@ -1,6 +1,7 @@
 #include "analyser/AnalysisTypes.hpp"
 
 #include <cmath>
+#include <format>
 
 namespace Analyser {
 
@@ -16,6 +17,8 @@ std::string to_string(InstructionClass i) {
             return "BRANCH";
         case InstructionClass::JUMP:
             return "JUMP";
+        case InstructionClass::ENTRY:
+            return "ENTRY";
         case InstructionClass::OTHER:
             return "OTHER";
         default:
@@ -28,9 +31,11 @@ std::string to_string(const Analysis& a) {
 
     for (auto& instrType : *(a.instructionMix)) {
         ret += "\t- " + to_string(instrType.first) + ": " +
-               std::to_string(
+               std::format(
+                   "{:.2f}",
                    std::round(static_cast<double>(instrType.second) /
-                              static_cast<double>(a.instructionCount) * 100)) +
+                              static_cast<double>(a.instructionCount) * 10000) /
+                       100) +
                "%\n";
     }
 
@@ -40,17 +45,21 @@ std::string to_string(const Analysis& a) {
         ret +=
             "Branch Density:\n\t- Forward Branches: " +
             std::to_string(a.forwardBackwardBranches[0]) + " | " +
-            std::to_string(
+            std::format(
+                "{:.2f}",
                 std::round(static_cast<double>(a.forwardBackwardBranches[0]) /
-                           static_cast<double>(branchIt->second) * 100)) +
+                           static_cast<double>(branchIt->second) * 10000) /
+                    100) +
             "%\n" + "\t- Backwards Branches: " +
             std::to_string(a.forwardBackwardBranches[1]) + " | " +
-            std::to_string(
+            std::format(
+                "{:.2f}",
                 std::round(static_cast<double>(a.forwardBackwardBranches[1]) /
-                           static_cast<double>(branchIt->second) * 100)) +
+                           static_cast<double>(branchIt->second) * 10000) /
+                    100) +
             "%\n";
     } else {
-        ret += "Branch Density:\n\tNO BRANCHES";
+        ret += "Branch Density:\n\tNO CONDITIONAL BRANCHES\n";
     }
 
     return ret;
