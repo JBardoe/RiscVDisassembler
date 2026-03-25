@@ -1,7 +1,9 @@
 #ifndef ANALYSISTYPES_HPP
 #define ANALYSISTYPES_HPP
 
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "translator/ArmTypes.hpp"
@@ -10,9 +12,12 @@
 namespace Analyser {
 
 typedef struct Analysis {
+    size_t instructionCount;
     std::unique_ptr<std::unordered_map<InstructionClass, int>> instructionMix;
     std::array<int, 2> forwardBackwardBranches;
 } Analysis;
+
+std::string to_string(const Analysis& a);
 
 enum class InstructionClass {
     ALU,

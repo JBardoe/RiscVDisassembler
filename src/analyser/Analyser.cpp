@@ -12,6 +12,7 @@
 namespace Analyser {
 
 void analyse(Translator::ArmFile& file) {
+    size_t instructionCount = 0;
     std::unique_ptr<std::unordered_map<InstructionClass, int>> mix;
     std::array<int, 2> forwardBackwardBranches{};
 
@@ -33,6 +34,7 @@ void analyse(Translator::ArmFile& file) {
     auto& instructions = std::ranges::join_view(textSection->getInstructions());
 
     for (auto& instr : instructions) {
+        instructionCount++;
         auto instrAnalysis = instr->getAnalysis();
         (*mix)[instrAnalysis.type]++;
 
@@ -42,8 +44,8 @@ void analyse(Translator::ArmFile& file) {
         }
     }
 
-    auto report =
-        std::make_unique<Analysis>(std::move(mix), forwardBackwardBranches);
+    auto report = std::make_unique<Analysis>(instructionCount, std::move(mix),
+                                             forwardBackwardBranches);
     file.setAnalysis(std::move(report));
 }
 }  // namespace Analyser

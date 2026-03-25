@@ -6,6 +6,7 @@
 #include <string>
 
 #include "analyser/Analyser.hpp"
+#include "analyser/AnalysisTypes.hpp"
 #include "disassembler/Disassembler.hpp"
 #include "translator/ArmFile.hpp"
 
@@ -41,6 +42,14 @@ int main() {
         armFile.writeToFile(fileName);
 
         Analyser::analyse(armFile);
+
+        auto& analysisReport = armFile.getAnalysis();
+
+        std::cout
+            << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
+               "Analysis>>>>>>>>>>>>>>>>\n"
+            << Analyser::to_string(*analysisReport)
+            << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n";
     }
 
     return 0;
