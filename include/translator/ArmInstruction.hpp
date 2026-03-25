@@ -5,6 +5,7 @@
 
 #include "analyser/AnalysisTypes.hpp"
 #include "translator/ArmTypes.hpp"
+#include "utils/AssemblyTypes.hpp"
 
 namespace Translator {
 
@@ -180,7 +181,10 @@ class RIInstruction : public virtual ArmInstruction {
  */
 class BIInstruction : public virtual ArmInstruction {
    public:
-    BIInstruction(Operator op, int imm) : ArmInstruction(op), imm(imm) {}
+    BIInstruction(Operator op, int imm)
+        : ArmInstruction(op),
+          imm(imm),
+          dir(static_cast<Assembly::BranchDirection>(imm < 0)) {}
 
     /**
      * toString method to print the instruction in assembly form
@@ -199,6 +203,8 @@ class BIInstruction : public virtual ArmInstruction {
 
     // Branch immediate
     int imm;
+
+    Assembly::BranchDirection dir;
 };
 
 /**
@@ -208,8 +214,8 @@ class BIInstruction : public virtual ArmInstruction {
  */
 class BLInstruction : public virtual ArmInstruction {
    public:
-    BLInstruction(Operator op, std::string label)
-        : ArmInstruction(op), label(label) {}
+    BLInstruction(Operator op, std::string label, Assembly::BranchDirection dir)
+        : ArmInstruction(op), label(label), dir(dir) {}
 
     /**
      * toString method to print the instruction in assembly form
@@ -228,6 +234,8 @@ class BLInstruction : public virtual ArmInstruction {
 
     // Label to jump to
     std::string label;
+
+    Assembly::BranchDirection dir;
 };
 
 /**

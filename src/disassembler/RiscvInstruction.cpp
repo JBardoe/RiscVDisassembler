@@ -588,6 +588,8 @@ BInstruction::BInstruction(Opcode op, uint32_t raw) : RiscvInstruction(op) {
     if (this->imm % 4 != 0) {
         throw DisassemblyException("Branch offset not divisible by 4");
     }
+
+    this->dir = static_cast<Assembly::BranchDirection>(imm < 0);
 }
 
 const std::string& BInstruction::toString() {
@@ -916,16 +918,19 @@ JInstructionEntry::toArm() {
 
     if (rd == Register::ra) {
         ret.push_back(std::make_unique<Translator::BLInstruction>(
-            Translator::Operator::bl, entryPoint));
+            Translator::Operator::bl, entryPoint,
+            Assembly::BranchDirection::JUMP));
     } else if (rd == Register::zero) {
         ret.push_back(std::make_unique<Translator::BLInstruction>(
-            Translator::Operator::b, entryPoint));
+            Translator::Operator::b, entryPoint,
+            Assembly::BranchDirection::JUMP));
     } else {
         ret.push_back(std::make_unique<Translator::RIInstruction>(
             Translator::Operator::adr, static_cast<Translator::Register>(rd),
             8));
         ret.push_back(std::make_unique<Translator::BLInstruction>(
-            Translator::Operator::b, entryPoint));
+            Translator::Operator::b, entryPoint,
+            Assembly::BranchDirection::JUMP));
     }
 
     return ret;
@@ -985,37 +990,37 @@ BInstructionEntry::toArm() {
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::beq, entryPoint));
+                Translator::Operator::beq, entryPoint, dir));
             break;
         case Operator::bne:
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::bne, entryPoint));
+                Translator::Operator::bne, entryPoint, dir));
             break;
         case Operator::blt:
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::blt, entryPoint));
+                Translator::Operator::blt, entryPoint, dir));
             break;
         case Operator::bge:
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::bge, entryPoint));
+                Translator::Operator::bge, entryPoint, dir));
             break;
         case Operator::bltu:
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::blo, entryPoint));
+                Translator::Operator::blo, entryPoint, dir));
             break;
         case Operator::bgeu:
             ret.push_back(std::make_unique<Translator::RRInstruction>(
                 Translator::Operator::cmp, wd, wn));
             ret.push_back(std::make_unique<Translator::BLInstruction>(
-                Translator::Operator::bhs, entryPoint));
+                Translator::Operator::bhs, entryPoint, dir));
             break;
         default:
             break;

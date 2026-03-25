@@ -8,6 +8,7 @@
 
 #include "disassembler/RiscvTypes.hpp"
 #include "translator/ArmInstruction.hpp"
+#include "utils/AssemblyTypes.hpp"
 
 namespace Disassembler {
 
@@ -318,6 +319,8 @@ class BInstruction : public virtual RiscvInstruction {
     Register rs1;
     Register rs2;
     int imm;
+
+    Assembly::BranchDirection dir;
 };
 
 /**
@@ -597,7 +600,8 @@ class BInstructionEntry : public virtual RiscvInstruction {
         : RiscvInstruction(Opcode::B_TYPE, old->instr),
           rs1(old->rs1),
           rs2(old->rs2),
-          entryPoint(entryPoint) {}
+          entryPoint(entryPoint),
+          dir(old->dir) {}
 
     /**
      * toString method to print the instruction in assembly form
@@ -652,6 +656,8 @@ class BInstructionEntry : public virtual RiscvInstruction {
     Register rs1;
     Register rs2;
     std::string entryPoint;
+
+    Assembly::BranchDirection dir;
 };
 
 /**

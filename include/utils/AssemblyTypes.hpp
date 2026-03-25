@@ -60,5 +60,11 @@ enum class SymbolBinding : int {
  */
 std::string to_string(SymbolBinding b);
 
+enum class BranchDirection : int {
+    FORWARD,
+    BACKWARD,
+    JUMP,
+};
+
 }  // namespace Assembly
 #endif
