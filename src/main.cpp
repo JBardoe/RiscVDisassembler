@@ -45,11 +45,10 @@ int main() {
 
         auto& analysisReport = armFile.getAnalysis();
 
-        std::cout
-            << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
-               "Analysis>>>>>>>>>>>>>>>>\n"
-            << Analyser::to_string(*analysisReport)
-            << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n";
+        std::cout << "\n<<<<<<<<<<<<<<<<"
+                     "Analysis>>>>>>>>>>>>>>>>\n"
+                  << Analyser::to_string(*analysisReport)
+                  << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n";
     }
 
     return 0;

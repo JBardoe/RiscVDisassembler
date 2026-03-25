@@ -5,7 +5,7 @@
 
 namespace Analyser {
 
-void analyse(const Translator::ArmFile& file);
+void analyse(Translator::ArmFile& file);
 
 }
 

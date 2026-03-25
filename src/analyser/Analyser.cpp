@@ -4,8 +4,10 @@
 #include <memory>
 #include <ranges>
 #include <unordered_map>
+#include <vector>
 
 #include "analyser/AnalysisTypes.hpp"
+#include "translator/ArmInstruction.hpp"
 #include "translator/ArmSection.hpp"
 #include "utils/AnalysisException.hpp"
 
@@ -13,7 +15,8 @@ namespace Analyser {
 
 void analyse(Translator::ArmFile& file) {
     size_t instructionCount = 0;
-    std::unique_ptr<std::unordered_map<InstructionClass, int>> mix;
+    std::unique_ptr<std::unordered_map<InstructionClass, int>> mix =
+        std::make_unique<std::unordered_map<InstructionClass, int>>();
     std::array<int, 2> forwardBackwardBranches{};
 
     auto& sections = file.getSections();
@@ -31,16 +34,21 @@ void analyse(Translator::ArmFile& file) {
         throw AnalysisException(".text section is not well-formed.");
     }
 
-    auto& instructions = std::ranges::join_view(textSection->getInstructions());
+    auto& instructions = textSection->getInstructions();
 
-    for (auto& instr : instructions) {
-        instructionCount++;
-        auto instrAnalysis = instr->getAnalysis();
-        (*mix)[instrAnalysis.type]++;
+    for (auto& block : instructions) {
+        for (auto& instr : block) {
+            auto instrAnalysis = instr->getAnalysis();
 
-        if (instrAnalysis.type == InstructionClass::BRANCH) {
-            forwardBackwardBranches[static_cast<int>(
-                instrAnalysis.branchDirection)]++;
+            if (instrAnalysis.type == InstructionClass::ENTRY) continue;
+
+            instructionCount++;
+            (*mix)[instrAnalysis.type]++;
+
+            if (instrAnalysis.type == InstructionClass::BRANCH) {
+                forwardBackwardBranches[static_cast<int>(
+                    instrAnalysis.branchDirection)]++;
+            }
         }
     }
 
