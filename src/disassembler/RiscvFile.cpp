@@ -27,13 +27,13 @@ void RiscvFile::addSymbol(std::string name, uint32_t addr, uint32_t size,
 }
 
 std::optional<std::reference_wrapper<const Symbol>> RiscvFile::getSymbolName(
-    std::string name) {
+    std::string name) const {
     return symbolTable.getSymbolName(name);
 }
-std::vector<Symbol> RiscvFile::getSymbolAddr(uint32_t addr) {
+std::vector<Symbol> RiscvFile::getSymbolAddr(uint32_t addr) const {
     return symbolTable.getSymbolAddr(addr);
 }
-std::vector<Symbol> RiscvFile::getSymbolSection(std::string sectionName) {
+std::vector<Symbol> RiscvFile::getSymbolSection(std::string sectionName) const {
     return symbolTable.getSymbolSection(sectionName);
 }
 

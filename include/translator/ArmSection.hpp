@@ -54,11 +54,11 @@ class TextSection : public virtual ArmSection {
 
     std::shared_ptr<
         std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
-    getBasicBlocks() {
+    getBasicBlocks() const {
         return basicBlocks;
     }
 
-    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() {
+    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() const {
         return registersUsed;
     }
 

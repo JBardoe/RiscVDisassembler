@@ -66,9 +66,9 @@ class RiscvFile {
      * getSymbolSections - Section name
      */
     std::optional<std::reference_wrapper<const Symbol>> getSymbolName(
-        std::string name);
-    std::vector<Symbol> getSymbolAddr(uint32_t addr);
-    std::vector<Symbol> getSymbolSection(std::string sectionName);
+        std::string name) const;
+    std::vector<Symbol> getSymbolAddr(uint32_t addr) const;
+    std::vector<Symbol> getSymbolSection(std::string sectionName) const;
 
     /**
      * Gives a string readout of the RISC-V file
@@ -84,11 +84,11 @@ class RiscvFile {
      */
     void writeToFile(std::string fileName);
 
-    FileType getFileType() { return type; }
+    FileType getFileType() const { return type; }
 
     const std::unordered_map<std::string,
                              std::shared_ptr<Assembly::AssemblySection>>&
-    getSections() {
+    getSections() const {
         return sections;
     }
 

@@ -41,7 +41,7 @@ class RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    virtual std::vector<Register> getRegistersUsed() { return {}; }
+    virtual std::vector<Register> getRegistersUsed() const { return {}; }
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -59,7 +59,7 @@ class RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    virtual int usesRegister(Register) { return 0; };
+    virtual int usesRegister(Register) const { return 0; };
 
     Operator instr;        // Instruction
     Opcode op;             // Opcode
@@ -93,7 +93,7 @@ class RInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override {
+    std::vector<Register> getRegistersUsed() const override {
         return {rd, rs1, rs2};
     };
 
@@ -117,7 +117,7 @@ class RInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rd == query) ? 2 : ((rs1 == query || rs2 == query) ? 1 : 0);
     };
 
@@ -157,7 +157,9 @@ class IInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd, rs1}; };
+    std::vector<Register> getRegistersUsed() const override {
+        return {rd, rs1};
+    };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -178,7 +180,7 @@ class IInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rd == query) ? 2 : ((rs1 == query) ? 1 : 0);
     };
 
@@ -219,7 +221,9 @@ class SInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+    std::vector<Register> getRegistersUsed() const override {
+        return {rs1, rs2};
+    };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -240,7 +244,7 @@ class SInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
 
@@ -279,7 +283,9 @@ class BInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+    std::vector<Register> getRegistersUsed() const override {
+        return {rs1, rs2};
+    };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -300,7 +306,7 @@ class BInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
 
@@ -339,7 +345,7 @@ class UInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd}; };
+    std::vector<Register> getRegistersUsed() const override { return {rd}; };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -359,7 +365,9 @@ class UInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+    int usesRegister(Register query) const override {
+        return (rd == query) ? 2 : 0;
+    };
 
     /**
      * U-Type instructions have the form:
@@ -396,7 +404,7 @@ class JInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd}; };
+    std::vector<Register> getRegistersUsed() const override { return {rd}; };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -416,7 +424,9 @@ class JInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+    int usesRegister(Register query) const override {
+        return (rd == query) ? 2 : 0;
+    };
 
     /**
      * J-Type instructions have the form:
@@ -453,7 +463,7 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd}; };
+    std::vector<Register> getRegistersUsed() const override { return {rd}; };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -473,7 +483,9 @@ class PseudoLoadInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+    int usesRegister(Register query) const override {
+        return (rd == query) ? 2 : 0;
+    };
 
     /**
      * Pseudo-loads have the form:
@@ -514,7 +526,9 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd, rt}; };
+    std::vector<Register> getRegistersUsed() const override {
+        return {rd, rt};
+    };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -535,7 +549,7 @@ class PseudoStoreInstruction : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rd == query || rt == query) ? 1 : 0;
     };
 
@@ -603,7 +617,9 @@ class BInstructionEntry : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rs1, rs2}; };
+    std::vector<Register> getRegistersUsed() const override {
+        return {rs1, rs2};
+    };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -624,7 +640,7 @@ class BInstructionEntry : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override {
+    int usesRegister(Register query) const override {
         return (rs1 == query || rs2 == query) ? 1 : 0;
     };
 
@@ -666,7 +682,7 @@ class JInstructionEntry : public virtual RiscvInstruction {
      * Get the registers used in the instruction
      * @return a vector of the instructions used
      */
-    std::vector<Register> getRegistersUsed() override { return {rd}; };
+    std::vector<Register> getRegistersUsed() const override { return {rd}; };
 
     /**
      * Swaps out any uses of the the first argument in the instruction, with the
@@ -686,7 +702,9 @@ class JInstructionEntry : public virtual RiscvInstruction {
      *      1 - reads to register
      *      2 - writes to register
      */
-    int usesRegister(Register query) override { return (rd == query) ? 2 : 0; };
+    int usesRegister(Register query) const override {
+        return (rd == query) ? 2 : 0;
+    };
 
     /**
      * J-Type instruction with entry points have the form:

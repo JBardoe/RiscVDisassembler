@@ -12,7 +12,7 @@ void SymbolTable::addSymbol(std::string name, uint32_t addr, uint32_t size,
 }
 
 std::optional<std::reference_wrapper<const Symbol>> SymbolTable::getSymbolName(
-    std::string name) {
+    std::string name) const {
     if (auto it = nameLookup.find(name); it != nameLookup.end()) {
         return table[(*it).second];
     }
@@ -20,7 +20,7 @@ std::optional<std::reference_wrapper<const Symbol>> SymbolTable::getSymbolName(
 }
 
 std::vector<Symbol> SymbolTable::getSymbolAddr(
-    uint32_t addr) {  // NOTE: could be optimised
+    uint32_t addr) const {  // NOTE: could be optimised
     auto it = addrLookup.find(addr);
     if (it == addrLookup.end()) return {};
 
@@ -34,7 +34,7 @@ std::vector<Symbol> SymbolTable::getSymbolAddr(
 }
 
 std::vector<Symbol> SymbolTable::getSymbolSection(
-    std::string sectionName) {  // NOTE: could be optimised
+    std::string sectionName) const {  // NOTE: could be optimised
     auto it = sectionLookup.find(sectionName);
     if (it == sectionLookup.end()) return {};
 

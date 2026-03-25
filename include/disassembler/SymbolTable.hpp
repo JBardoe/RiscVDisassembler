@@ -39,9 +39,9 @@ class SymbolTable {
      * getSymbolSections - Section name
      */
     std::optional<std::reference_wrapper<const Symbol>> getSymbolName(
-        std::string name);
-    std::vector<Symbol> getSymbolAddr(uint32_t addr);
-    std::vector<Symbol> getSymbolSection(std::string sectionName);
+        std::string name) const;
+    std::vector<Symbol> getSymbolAddr(uint32_t addr) const;
+    std::vector<Symbol> getSymbolSection(std::string sectionName) const;
 
     /**
      * Prints the symbol table

@@ -9,7 +9,7 @@ void DataSection::addVariable(std::string name, uint32_t addr, uint32_t val,
 }
 
 std::optional<std::reference_wrapper<const Variable>> DataSection::getVar(
-    std::string name) {
+    std::string name) const {
     if (auto it = vars.find(name); it != vars.end()) {
         return (*it).second;
     }

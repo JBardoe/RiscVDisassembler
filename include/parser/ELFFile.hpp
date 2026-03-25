@@ -34,14 +34,14 @@ class ELFFile {
     void parseSegments();  // Extracts the segments
 
     const std::unordered_map<std::string, std::unique_ptr<ELFSection>>&
-    getSections() {
+    getSections() const {
         return sections;
     };
-    const std::vector<std::unique_ptr<ELFSegment>>& getSegments() {
+    const std::vector<std::unique_ptr<ELFSegment>>& getSegments() const {
         return segments;
     }
 
-    const std::unique_ptr<ELFHeader>& getHeader() { return header; }
+    const std::unique_ptr<ELFHeader>& getHeader() const { return header; }
 
     /**
      * Matches a section index to the name of the section

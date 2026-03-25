@@ -44,17 +44,17 @@ class TextSection : public virtual RiscvSection {
     }
 
     std::vector<std::pair<std::string, Assembly::SymbolBinding>>
-    getEntryPoints() {
+    getEntryPoints() const {
         return entryPoints;
     }
 
     std::shared_ptr<
         std::map<int, std::unique_ptr<std::unordered_map<int, int>>>>
-    getBasicBlocks() {
+    getBasicBlocks() const {
         return basicBlocks;
     }
 
-    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() {
+    std::shared_ptr<std::unordered_set<int>> getRegistersUsed() const {
         return registersUsed;
     }
 

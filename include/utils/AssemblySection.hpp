@@ -30,7 +30,7 @@ class AssemblySection {
      */
     virtual const std::string& toString() { return this->printOut; }
 
-    const std::string& getName() { return this->name; }
+    const std::string& getName() const { return this->name; }
 
    protected:
     std::string name;      // Name of the section
@@ -59,10 +59,10 @@ class DataSection : public virtual AssemblySection {
 
     // NEXT check if can be removed
     std::optional<std::reference_wrapper<const Variable>> getVar(
-        std::string name);
+        std::string name) const;
     std::optional<std::reference_wrapper<const Variable>> getVar(uint32_t addr);
 
-    bool empty() { return addrLookup.empty(); }
+    bool empty() const { return addrLookup.empty(); }
 
     /**
      * toString method to print the .data section in assembly form

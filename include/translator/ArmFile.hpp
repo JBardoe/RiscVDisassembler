@@ -36,8 +36,14 @@ class ArmFile {
         this->analysisReport = std::move(analysisReport);
     }
 
-    const std::unique_ptr<Analyser::Analysis>& getAnalysis() {
+    const std::unique_ptr<Analyser::Analysis>& getAnalysis() const {
         return analysisReport;
+    }
+
+    const std::unordered_map<std::string,
+                             std::shared_ptr<Assembly::AssemblySection>>&
+    getSections() const {
+        return sections;
     }
 
    private:
