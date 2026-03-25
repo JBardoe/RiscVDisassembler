@@ -9,6 +9,7 @@
 namespace Analyser {
 
 typedef struct Analysis {
+    std::unique_ptr<std::unordered_map<InstructionClass, int>> instructionMix;
 } Analysis;
 
 enum class InstructionClass {

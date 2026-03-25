@@ -62,6 +62,11 @@ class TextSection : public virtual ArmSection {
         return registersUsed;
     }
 
+    const std::vector<std::vector<std::unique_ptr<ArmInstruction>>>&
+    getInstructions() const {
+        return instructions;
+    }
+
    private:
     std::vector<std::vector<std::unique_ptr<ArmInstruction>>>
         instructions;  // Vector of the instructions in the section
