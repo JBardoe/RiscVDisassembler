@@ -51,8 +51,9 @@ const std::string& RRRInstruction::toString() {
 }
 
 const Analyser::InstructionAnalysis& RRRInstruction::getAnalysis() {
-    analysis = Analyser::InstructionAnalysis(
-        {wn, wm}, wd, Analyser::InstructionClass::ALU, -1);
+    analysis = Analyser::InstructionAnalysis({wn, wm}, wd,
+                                             Analyser::InstructionClass::ALU,
+                                             Assembly::BranchDirection::NA, -1);
     return analysis;
 }
 
@@ -81,10 +82,12 @@ const std::string& RRInstruction::toString() {
 const Analyser::InstructionAnalysis& RRInstruction::getAnalysis() {
     if (instr == Operator::cmp) {
         analysis = Analyser::InstructionAnalysis(
-            {wd, wn}, Register::empty, Analyser::InstructionClass::ALU, -1);
+            {wd, wn}, Register::empty, Analyser::InstructionClass::ALU,
+            Assembly::BranchDirection::NA, -1);
     } else {
         analysis = Analyser::InstructionAnalysis(
-            {wn}, wd, Analyser::InstructionClass::ALU, -1);
+            {wn}, wd, Analyser::InstructionClass::ALU,
+            Assembly::BranchDirection::NA, -1);
     }
     return analysis;
 }
@@ -190,7 +193,8 @@ const Analyser::InstructionAnalysis& RRIInstruction::getAnalysis() {
         case Operator::ldrb:
         case Operator::ldrh:
             analysis = Analyser::InstructionAnalysis(
-                {wn}, wd, Analyser::InstructionClass::LOAD, imm);
+                {wn}, wd, Analyser::InstructionClass::LOAD,
+                Assembly::BranchDirection::NA, imm);
             break;
 
         case Operator::strb:
@@ -198,12 +202,13 @@ const Analyser::InstructionAnalysis& RRIInstruction::getAnalysis() {
         case Operator::str:
             analysis = Analyser::InstructionAnalysis(
                 {wn, wd}, Register::empty, Analyser::InstructionClass::STORE,
-                imm);
+                Assembly::BranchDirection::NA, imm);
             break;
 
         default:
             analysis = Analyser::InstructionAnalysis(
-                {wn}, wd, Analyser::InstructionClass::ALU, imm);
+                {wn}, wd, Analyser::InstructionClass::ALU,
+                Assembly::BranchDirection::NA, imm);
     }
 
     return analysis;
@@ -243,10 +248,12 @@ const std::string& RIInstruction::toString() {
 const Analyser::InstructionAnalysis& RIInstruction::getAnalysis() {
     if (instr == Operator::cmp) {
         analysis = Analyser::InstructionAnalysis(
-            {wd}, Register::empty, Analyser::InstructionClass::ALU, imm);
+            {wd}, Register::empty, Analyser::InstructionClass::ALU,
+            Assembly::BranchDirection::NA, imm);
     } else {
         analysis = Analyser::InstructionAnalysis(
-            {}, wd, Analyser::InstructionClass::ALU, imm);
+            {}, wd, Analyser::InstructionClass::ALU,
+            Assembly::BranchDirection::NA, imm);
     }
 
     return analysis;
@@ -296,10 +303,11 @@ const std::string& BIInstruction::toString() {
 const Analyser::InstructionAnalysis& BIInstruction::getAnalysis() {
     if (instr == Operator::b || instr == Operator::bl) {
         analysis = Analyser::InstructionAnalysis(
-            {}, Register::empty, Analyser::InstructionClass::JUMP, imm);
+            {}, Register::empty, Analyser::InstructionClass::JUMP,
+            Assembly::BranchDirection::JUMP, imm);
     } else {
         analysis = Analyser::InstructionAnalysis(
-            {}, Register::empty, Analyser::InstructionClass::BRANCH, imm);
+            {}, Register::empty, Analyser::InstructionClass::BRANCH, dir, imm);
     }
 
     return analysis;
@@ -349,10 +357,11 @@ const std::string& BLInstruction::toString() {
 const Analyser::InstructionAnalysis& BLInstruction::getAnalysis() {
     if (instr == Operator::b || instr == Operator::bl) {
         analysis = Analyser::InstructionAnalysis(
-            {}, Register::empty, Analyser::InstructionClass::JUMP, -1);
+            {}, Register::empty, Analyser::InstructionClass::JUMP,
+            Assembly::BranchDirection::JUMP, -1);
     } else {
         analysis = Analyser::InstructionAnalysis(
-            {}, Register::empty, Analyser::InstructionClass::BRANCH, -1);
+            {}, Register::empty, Analyser::InstructionClass::BRANCH, dir, -1);
     }
 
     return analysis;
@@ -378,7 +387,8 @@ const std::string& BRInstruction::toString() {
 
 const Analyser::InstructionAnalysis& BRInstruction::getAnalysis() {
     analysis = Analyser::InstructionAnalysis(
-        {wd}, Register::empty, Analyser::InstructionClass::JUMP, -1);
+        {wd}, Register::empty, Analyser::InstructionClass::JUMP,
+        Assembly::BranchDirection::JUMP, -1);
     return analysis;
 }
 
@@ -402,8 +412,9 @@ const std::string& EInstruction::toString() {
 }
 
 const Analyser::InstructionAnalysis& EInstruction::getAnalysis() {
-    analysis = Analyser::InstructionAnalysis(
-        {}, Register::empty, Analyser::InstructionClass::OTHER, -1);
+    analysis = Analyser::InstructionAnalysis({}, Register::empty,
+                                             Analyser::InstructionClass::OTHER,
+                                             Assembly::BranchDirection::NA, -1);
     return analysis;
 }
 
@@ -462,17 +473,20 @@ const Analyser::InstructionAnalysis& RSInstruction::getAnalysis() {
         case Operator::ldrsh:
         case Operator::ldr:
             analysis = Analyser::InstructionAnalysis(
-                {}, wd, Analyser::InstructionClass::LOAD, -1);
+                {}, wd, Analyser::InstructionClass::LOAD,
+                Assembly::BranchDirection::NA, -1);
             break;
         case Operator::strb:
         case Operator::strh:
         case Operator::str:
             analysis = Analyser::InstructionAnalysis(
-                {wd}, Register::empty, Analyser::InstructionClass::STORE, -1);
+                {wd}, Register::empty, Analyser::InstructionClass::STORE,
+                Assembly::BranchDirection::NA, -1);
             break;
         default:
             analysis = Analyser::InstructionAnalysis(
-                {}, wd, Analyser::InstructionClass::ALU, -1);
+                {}, wd, Analyser::InstructionClass::ALU,
+                Assembly::BranchDirection::NA, -1);
     }
     return analysis;
 }

@@ -1,5 +1,6 @@
 #include "analyser/Analyser.hpp"
 
+#include <array>
 #include <memory>
 #include <ranges>
 #include <unordered_map>
@@ -12,6 +13,7 @@ namespace Analyser {
 
 void analyse(Translator::ArmFile& file) {
     std::unique_ptr<std::unordered_map<InstructionClass, int>> mix;
+    std::array<int, 2> forwardBackwardBranches{};
 
     auto& sections = file.getSections();
 
@@ -33,9 +35,15 @@ void analyse(Translator::ArmFile& file) {
     for (auto& instr : instructions) {
         auto instrAnalysis = instr->getAnalysis();
         (*mix)[instrAnalysis.type]++;
+
+        if (instrAnalysis.type == InstructionClass::BRANCH) {
+            forwardBackwardBranches[static_cast<int>(
+                instrAnalysis.branchDirection)]++;
+        }
     }
 
-    auto report = std::make_unique<Analysis>(std::move(mix));
+    auto report =
+        std::make_unique<Analysis>(std::move(mix), forwardBackwardBranches);
     file.setAnalysis(std::move(report));
 }
 }  // namespace Analyser

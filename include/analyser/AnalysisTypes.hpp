@@ -5,11 +5,13 @@
 #include <vector>
 
 #include "translator/ArmTypes.hpp"
+#include "utils/AssemblyTypes.hpp"
 
 namespace Analyser {
 
 typedef struct Analysis {
     std::unique_ptr<std::unordered_map<InstructionClass, int>> instructionMix;
+    std::array<int, 2> forwardBackwardBranches;
 } Analysis;
 
 enum class InstructionClass {
@@ -28,6 +30,7 @@ typedef struct InstructionAnalysis {
     Translator::Register write;
 
     InstructionClass type;
+    Assembly::BranchDirection branchDirection;
 
     int imm;
 } InstructionAnalysis;

@@ -18,7 +18,8 @@ class ArmInstruction {
         : instr(instr),
           printOut(""),
           analysis(Analyser::InstructionAnalysis(
-              {}, Register::empty, Analyser::InstructionClass::OTHER, -1)) {}
+              {}, Register::empty, Analyser::InstructionClass::OTHER,
+              Assembly::BranchDirection::NA, -1)) {}
     virtual ~ArmInstruction() = default;
 
     /**

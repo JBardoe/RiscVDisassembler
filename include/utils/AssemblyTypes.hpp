@@ -64,6 +64,7 @@ enum class BranchDirection : int {
     FORWARD,
     BACKWARD,
     JUMP,
+    NA,
 };
 
 }  // namespace Assembly
