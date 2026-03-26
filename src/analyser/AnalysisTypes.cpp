@@ -52,6 +52,38 @@ std::string to_string(HazardSeverity s) {
     }
 }
 
+HazardSeverity getSeverity(Translator::Operator instr, int diff) {
+    switch (instr) {
+        case Translator::Operator::add:
+        case Translator::Operator::sub:
+        case Translator::Operator::eor:
+        case Translator::Operator::orr:
+        case Translator::Operator::And:
+        case Translator::Operator::cset:
+        case Translator::Operator::adr:
+        case Translator::Operator::movz:
+            return (diff == 1) ? HazardSeverity::MEDIUM : HazardSeverity::LOW;
+
+        case Translator::Operator::lsl:
+        case Translator::Operator::lsr:
+        case Translator::Operator::asr:
+            if (diff == 1) return HazardSeverity::HIGH;
+            if (diff == 2) return HazardSeverity::MEDIUM;
+            return HazardSeverity::LOW;
+
+        case Translator::Operator::ldr:
+        case Translator::Operator::ldrsb:
+        case Translator::Operator::ldrsh:
+        case Translator::Operator::ldrb:
+        case Translator::Operator::ldrh:
+            if (diff < 3) return HazardSeverity::HIGH;
+            if (diff < 5) return HazardSeverity::MEDIUM;
+            return HazardSeverity::LOW;
+        default:
+            return HazardSeverity::LOW;
+    }
+}
+
 std::string to_string(Hazard h) {
     return to_string(h.type) + " hazard between instructions " +
            std::to_string(h.first) + " and " + std::to_string(h.second) +
