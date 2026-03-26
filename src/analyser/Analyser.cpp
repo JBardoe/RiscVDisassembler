@@ -52,6 +52,8 @@ void analyse(Translator::ArmFile& file) {
         }
     }
 
+    // TODO hazards
+
     auto report = std::make_unique<Analysis>(instructionCount, std::move(mix),
                                              forwardBackwardBranches);
     file.setAnalysis(std::move(report));

@@ -26,6 +26,38 @@ std::string to_string(InstructionClass i) {
     }
 }
 
+std::string to_string(HazardType t) {
+    switch (t) {
+        case HazardType::RAW:
+            return "RAW";
+        case HazardType::WAW:
+            return "WAW";
+        case HazardType::WAR:
+            return "WAR";
+        default:
+            return "<unknown_hazard_type>";
+    }
+}
+
+std::string to_string(HazardSeverity s) {
+    switch (s) {
+        case HazardSeverity::HIGH:
+            return "HIGH";
+        case HazardSeverity::MEDIUM:
+            return "MEDIUM";
+        case HazardSeverity::LOW:
+            return "LOW";
+        default:
+            return "<unknown_severity>";
+    }
+}
+
+std::string to_string(Hazard h) {
+    return to_string(h.type) + " hazard between instructions " +
+           std::to_string(h.first) + " and " + std::to_string(h.second) +
+           " -> Severity: " + to_string(h.severity) + "\n";
+}
+
 std::string to_string(const Analysis& a) {
     std::string ret = "Instruction Mix:\n";
 
