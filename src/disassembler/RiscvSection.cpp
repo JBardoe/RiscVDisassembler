@@ -53,7 +53,7 @@ const std::string& TextSection::toString() {
 
     this->printOut = ".text\n";
 
-    for (auto entry : entryPoints) {
+    for (auto& entry : entryPoints) {
         printOut += to_string(entry.second) + " " + entry.first + "\n";
     }
 

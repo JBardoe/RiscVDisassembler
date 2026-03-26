@@ -26,7 +26,7 @@ std::vector<Symbol> SymbolTable::getSymbolAddr(
 
     std::vector<Symbol> ret;
 
-    for (auto i : (*it).second) {
+    for (auto& i : (*it).second) {
         ret.push_back(table[i]);
     }
 
@@ -40,7 +40,7 @@ std::vector<Symbol> SymbolTable::getSymbolSection(
 
     std::vector<Symbol> ret;
 
-    for (auto i : (*it).second) {
+    for (auto& i : (*it).second) {
         ret.push_back(table[i]);
     }
 
@@ -50,7 +50,7 @@ std::vector<Symbol> SymbolTable::getSymbolSection(
 std::string SymbolTable::toString() {
     std::string ret = "Symbol Table:\n";
 
-    for (auto sym : table) {
+    for (auto& sym : table) {
         ret += to_string(sym);
     }
 

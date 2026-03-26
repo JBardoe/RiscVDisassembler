@@ -196,8 +196,8 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
 
 ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     : printOut("") {
-    auto riscSections = riscFile->getSections();
-    auto riscTextSection = dynamic_cast<Disassembler::TextSection*>(
+    auto& riscSections = riscFile->getSections();
+    auto* riscTextSection = dynamic_cast<Disassembler::TextSection*>(
         riscSections.find(".text")->second.get());
     std::vector<std::unique_ptr<Disassembler::RiscvInstruction>>&
         riscTextInstructions = riscTextSection->getInstructions();

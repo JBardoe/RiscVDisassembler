@@ -457,7 +457,7 @@ shared_ptr<TextSection> disassembleTextSection(
     // New entry points are not inserted into the instructions until the end so
     // explicit jumps can still accurately calculate difference to existing
     // entry points
-    for (auto tmp : tmps) {
+    for (auto& tmp : tmps) {
         textInstructions.insert(textInstructions.begin() + tmp.first,
                                 make_unique<EntryPoint>(tmp.second));
     }

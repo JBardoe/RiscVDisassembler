@@ -44,7 +44,7 @@ const std::string& DataSection::toString() {
             continue;
         }
 
-        for (auto var : addrList.second) {
+        for (auto& var : addrList.second) {
             printOut += "\t" + var + ":\n";
         }
         printOut +=
@@ -76,7 +76,7 @@ const std::string& BSSSection::toString() {
             continue;
         }
 
-        for (auto var : addrList.second) {
+        for (auto& var : addrList.second) {
             printOut += "\t" + var + ":\n";
         }
         printOut += "\t\t .space " +
