@@ -107,7 +107,7 @@ std::string to_string(const Analysis& a) {
 
     if (branchIt != a.instructionMix->end()) {
         ret +=
-            "Branch Density:\n\t- Forward Branches: " +
+            "\nBranch Density:\n\t- Forward Branches: " +
             std::to_string(a.forwardBackwardBranches[0]) + " | " +
             std::format(
                 "{:.2f}",
@@ -124,6 +124,16 @@ std::string to_string(const Analysis& a) {
             "%\n";
     } else {
         ret += "Branch Density:\n\tNO CONDITIONAL BRANCHES\n";
+    }
+
+    ret += "\nThe following blocks have data dependencies:\n";
+
+    for (auto& block : *(a.hazards)) {
+        ret +=
+            "\t- Block ending on line " + std::to_string(block.first) + ":\n";
+        for (auto& hazard : block.second) {
+            ret += "\t\t- " + to_string(hazard);
+        }
     }
 
     return ret;
