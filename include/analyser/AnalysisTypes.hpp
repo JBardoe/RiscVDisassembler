@@ -50,6 +50,8 @@ enum class HazardSeverity : int {
 
 std::string to_string(HazardSeverity s);
 
+HazardSeverity getSeverity(Translator::Operator instr, int diff);
+
 typedef struct Hazard {
     HazardType type;
 
@@ -65,7 +67,7 @@ typedef struct Analysis {
     size_t instructionCount;
     std::unique_ptr<std::unordered_map<InstructionClass, int>> instructionMix;
     std::array<int, 2> forwardBackwardBranches;
-    std::map<int, std::vector<Hazard>> hazards;
+    std::unique_ptr<std::map<int, std::vector<Hazard>>> hazards;
 } Analysis;
 
 std::string to_string(const Analysis& a);
