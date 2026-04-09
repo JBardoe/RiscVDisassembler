@@ -2,14 +2,14 @@
 .globl _start
 
 _start:
-	adr, w9, myVar          // w9 = &myVar
-	add w10, wzr, #10       // w10 = wzr + 10
-	str w9, [w10, #0]       // Memory[w9+0][0:31] = w10[0:31]
-	ldr w11, [w9, #0]       // w11 = Memory[w9+0][0:31]
-	add w11, w11, #5        // w11 = w11 + 5
-	str w9, [w11, #0]       // Memory[w9+0][0:31] = w11[0:31]
-	add w8, wzr, #93        // w8 = wzr + 93
-	add w0, wzr, #0         // w0 = wzr + 0
+	adr x9, myVar           // x9 = &myVar
+	add x10, xzr, #10       // x10 = xzr + 10
+	str x9, [x10, #0]       // Memory[x9+0][0:31] = x10[0:31]
+	ldrsw x11, [x9, #0]     // x11 = Memory[x9+0][0:31]
+	add x11, x11, #5        // x11 = x11 + 5
+	str x9, [x11, #0]       // Memory[x9+0][0:31] = x11[0:31]
+	add x8, xzr, #93        // x8 = xzr + 93
+	add x0, xzr, #0         // x0 = xzr + 0
 	svc #0                  // Transfer control to OS
 
 .bss

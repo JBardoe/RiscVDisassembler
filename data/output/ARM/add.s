@@ -2,15 +2,15 @@
 .globl _start
 
 _start:
-	adr, w9, num1           // w9 = &num1
-	adr, w10, num2          // w10 = &num2
-	adr, w11, result        // w11 = &result
-	ldr w12, [w9, #0]       // w12 = Memory[w9+0][0:31]
-	ldr w13, [w10, #0]      // w13 = Memory[w10+0][0:31]
-	add w14, w12, w13       // w14 = w12 + w13
-	str w11, [w14, #0]      // Memory[w11+0][0:31] = w14[0:31]
-	add w0, wzr, #0         // w0 = wzr + 0
-	add w8, wzr, #93        // w8 = wzr + 93
+	adr x9, num1            // x9 = &num1
+	adr x10, num2           // x10 = &num2
+	adr x11, result         // x11 = &result
+	ldrsw x12, [x9, #0]     // x12 = Memory[x9+0][0:31]
+	ldrsw x13, [x10, #0]    // x13 = Memory[x10+0][0:31]
+	add x14, x12, x13       // x14 = x12 + x13
+	str x11, [x14, #0]      // Memory[x11+0][0:31] = x14[0:31]
+	add x0, xzr, #0         // x0 = xzr + 0
+	add x8, xzr, #93        // x8 = xzr + 93
 	svc #0                  // Transfer control to OS
 
 .data

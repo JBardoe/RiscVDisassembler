@@ -4,28 +4,28 @@
 .globl entry_b
 
 _start:
-	adr, w9, var_byte       // w9 = &var_byte
-	ldrsb w10, [w9, #0]     // w10 = Memory[w9+0][0:7] (sign-extends)
-	adr, w9, var_half       // w9 = &var_half
-	ldrsh w11, [w9, #0]     // w11 = Memory[w9+0][0:15] (sign-extends)
-	adr, w9, var_word       // w9 = &var_word
-	ldr w12, [w9, #0]       // w12 = Memory[w9+0][0:31]
-	add w13, w10, w11       // w13 = w10 + w11
-	add w13, w13, w12       // w13 = w13 + w12
+	adr x9, var_byte        // x9 = &var_byte
+	ldrsb x10, [x9, #0]     // x10 = Memory[x9+0][0:7] (sign-extends)
+	adr x9, var_half        // x9 = &var_half
+	ldrsh x11, [x9, #0]     // x11 = Memory[x9+0][0:15] (sign-extends)
+	adr x9, var_word        // x9 = &var_word
+	ldrsw x12, [x9, #0]     // x12 = Memory[x9+0][0:31]
+	add x13, x10, x11       // x13 = x10 + x11
+	add x13, x13, x12       // x13 = x13 + x12
 	b entry_a               // Branch to entry_a 
 
 entry_a:
-	adr, w0, var_word       // w0 = &var_word
-	ldr w1, [w0, #0]        // w1 = Memory[w0+0][0:31]
-	add w1, w1, #1          // w1 = w1 + 1
-	str w0, [w1, #0]        // Memory[w0+0][0:31] = w1[0:31]
+	adr x0, var_word        // x0 = &var_word
+	ldrsw x1, [x0, #0]      // x1 = Memory[x0+0][0:31]
+	add x1, x1, #1          // x1 = x1 + 1
+	str x0, [x1, #0]        // Memory[x0+0][0:31] = x1[0:31]
 	b entry_b               // Branch to entry_b 
 
 entry_b:
-	adr, w0, var_byte       // w0 = &var_byte
-	ldrsb w1, [w0, #0]      // w1 = Memory[w0+0][0:7] (sign-extends)
-	add w1, w1, #2          // w1 = w1 + 2
-	strb w0, [w1, #0]       // Memory[w0+0][0:7] = w1[0:7]
+	adr x0, var_byte        // x0 = &var_byte
+	ldrsb x1, [x0, #0]      // x1 = Memory[x0+0][0:7] (sign-extends)
+	add x1, x1, #2          // x1 = x1 + 2
+	strb x0, [x1, #0]       // Memory[x0+0][0:7] = x1[0:7]
 	b entry_b               // Branch to entry_b 
 
 .data

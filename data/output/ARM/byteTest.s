@@ -2,10 +2,10 @@
 .globl _start
 
 _start:
-	adr, w9, my_byte        // w9 = &my_byte
-	ldrsb w10, [w9, #0]     // w10 = Memory[w9+0][0:7] (sign-extends)
-	add w10, w10, #1        // w10 = w10 + 1
-	strb w9, [w10, #0]      // Memory[w9+0][0:7] = w10[0:7]
+	adr x9, my_byte         // x9 = &my_byte
+	ldrsb x10, [x9, #0]     // x10 = Memory[x9+0][0:7] (sign-extends)
+	add x10, x10, #1        // x10 = x10 + 1
+	strb x9, [x10, #0]      // Memory[x9+0][0:7] = x10[0:7]
 	b _start                // Branch to _start 
 
 .data
