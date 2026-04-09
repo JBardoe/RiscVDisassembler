@@ -417,7 +417,7 @@ std::vector<std::unique_ptr<Translator::ArmInstruction>> IInstruction::toArm() {
             break;
         case Operator::lw:
             ret.push_back(std::make_unique<Translator::RRIInstruction>(
-                Translator::Operator::ldr, wd, wn, imm, false));
+                Translator::Operator::ldrsw, wd, wn, imm, false));
             break;
         case Operator::lbu:
             ret.push_back(std::make_unique<Translator::RRIInstruction>(
@@ -444,24 +444,24 @@ std::vector<std::unique_ptr<Translator::ArmInstruction>> IInstruction::toArm() {
     // jalr
     if (rd == Register::ra) {
         ret.push_back(std::make_unique<Translator::RRIInstruction>(
-            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            Translator::Operator::add, Translator::Register::x15, wn, imm,
             false));
         ret.push_back(std::make_unique<Translator::BRInstruction>(
-            Translator::Operator::blr, Translator::Register::w15));
+            Translator::Operator::blr, Translator::Register::x15));
     } else if (rd == Register::zero) {
         ret.push_back(std::make_unique<Translator::RRIInstruction>(
-            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            Translator::Operator::add, Translator::Register::x15, wn, imm,
             false));
         ret.push_back(std::make_unique<Translator::BRInstruction>(
-            Translator::Operator::br, Translator::Register::w15));
+            Translator::Operator::br, Translator::Register::x15));
     } else {
         ret.push_back(std::make_unique<Translator::RRIInstruction>(
-            Translator::Operator::add, Translator::Register::w15, wn, imm,
+            Translator::Operator::add, Translator::Register::x15, wn, imm,
             false));
         ret.push_back(std::make_unique<Translator::RIInstruction>(
             Translator::Operator::adr, wd, 8));
         ret.push_back(std::make_unique<Translator::BRInstruction>(
-            Translator::Operator::br, Translator::Register::w15));
+            Translator::Operator::br, Translator::Register::x15));
     }
 
     return ret;
@@ -826,7 +826,7 @@ PseudoLoadInstruction::toArm() {
             break;
         case Operator::lw:
             ret.push_back(std::make_unique<Translator::RSInstruction>(
-                Translator::Operator::ldr, wd, symbol));
+                Translator::Operator::ldrsw, wd, symbol));
             break;
         default:
             break;

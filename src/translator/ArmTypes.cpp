@@ -4,8 +4,8 @@ namespace Translator {
 
 std::string to_string(Register r) {
     switch (r) {
-        case Register::wzr:
-            return "wzr";
+        case Register::xzr:
+            return "xzr";
         case Register::lr:
             return "lr";
         case Register::sp:
@@ -14,60 +14,60 @@ std::string to_string(Register r) {
             return "xxgp";
         case Register::xxtp:
             return "xxtp";
-        case Register::w9:
-            return "w9";
-        case Register::w10:
-            return "w10";
-        case Register::w11:
-            return "w11";
+        case Register::x9:
+            return "x9";
+        case Register::x10:
+            return "x10";
+        case Register::x11:
+            return "x11";
         case Register::fp:
             return "fp";
-        case Register::w19:
-            return "w19";
-        case Register::w0:
-            return "w0";
-        case Register::w1:
-            return "w1";
-        case Register::w2:
-            return "w2";
-        case Register::w3:
-            return "w3";
-        case Register::w4:
-            return "w4";
-        case Register::w5:
-            return "w5";
-        case Register::w6:
-            return "w6";
-        case Register::w8:
-            return "w8";
-        case Register::w20:
-            return "w20";
-        case Register::w21:
-            return "w21";
-        case Register::w22:
-            return "w22";
-        case Register::w23:
-            return "w23";
-        case Register::w24:
-            return "w24";
-        case Register::w25:
-            return "w25";
-        case Register::w26:
-            return "w26";
-        case Register::w27:
-            return "w27";
-        case Register::w28:
-            return "w28";
-        case Register::w7:
-            return "w7";
-        case Register::w12:
-            return "w12";
-        case Register::w13:
-            return "w13";
-        case Register::w14:
-            return "w14";
-        case Register::w15:
-            return "w15";
+        case Register::x19:
+            return "x19";
+        case Register::x0:
+            return "x0";
+        case Register::x1:
+            return "x1";
+        case Register::x2:
+            return "x2";
+        case Register::x3:
+            return "x3";
+        case Register::x4:
+            return "x4";
+        case Register::x5:
+            return "x5";
+        case Register::x6:
+            return "x6";
+        case Register::x8:
+            return "x8";
+        case Register::x20:
+            return "x20";
+        case Register::x21:
+            return "x21";
+        case Register::x22:
+            return "x22";
+        case Register::x23:
+            return "x23";
+        case Register::x24:
+            return "x24";
+        case Register::x25:
+            return "x25";
+        case Register::x26:
+            return "x26";
+        case Register::x27:
+            return "x27";
+        case Register::x28:
+            return "x28";
+        case Register::x7:
+            return "x7";
+        case Register::x12:
+            return "x12";
+        case Register::x13:
+            return "x13";
+        case Register::x14:
+            return "x14";
+        case Register::x15:
+            return "x15";
         case Register::lt:
             return "lt";
         case Register::lo:
@@ -103,8 +103,8 @@ std::string to_string(Operator i) {
             return "ldrsb";
         case Operator::ldrsh:
             return "ldrsh";
-        case Operator::ldr:
-            return "ldr";
+        case Operator::ldrsw:
+            return "ldrsw";
         case Operator::ldrb:
             return "ldrb";
         case Operator::ldrh:

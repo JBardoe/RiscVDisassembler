@@ -70,7 +70,7 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
                             riscTextInstructions.size() - 1);
             registersUsed->erase(reg);
             ret[1].push_back(std::make_unique<RSInstruction>(
-                Operator::ldr, static_cast<Register>(tempReg), regVarName));
+                Operator::ldrsw, static_cast<Register>(tempReg), regVarName));
             return ret;
         }
     }
@@ -93,7 +93,7 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
 
                 ret[std::prev(block)->first + 1].push_back(
                     std::make_unique<RSInstruction>(
-                        Operator::ldr, static_cast<Register>(tempReg),
+                        Operator::ldrsw, static_cast<Register>(tempReg),
                         regVarName));
 
                 if (written) {
@@ -175,7 +175,7 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
                 Operator::str, static_cast<Register>(tempReg), regSpillName));
 
             ret[i].push_back(std::make_unique<RSInstruction>(
-                Operator::ldr, static_cast<Register>(tempReg), regVarName));
+                Operator::ldrsw, static_cast<Register>(tempReg), regVarName));
 
             if (written) {
                 ret[j].push_back(std::make_unique<RSInstruction>(
@@ -184,7 +184,7 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
 
             if (j == nextTmpUse[indexes.back()]) {
                 ret[j].push_back(std::make_unique<RSInstruction>(
-                    Operator::ldr, static_cast<Register>(tempReg),
+                    Operator::ldrsw, static_cast<Register>(tempReg),
                     regSpillName));
             }
 

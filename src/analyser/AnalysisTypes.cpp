@@ -71,7 +71,7 @@ HazardSeverity getSeverity(Translator::Operator instr, int diff) {
             if (diff == 2) return HazardSeverity::MEDIUM;
             return HazardSeverity::LOW;
 
-        case Translator::Operator::ldr:
+        case Translator::Operator::ldrsw:
         case Translator::Operator::ldrsb:
         case Translator::Operator::ldrsh:
         case Translator::Operator::ldrb:
@@ -126,7 +126,9 @@ std::string to_string(const Analysis& a) {
         ret += "Branch Density:\n\tNO CONDITIONAL BRANCHES\n";
     }
 
-    ret += "\nThe following blocks have data dependencies:\n";
+    if (!a.hazards->empty()) {
+        ret += "\nThe following blocks have data dependencies:\n";
+    }
 
     for (auto& block : *(a.hazards)) {
         ret +=

@@ -106,7 +106,7 @@ const std::string& RRIInstruction::toString() {
         case Operator::ldrsh:
             suffix = "[0:15] (sign-extends)";
             goto loads;
-        case Operator::ldr:
+        case Operator::ldrsw:
             suffix = "[0:31]";
             goto loads;
         case Operator::ldrb:
@@ -189,7 +189,7 @@ const Analyser::InstructionAnalysis& RRIInstruction::getAnalysis() {
     switch (instr) {
         case Operator::ldrsb:
         case Operator::ldrsh:
-        case Operator::ldr:
+        case Operator::ldrsw:
         case Operator::ldrb:
         case Operator::ldrh:
             analysis = Analyser::InstructionAnalysis(
@@ -421,10 +421,10 @@ const Analyser::InstructionAnalysis& EInstruction::getAnalysis() {
 const std::string& RSInstruction::toString() {
     if (printOut != "") return printOut;
 
-    printOut = "\t" + to_string(instr) + ", " + to_string(wd) + ", ";
+    printOut = "\t" + to_string(instr) + " " + to_string(wd) + ", ";
 
     if (instr == Operator::ldrsb || instr == Operator::ldrsh ||
-        instr == Operator::ldr) {
+        instr == Operator::ldrsw) {
         printOut += "[" + symbol + "]";
     } else {
         printOut += symbol;
@@ -444,7 +444,7 @@ const std::string& RSInstruction::toString() {
         case Operator::ldrsh:
             suffix = "[0:15]";
             goto loads;
-        case Operator::ldr:
+        case Operator::ldrsw:
             suffix = "[0:31]";
         loads:
             printOut += to_string(wd) + " = " + symbol + suffix;
@@ -471,7 +471,7 @@ const Analyser::InstructionAnalysis& RSInstruction::getAnalysis() {
     switch (instr) {
         case Operator::ldrsb:
         case Operator::ldrsh:
-        case Operator::ldr:
+        case Operator::ldrsw:
             analysis = Analyser::InstructionAnalysis(
                 {}, wd, Analyser::InstructionClass::LOAD,
                 Assembly::BranchDirection::NA, -1);

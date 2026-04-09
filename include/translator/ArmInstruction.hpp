@@ -112,7 +112,7 @@ class RRInstruction : public virtual ArmInstruction {
 /**
  * Represents an instruction that uses two registers and an immediate
  *
- * Includes: add, eor, orr, and, lsl, lsr, asr, ldrsb, ldrsh, ldr, ldrb, ldrh,
+ * Includes: add, eor, orr, and, lsl, lsr, asr, ldrsb, ldrsh, ldrsw, ldrb, ldrh,
  * strb, strh, str
  */
 class RRIInstruction : public virtual ArmInstruction {
