@@ -9,6 +9,10 @@
 #include "analyser/AnalysisTypes.hpp"
 #include "disassembler/Disassembler.hpp"
 #include "translator/ArmFile.hpp"
+#include "utils/AnalysisException.hpp"
+#include "utils/BadFileException.hpp"
+#include "utils/DisassemblyException.hpp"
+#include "utils/TranslationException.hpp"
 
 int main() {
     while (true) {
@@ -21,18 +25,38 @@ int main() {
 
         system("clear");
 
-        auto riscFile =
-            Disassembler::disassemble("data/test/elf/" + fileName + ".elf");
+        std::unique_ptr<Disassembler::RiscvFile> riscFile;
+
+        try {
+            riscFile =
+                Disassembler::disassemble("data/test/elf/" + fileName + ".elf");
+        } catch (const ELFParser::BadFileException& e) {
+            std::cout << "An Error Occurred During Parsing:\n"
+                      << e.what() << "\n";
+            return 1;
+        } catch (const Disassembler::DisassemblyException& e) {
+            std::cout << "An Error Occurred During Disassembly:\n"
+                      << e.what() << "\n";
+            return 1;
+        }
 
         std::cout << "<<<<<<<<<<<<<<<<RISC-V File>>>>>>>>>>>>>>>>\n";
 
         std::cout << riscFile->toString();
 
+        Translator::ArmFile armFile;
+
+        try {
+            armFile = Translator::ArmFile(riscFile);
+        } catch (const Translator::TranslationException& e) {
+            std::cout << "An Error Occurred During Translation:\n"
+                      << e.what() << "\n";
+            return 1;
+        }
+
         std::cout
             << "<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>\n\n<<<<<<<<<<<<<<<<"
-               "ARM64 File>>>>>>>>>>>>>>>>\n";
-
-        auto armFile = Translator::ArmFile(riscFile);
+               "AArch64 File>>>>>>>>>>>>>>>>\n";
 
         std::cout << armFile.toString();
 
@@ -41,7 +65,13 @@ int main() {
         riscFile->writeToFile(fileName);
         armFile.writeToFile(fileName);
 
-        Analyser::analyse(armFile);
+        try {
+            Analyser::analyse(armFile);
+        } catch (const Analyser::AnalysisException& e) {
+            std::cout << "An Error Occurred During Analysis:\n"
+                      << e.what() << "\n";
+            return 1;
+        }
 
         auto& analysisReport = armFile.getAnalysis();
 
@@ -53,5 +83,3 @@ int main() {
 
     return 0;
 }
-
-// NEXT catch errors for nice printing

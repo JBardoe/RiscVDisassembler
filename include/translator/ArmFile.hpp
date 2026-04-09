@@ -16,6 +16,7 @@ namespace Translator {
  */
 class ArmFile {
    public:
+    ArmFile() = default;
     ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile);
 
     /**
