@@ -138,6 +138,12 @@ std::string to_string(const Analysis& a) {
         }
     }
 
+    if (!a.excessSpillageBlocks.empty()) {
+        ret += "\nThe following blocks have excessive register spillage:\n";
+        for (auto& block : a.excessSpillageBlocks) {
+            ret += "\t- Block ending on line " + std::to_string(block) + "\n";
+        }
+    }
     return ret;
 }
 

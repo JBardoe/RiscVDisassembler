@@ -46,7 +46,8 @@ bool replaceRegister(
  * the form (index to insert before, instructions to insert)
  */
 std::unordered_map<int, std::vector<std::unique_ptr<ArmInstruction>>>
-eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
+eliminateRegister(int reg, Disassembler::TextSection* riscTextSection,
+                  Translator::ArmFile* armFile) {
     // Names of the variables inserted to allow for spilling
     std::string regVarName =
         Disassembler::to_string(static_cast<Disassembler::Register>(
@@ -104,6 +105,8 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
                 return ret;
             }
         }
+
+        armFile->addExcessivelySpilledBlock(block->first);
 
         int i =
             std::prev(block)->first + 1;  // Base instruction of the register
@@ -195,7 +198,7 @@ eliminateRegister(int reg, Disassembler::TextSection* riscTextSection) {
 }
 
 ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
-    : printOut("") {
+    : printOut(""), excessSpillageBlocks(std::unordered_set<int>{}) {
     auto& riscSections = riscFile->getSections();
     auto* riscTextSection = dynamic_cast<Disassembler::TextSection*>(
         riscSections.find(".text")->second.get());
@@ -223,12 +226,12 @@ ArmFile::ArmFile(const std::unique_ptr<Disassembler::RiscvFile>& riscFile)
     // Eliminate tp + gp
     if (registersUsed->count(3)) {
         gpSpill = true;
-        toAdd = std::move(eliminateRegister(3, riscTextSection));
+        toAdd = std::move(eliminateRegister(3, riscTextSection, this));
     }
 
     if (registersUsed->count(4)) {
         tpSpill = true;
-        auto temp = eliminateRegister(4, riscTextSection);
+        auto temp = eliminateRegister(4, riscTextSection, this);
 
         for (auto& addition : temp) {
             if (auto it = toAdd.find(addition.first); it != toAdd.end()) {

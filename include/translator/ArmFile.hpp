@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "analyser/AnalysisTypes.hpp"
 #include "disassembler/RiscvFile.hpp"
@@ -34,6 +35,7 @@ class ArmFile {
     void writeToFile(std::string fileName);
 
     void setAnalysis(std::unique_ptr<Analyser::Analysis> analysisReport) {
+        analysisReport->excessSpillageBlocks = this->excessSpillageBlocks;
         this->analysisReport = std::move(analysisReport);
     }
 
@@ -47,12 +49,17 @@ class ArmFile {
         return sections;
     }
 
+    void addExcessivelySpilledBlock(int block) {
+        excessSpillageBlocks.insert(block);
+    }
+
    private:
     std::string printOut;  // String readout of the file
     std::unordered_map<std::string, std::shared_ptr<Assembly::AssemblySection>>
         sections;  // Map of the sections in the file
 
     std::unique_ptr<Analyser::Analysis> analysisReport;
+    std::unordered_set<int> excessSpillageBlocks;
 };
 
 }  // namespace Translator

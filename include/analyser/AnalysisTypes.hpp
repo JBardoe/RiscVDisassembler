@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "translator/ArmTypes.hpp"
@@ -68,6 +69,7 @@ typedef struct Analysis {
     std::unique_ptr<std::unordered_map<InstructionClass, int>> instructionMix;
     std::array<int, 2> forwardBackwardBranches;
     std::unique_ptr<std::map<int, std::vector<Hazard>>> hazards;
+    std::unordered_set<int> excessSpillageBlocks;
 } Analysis;
 
 std::string to_string(const Analysis& a);

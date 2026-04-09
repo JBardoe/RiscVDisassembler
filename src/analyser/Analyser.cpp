@@ -116,9 +116,10 @@ void analyse(Translator::ArmFile& file) {
         }
     }
 
-    auto report =
-        std::make_unique<Analysis>(instructionCount, std::move(mix),
-                                   forwardBackwardBranches, std::move(hazards));
+    auto report = std::make_unique<Analysis>(
+        instructionCount, std::move(mix), forwardBackwardBranches,
+        std::move(hazards), std::unordered_set<int>{});
+
     file.setAnalysis(std::move(report));
 }
 }  // namespace Analyser
