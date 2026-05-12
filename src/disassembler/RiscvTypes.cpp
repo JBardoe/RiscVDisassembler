@@ -20,7 +20,7 @@ std::string to_string(Register r) {
         case Register::t2:
             return "t2";
         case Register::s0fp:
-            return "s0/fp";
+            return "s0";
         case Register::s1:
             return "s1";
         case Register::a0:

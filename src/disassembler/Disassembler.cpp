@@ -1,6 +1,7 @@
 #include "disassembler/Disassembler.hpp"
 
 #include <format>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -343,6 +344,11 @@ shared_ptr<TextSection> disassembleTextSection(
     }
 
     auto entries = asmFile->getSymbolSection(".text");
+
+    // Sort the entry points by their addresses
+    sort(entries.begin(), entries.end(),
+         [](auto& a, auto& b) { return a.addr < b.addr; });
+
     vector<pair<string, Assembly::SymbolBinding>> entryPoints;
 
     int added = 0;
@@ -427,6 +433,13 @@ shared_ptr<TextSection> disassembleTextSection(
             // If there's already an entry point at the end of the jump
             if (auto* castedE =
                     dynamic_cast<EntryPoint*>(textInstructions[offset].get())) {
+                textInstructions[i] = move(
+                    make_unique<BInstructionEntry>(castedB, castedE->name));
+            } else if (auto* castedE =
+                           (offset > 0)
+                               ? dynamic_cast<EntryPoint*>(
+                                     textInstructions[offset - 1].get())
+                               : nullptr) {
                 textInstructions[i] = move(
                     make_unique<BInstructionEntry>(castedB, castedE->name));
             } else if (auto it = tmps.find(offset);
